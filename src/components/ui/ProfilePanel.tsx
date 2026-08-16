@@ -53,7 +53,9 @@ function AboutPanel() {
         className="h-36 w-36 rounded-full object-cover"
       />
       <p className="tracking-[0.14em] text-paper/70 uppercase">{profile.headline}</p>
-      <p>{profile.intro}</p>
+      {profile.intro.map((paragraph) => (
+        <p key={paragraph}>{paragraph}</p>
+      ))}
       <ul className="grid grid-cols-1 gap-2">
         {profile.focus.map((item) => (
           <li key={item} className="border-l border-paper/30 pl-3">

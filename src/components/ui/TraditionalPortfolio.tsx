@@ -26,7 +26,11 @@ export function TraditionalPortfolio() {
         />
         <h1 className="mt-3 font-display text-4xl sm:text-6xl">{profile.name}</h1>
         <p className="mt-3 font-ui tracking-[0.12em] uppercase">{profile.headline}</p>
-        <p className="mt-6 max-w-xl text-lg text-paper/85">{profile.intro}</p>
+        <div className="mt-6 max-w-xl space-y-4 text-lg text-paper/85">
+          {profile.intro.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+        </div>
         <p className="mt-4 text-paper/70">{profile.locationPath}</p>
         {webgl ? (
           <button

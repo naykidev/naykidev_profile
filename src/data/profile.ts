@@ -8,8 +8,13 @@ export const profile = {
   email: "college.naykiaaron@gmail.com",
   linkedin: "https://www.linkedin.com/in/aaron-nayki",
   photo: asset("/textures/profile/aaron-nayki.png"),
-  intro:
-    "I’m a Computer Engineering student interested in software, accessibility, AI, and building technology that solves real problems.",
+  intro: [
+    "Hi, my name is Aaron Nayki, and I’m a freshman at the University of Wisconsin–Madison studying Computer Engineering.",
+    "I was born and raised in San Diego, California, and I’m interested in developing digital accessibility platforms, assistive devices, and technologies that make everyday technology more usable and accessible.",
+    "I’m also interested in artificial intelligence, robotics, embedded systems, and the intersection of hardware and software, especially how these technologies can be applied to solve real-world problems and improve people’s lives.",
+    "In my free time, I enjoy working on side projects as a way to volunteer my technical skills, solve problems for others, and create things that can have a meaningful impact.",
+    "Outside of engineering, I enjoy playing guitar and following Formula 1.",
+  ],
   focus: [
     "San Diego → Madison",
     "Computer Engineering",
