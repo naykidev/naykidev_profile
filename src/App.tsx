@@ -125,9 +125,9 @@ export function App() {
           <Hud />
           <GalleryModal />
           <MobileControls />
-          <ProfilePanel />
         </>
       )}
+      <ProfilePanel />
     </div>
   );
 }

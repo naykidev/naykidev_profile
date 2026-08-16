@@ -28,7 +28,7 @@ function Shell({
       aria-modal="true"
       aria-labelledby="panel-title"
       data-look-block
-      className="absolute inset-0 z-30 flex h-full w-full max-w-none flex-col border-r border-paper/15 bg-[#1c1814]/90 px-5 pt-[max(3.75rem,calc(env(safe-area-inset-top)+2.75rem))] pb-[max(1.25rem,env(safe-area-inset-bottom))] text-paper backdrop-blur-[6px] sm:inset-auto sm:top-0 sm:left-0 sm:max-w-md sm:w-[28rem] sm:px-7 sm:pt-8 sm:pb-8"
+      className="absolute inset-0 z-[65] flex h-full w-full max-w-none flex-col border-r border-paper/15 bg-[#1c1814]/90 px-5 pt-[max(3.75rem,calc(env(safe-area-inset-top)+2.75rem))] pb-[max(1.25rem,env(safe-area-inset-bottom))] text-paper backdrop-blur-[6px] sm:inset-auto sm:top-0 sm:left-0 sm:max-w-md sm:w-[28rem] sm:px-7 sm:pt-8 sm:pb-8"
     >
       <CloseButton onClick={closePanel} />
       <p className="font-ui text-[10px] tracking-[0.32em] text-paper/60 uppercase">
