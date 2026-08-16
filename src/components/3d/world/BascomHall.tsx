@@ -11,6 +11,7 @@ import {
   windowFrame,
 } from "./materials";
 import { entablatureMap, flagMap } from "./textures";
+import { asset } from "@/lib/asset";
 
 const dummy = new Object3D();
 const BODY_Y = 0;
@@ -107,8 +108,8 @@ function usePunchedDoorMap(src: string) {
 }
 
 function BascomDoorPair() {
-  const leftMap = usePunchedDoorMap("/textures/gallery-door-left.png");
-  const rightMap = usePunchedDoorMap("/textures/gallery-door-right.png");
+  const leftMap = usePunchedDoorMap(asset("/textures/gallery-door-left.png"));
+  const rightMap = usePunchedDoorMap(asset("/textures/gallery-door-right.png"));
   const leafW = 0.86;
   const leafH = 2.18;
   return (
@@ -322,7 +323,7 @@ function PorticoBalustrade() {
 }
 
 function BuckyBanner() {
-  const map = useTexture("/textures/bucky-banner.png");
+  const map = useTexture(asset("/textures/bucky-banner.png"));
   map.colorSpace = SRGBColorSpace;
   map.anisotropy = 8;
   const width = 8.15;

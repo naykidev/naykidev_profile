@@ -3,25 +3,26 @@ import { useLayoutEffect, useMemo, useRef } from "react";
 import { InstancedMesh, Mesh, Object3D } from "three";
 import { coastHeight } from "./noise";
 import { coastTown, neighborhoodDeck, onPavement, type Pose } from "./townLayout";
+import { asset } from "@/lib/asset";
 
 const DRACO = true;
 
 const URLS = {
-  bungalow: "/models/neighborhood/bungalow-house.glb",
-  cottage: "/models/neighborhood/home-cottage-01.glb",
-  ranch: "/models/neighborhood/ranch-house.glb",
-  twoStory: "/models/neighborhood/two-story-house.glb",
-  garage: "/models/neighborhood/garage.glb",
-  shed: "/models/neighborhood/garden-shed.glb",
-  fence: "/models/neighborhood/picket-fence.glb",
-  privacy: "/models/neighborhood/privacy-fence.glb",
-  mail: "/models/neighborhood/mailbox.glb",
-  lamp: "/models/neighborhood/deco-street-lamp.glb",
-  family: "/models/neighborhood/family-sedan.glb",
-  sedan: "/models/neighborhood/sedan-01.glb",
-  bush: "/models/nature/bush-round-01.glb",
-  flowers: "/models/nature/flower-bed.glb",
-  lawn: "/models/nature/lawn-tuft-scatter.glb",
+  bungalow: asset("/models/neighborhood/bungalow-house.glb"),
+  cottage: asset("/models/neighborhood/home-cottage-01.glb"),
+  ranch: asset("/models/neighborhood/ranch-house.glb"),
+  twoStory: asset("/models/neighborhood/two-story-house.glb"),
+  garage: asset("/models/neighborhood/garage.glb"),
+  shed: asset("/models/neighborhood/garden-shed.glb"),
+  fence: asset("/models/neighborhood/picket-fence.glb"),
+  privacy: asset("/models/neighborhood/privacy-fence.glb"),
+  mail: asset("/models/neighborhood/mailbox.glb"),
+  lamp: asset("/models/neighborhood/deco-street-lamp.glb"),
+  family: asset("/models/neighborhood/family-sedan.glb"),
+  sedan: asset("/models/neighborhood/sedan-01.glb"),
+  bush: asset("/models/nature/bush-round-01.glb"),
+  flowers: asset("/models/nature/flower-bed.glb"),
+  lawn: asset("/models/nature/lawn-tuft-scatter.glb"),
 } as const;
 
 const dummy = new Object3D();

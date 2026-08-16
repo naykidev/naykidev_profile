@@ -3,8 +3,9 @@ import { useGLTF } from "@react-three/drei";
 import type { Mesh, Object3D } from "three";
 import { LINCOLN_Z, TERRACE_Y } from "@/systems/campusLayout";
 import { bronze, granite, limestone } from "./materials";
+import { asset } from "@/lib/asset";
 
-const LINCOLN_URL = "/models/lincoln.glb";
+const LINCOLN_URL = asset("/models/lincoln.glb");
 const STATUE_SCALE = 2.55;
 const PEDESTAL_TOP = 1.29;
 const STATUE_SINK = 0.42;

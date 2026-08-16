@@ -3,28 +3,29 @@ import { useMemo } from "react";
 import type { Mesh, Object3D } from "three";
 import { occupies } from "./townLayout";
 import { coastHeight, hash2, shoreXAt } from "./noise";
+import { asset } from "@/lib/asset";
 
 const DRACO = true;
 
 const URLS = {
-  coconut: "/models/nature/coconut-palm.glb",
-  royal: "/models/nature/royal-palm.glb",
-  date: "/models/nature/date-palm.glb",
-  bush: "/models/nature/bush-round-01.glb",
-  hedge: "/models/nature/boxwood-hedge.glb",
-  scrub: "/models/nature/desert-scrub.glb",
-  dune: "/models/nature/dune-grass-tuft.glb",
-  flowering: "/models/nature/flowering-tree.glb",
-  shade: "/models/nature/shade-tree.glb",
-  street: "/models/nature/street-tree-01.glb",
-  boulder: "/models/nature/sandstone-boulder.glb",
-  moss: "/models/nature/mossy-boulder.glb",
-  driftwood: "/models/nature/driftwood-snag.glb",
-  grass: "/models/nature/grass-tuft-scatter.glb",
-  lawn: "/models/nature/lawn-tuft-scatter.glb",
-  flowers: "/models/nature/flower-bed.glb",
-  shrub: "/models/nature/lineside-shrub.glb",
-  cattail: "/models/nature/cattail-reed-clump.glb",
+  coconut: asset("/models/nature/coconut-palm.glb"),
+  royal: asset("/models/nature/royal-palm.glb"),
+  date: asset("/models/nature/date-palm.glb"),
+  bush: asset("/models/nature/bush-round-01.glb"),
+  hedge: asset("/models/nature/boxwood-hedge.glb"),
+  scrub: asset("/models/nature/desert-scrub.glb"),
+  dune: asset("/models/nature/dune-grass-tuft.glb"),
+  flowering: asset("/models/nature/flowering-tree.glb"),
+  shade: asset("/models/nature/shade-tree.glb"),
+  street: asset("/models/nature/street-tree-01.glb"),
+  boulder: asset("/models/nature/sandstone-boulder.glb"),
+  moss: asset("/models/nature/mossy-boulder.glb"),
+  driftwood: asset("/models/nature/driftwood-snag.glb"),
+  grass: asset("/models/nature/grass-tuft-scatter.glb"),
+  lawn: asset("/models/nature/lawn-tuft-scatter.glb"),
+  flowers: asset("/models/nature/flower-bed.glb"),
+  shrub: asset("/models/nature/lineside-shrub.glb"),
+  cattail: asset("/models/nature/cattail-reed-clump.glb"),
 } as const;
 
 type Lot = { x: number; z: number; rot: number; scale: number };

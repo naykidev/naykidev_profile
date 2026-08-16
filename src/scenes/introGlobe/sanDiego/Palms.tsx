@@ -2,8 +2,9 @@ import { useGLTF } from "@react-three/drei";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { InstancedMesh, Mesh, Object3D } from "three";
 import { coastHeight, hash2, shoreXAt } from "./noise";
+import { asset } from "@/lib/asset";
 
-const PALM_URL = "/models/san-diego-palm.glb";
+const PALM_URL = asset("/models/san-diego-palm.glb");
 const PALM_COUNT = 10;
 const dummy = new Object3D();
 

@@ -45,6 +45,7 @@ import {
   windowFrame,
 } from "./materials";
 import { awardsSignMap, gallerySignMap, makePlaqueTexture } from "./textures";
+import { asset } from "@/lib/asset";
 
 const HALF_X = GALLERY_SIZE_X / 2;
 const HALF_Z = GALLERY_SIZE_Z / 2;
@@ -180,7 +181,7 @@ function PictureLight({ lit, frameH }: { lit: boolean; frameH: number }) {
 }
 
 function SecondPlaceRibbons() {
-  const map = useTexture("/textures/projects/second-place-ribbon.png");
+  const map = useTexture(asset("/textures/projects/second-place-ribbon.png"));
   useLayoutEffect(() => {
     const img = map.image as HTMLImageElement | HTMLCanvasElement | undefined;
     if (!img || map.userData.punched) return;
@@ -480,7 +481,7 @@ function GalleryDoors({ hall }: { hall: Exclude<InteriorId, null> }) {
     <group position={[-HALF_X - WALL / 2 + 0.05, 0, 0]}>
       <group ref={left} position={[0, leafH / 2 + 0.01, DOOR_W / 2]}>
         <DoorLeafFace
-          src="/textures/gallery-door-right.png"
+          src={asset("/textures/gallery-door-right.png")}
           width={leafW}
           height={leafH}
           z={-leafW / 2}
@@ -488,7 +489,7 @@ function GalleryDoors({ hall }: { hall: Exclude<InteriorId, null> }) {
       </group>
       <group ref={right} position={[0, leafH / 2 + 0.01, -DOOR_W / 2]}>
         <DoorLeafFace
-          src="/textures/gallery-door-left.png"
+          src={asset("/textures/gallery-door-left.png")}
           width={leafW}
           height={leafH}
           z={leafW / 2}
@@ -499,7 +500,7 @@ function GalleryDoors({ hall }: { hall: Exclude<InteriorId, null> }) {
 }
 
 function OakFloor() {
-  const map = useTexture("/textures/gallery-hardwood.png");
+  const map = useTexture(asset("/textures/gallery-hardwood.png"));
   map.wrapS = RepeatWrapping;
   map.wrapT = RepeatWrapping;
   map.repeat.set(2.35, 3.5);

@@ -1,4 +1,5 @@
 import type { GalleryPiece } from "./projects";
+import { asset } from "@/lib/asset";
 
 export type Achievement = {
   id: string;
@@ -69,7 +70,7 @@ export const achievements: Achievement[] = [
     detail:
       "Completed the Google AI Professional Certificate: seven courses covering AI fundamentals, brainstorming and planning, research and insights, writing and communicating, content creation, data analysis, and app building. Earners are fluent in applying AI across real work and build a portfolio of 20+ artifacts.",
     kind: "certificate",
-    photo: "/textures/awards/google-ai-certificate.png",
+    photo: asset("/textures/awards/google-ai-certificate.png"),
     photoAlt: "Google AI Professional Certificate awarded to Aaron Nayki on June 24, 2026",
     href: "https://coursera.org/verify/professional-cert/DG2X1OD8KEWQ",
   },
@@ -81,7 +82,7 @@ export const achievements: Achievement[] = [
     detail:
       "Credential 1: UDL Mindset. CAST is a multifaceted organization with a singular ambition: bust the barriers to learning that millions of people experience every day. CAST does this by helping educators and organizations apply insights from the learning sciences and leading-edge practices to educational design and implementation. As part of these ongoing efforts, CAST created the Universal Design for Learning (UDL) Framework and Guidelines. CAST is the nonprofit owner and operator of the Learning Designed online platform, which provides access to competency-based credentials that evaluate knowledge and skill with UDL.",
     kind: "certificate",
-    photo: "/textures/awards/udl-mindset.png",
+    photo: asset("/textures/awards/udl-mindset.png"),
     photoAlt: "CAST Learning Designed Credential 1: UDL Mindset badge, issued May 1, 2024",
   },
 ];

@@ -17,6 +17,7 @@ import {
   SphereGeometry,
   TextureLoader,
 } from "three";
+import { asset } from "@/lib/asset";
 import {
   globeBeatAt,
   GLOBE_BEAT_DURATION,
@@ -80,7 +81,7 @@ function addMoon() {
     emissive: new Color("#1a1612"),
     emissiveIntensity: 0.18,
   });
-  new TextureLoader().load("/intro/moon.jpg", (map) => {
+  new TextureLoader().load(asset("/intro/moon.jpg"), (map) => {
     material.map = map;
     material.needsUpdate = true;
   });
@@ -112,13 +113,13 @@ function createGlobe(el: HTMLElement) {
     .width(el.clientWidth)
     .height(el.clientHeight)
     .backgroundColor("#03060d")
-    .backgroundImageUrl("/intro/night-sky.png")
+    .backgroundImageUrl(asset("/intro/night-sky.png"))
     .showGlobe(true)
     .showAtmosphere(true)
     .atmosphereColor("#6eb0e8")
     .atmosphereAltitude(0.22)
-    .globeImageUrl("/intro/earth-blue-marble.jpg")
-    .bumpImageUrl("/intro/earth-topology.png")
+    .globeImageUrl(asset("/intro/earth-blue-marble.jpg"))
+    .bumpImageUrl(asset("/intro/earth-topology.png"))
     .polygonsData([])
     .polygonCapColor(() => "rgba(0,0,0,0)")
     .polygonSideColor(() => "rgba(0,0,0,0)")
@@ -154,7 +155,7 @@ function createGlobe(el: HTMLElement) {
   mat.emissiveIntensity = 0.12;
   mat.shininess = 18;
   mat.specular = new Color("#89c4e8");
-  new TextureLoader().load("/intro/earth-water.png", (water) => {
+  new TextureLoader().load(asset("/intro/earth-water.png"), (water) => {
     mat.specularMap = water;
     mat.needsUpdate = true;
   });
@@ -185,8 +186,8 @@ function createGlobe(el: HTMLElement) {
 
 async function loadPreciseLand(globe: GlobeInstance, signal: AbortSignal) {
   const [countriesRes, statesRes] = await Promise.all([
-    fetch("/intro/ne_110m_admin_0_countries.geojson", { signal }),
-    fetch("/intro/ne_110m_us_states.geojson", { signal }),
+    fetch(asset("/intro/ne_110m_admin_0_countries.geojson"), { signal }),
+    fetch(asset("/intro/ne_110m_us_states.geojson"), { signal }),
   ]);
   const countries = (await countriesRes.json()) as {
     features: { properties: { ISO_A3?: string } }[];

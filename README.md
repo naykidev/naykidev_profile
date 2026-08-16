@@ -13,6 +13,8 @@ npm install
 npm run dev
 ```
 
+Live site: [https://naykidev.github.io/naykidev_profile/](https://naykidev.github.io/naykidev_profile/)
+
 ## Structure
 
 Portfolio copy lives in `src/data`. Interactable locations are declared in `src/data/locations.ts` and wired through a generic panel system.

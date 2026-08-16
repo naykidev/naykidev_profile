@@ -1,3 +1,5 @@
+import { asset } from "@/lib/asset";
+
 export type ProjectLink = {
   label: string;
   href: string;
@@ -38,7 +40,7 @@ export const axolAssist = {
         "Spacing controls",
         "Contrast controls",
       ],
-      photo: "/textures/projects/accessibility-surfer-store.png",
+      photo: asset("/textures/projects/accessibility-surfer-store.png"),
       photoAlt: "Accessibility Surfer on the Chrome Web Store, with dwell and reading controls over a web article",
       links: [
         { label: "Chrome Web Store", href: "https://chromewebstore.google.com/detail/accessibility-surfer/pccmbliammnfaklpblehkonmhcdnedhn" },
@@ -70,15 +72,15 @@ export const axolAssist = {
       ],
       photos: [
         {
-          src: "/textures/projects/axol-work-prospect.png",
+          src: asset("/textures/projects/axol-work-prospect.png"),
           alt: "Axol Work prospect view: find work sorted by how well each shift fits your needs",
         },
         {
-          src: "/textures/projects/axol-work-recruiter.png",
+          src: asset("/textures/projects/axol-work-recruiter.png"),
           alt: "Axol Work recruiter dashboard with open shifts, applicants, and quick actions",
         },
         {
-          src: "/textures/projects/axol-work-shifts.png",
+          src: asset("/textures/projects/axol-work-shifts.png"),
           alt: "Axol Work recruiter shift listings with accommodation tags",
         },
       ],
@@ -137,7 +139,7 @@ export const arcadeProjects: Project[] = [
     summary:
       "The official Surf Del Mar Festival website, built to highlight the history, culture, and community that make Del Mar special. Surf Del Mar is a four-day celebration of the city’s surfing culture and coastal heritage. The site showcases the event, shares stories from the past, and recognizes the sponsors who helped bring it together — October 8–11, 2026.",
     technologies: ["Web", "Design"],
-    photo: "/textures/projects/surf-del-mar.png",
+    photo: asset("/textures/projects/surf-del-mar.png"),
     photoAlt: "Surf Del Mar Festival homepage with retro coastal illustration and surfboard navigation",
     links: [{ label: "Festival website", href: "https://surfdelmarfestival.com" }],
   },
@@ -160,7 +162,7 @@ export const arcadeProjects: Project[] = [
     summary:
       "A weather app–disguised safety tool that helps users discreetly seek help in dangerous situations. Developed in Android Studio, it allows silent photo and video capture, GPS location sharing, and one-tap emergency calls—all while appearing to function as a simple weather app. We integrated real-time weather data through an API and designed custom pixel art with help from Microsoft Copilot AI to complete the disguise.",
     technologies: ["Android Studio", "APIs", "GPS"],
-    photo: "/textures/projects/weather-report-tritonhacks.png",
+    photo: asset("/textures/projects/weather-report-tritonhacks.png"),
     photoAlt: "Weather Report team celebrating 2nd place at TritonHacks 2025",
     links: [
       { label: "GitHub", href: "https://github.com/naykidev/Weather-ReportZ" },
@@ -184,7 +186,7 @@ export const galleryPieces: GalleryPiece[] = [
     photo: axolAssist.products[0].photo,
     photoAlt: axolAssist.products[0].photoAlt,
     links: [...axolAssist.products[0].links],
-    portrait: "/textures/projects/accessibility-surfer.png",
+    portrait: asset("/textures/projects/accessibility-surfer.png"),
   },
   {
     id: "axol-assist",
@@ -192,7 +194,7 @@ export const galleryPieces: GalleryPiece[] = [
     summary: axolAssist.story,
     technologies: ["Accessibility", "Product design", "Chrome extension", "Web"],
     links: [{ label: "axolassist.com", href: "https://axolassist.com" }],
-    portrait: "/textures/projects/axol-assist.png",
+    portrait: asset("/textures/projects/axol-assist.png"),
   },
   {
     id: "axol-work",
@@ -201,7 +203,7 @@ export const galleryPieces: GalleryPiece[] = [
     technologies: [...axolAssist.products[2].highlights.slice(0, 4)],
     photos: axolAssist.products[2].photos,
     links: [...axolAssist.products[2].links],
-    portrait: "/textures/projects/axol-work.png",
+    portrait: asset("/textures/projects/axol-work.png"),
   },
   {
     id: "weather-report",
@@ -212,7 +214,7 @@ export const galleryPieces: GalleryPiece[] = [
     links: arcade("weather-report").links,
     photo: arcade("weather-report").photo,
     photoAlt: arcade("weather-report").photoAlt,
-    portrait: "/textures/projects/weather-report.png",
+    portrait: asset("/textures/projects/weather-report.png"),
   },
   {
     id: "dodo",
@@ -221,7 +223,7 @@ export const galleryPieces: GalleryPiece[] = [
     context: arcade("dodo").context,
     technologies: [...arcade("dodo").technologies],
     links: arcade("dodo").links,
-    portrait: "/textures/projects/dodo.png",
+    portrait: asset("/textures/projects/dodo.png"),
   },
   {
     id: "surf-del-mar",
@@ -232,7 +234,7 @@ export const galleryPieces: GalleryPiece[] = [
     photo: arcade("surf-del-mar").photo,
     photoAlt: arcade("surf-del-mar").photoAlt,
     links: arcade("surf-del-mar").links,
-    portrait: "/textures/projects/surf-del-mar.png",
+    portrait: asset("/textures/projects/surf-del-mar.png"),
   },
   {
     id: "freddy-takes-flight",
@@ -241,6 +243,6 @@ export const galleryPieces: GalleryPiece[] = [
     context: arcade("freddy-takes-flight").context,
     technologies: [...arcade("freddy-takes-flight").technologies],
     links: arcade("freddy-takes-flight").links,
-    portrait: "/textures/projects/freddy-takes-flight.png",
+    portrait: asset("/textures/projects/freddy-takes-flight.png"),
   },
 ];
