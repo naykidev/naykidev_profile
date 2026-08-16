@@ -8,6 +8,7 @@ export const profile = {
   email: "college.naykiaaron@gmail.com",
   linkedin: "https://www.linkedin.com/in/aaron-nayki",
   photo: asset("/textures/profile/aaron-nayki.png"),
+  resume: asset("/resume/Resume2026.pdf"),
   intro: [
     "Hi, my name is Aaron Nayki, and I’m a freshman at the University of Wisconsin–Madison studying Computer Engineering.",
     "I was born and raised in San Diego, California, and I’m interested in developing digital accessibility platforms, assistive devices, and technologies that make everyday technology more usable and accessible.",

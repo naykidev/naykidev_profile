@@ -56,7 +56,7 @@ export function IntroOverlay() {
           className="mt-6 font-ui text-[11px] tracking-[0.18em] text-paper/60 uppercase underline-offset-4 hover:text-paper hover:underline"
           onClick={() => setMode("traditional")}
         >
-          View traditional portfolio
+          View resume
         </button>
       </div>
     </div>
