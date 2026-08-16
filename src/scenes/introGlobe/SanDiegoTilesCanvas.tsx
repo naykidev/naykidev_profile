@@ -25,8 +25,8 @@ export function SanDiegoTilesCanvas({
       }}
     >
       <Canvas
-        dpr={[1, 1.5]}
-        shadows
+        dpr={[1, 1]}
+        shadows={false}
         gl={{ antialias: true, stencil: false }}
         camera={{ fov: 50, near: 0.4, far: 280, position: [-20, 20, 16] }}
         style={{ width: "100%", height: "100%", display: "block", background: "#e4ddd0" }}

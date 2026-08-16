@@ -27,13 +27,13 @@ function Shell({
       role="dialog"
       aria-modal="true"
       aria-labelledby="panel-title"
-      className="absolute top-0 left-0 z-30 flex h-full w-full max-w-md flex-col border-r border-paper/15 bg-[#1c1814]/82 px-7 py-8 text-paper backdrop-blur-[6px] sm:w-[28rem]"
+      className="absolute inset-0 z-30 flex h-full w-full max-w-none flex-col border-r border-paper/15 bg-[#1c1814]/90 px-5 pt-[max(3.75rem,calc(env(safe-area-inset-top)+2.75rem))] pb-[max(1.25rem,env(safe-area-inset-bottom))] text-paper backdrop-blur-[6px] sm:inset-auto sm:top-0 sm:left-0 sm:max-w-md sm:w-[28rem] sm:px-7 sm:pt-8 sm:pb-8"
     >
       <CloseButton onClick={closePanel} />
       <p className="font-ui text-[10px] tracking-[0.32em] text-paper/60 uppercase">
         {kicker}
       </p>
-      <h2 id="panel-title" className="mt-2 font-display text-4xl">
+      <h2 id="panel-title" className="mt-2 pr-12 font-display text-3xl sm:text-4xl">
         {title}
       </h2>
       <div className="mt-6 flex-1 space-y-5 overflow-y-auto pr-1 font-ui text-sm leading-relaxed text-paper/85">

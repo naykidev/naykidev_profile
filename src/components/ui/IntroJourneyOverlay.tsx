@@ -35,7 +35,7 @@ export function IntroCinematicLayer() {
       {frame.showSkip ? (
         <button
           type="button"
-          className="pointer-events-auto absolute bottom-6 left-6 z-[58] border border-paper/30 bg-ink/40 px-3 py-1.5 font-ui text-[10px] tracking-[0.18em] text-paper/80 uppercase backdrop-blur-[2px] hover:text-paper"
+          className="pointer-events-auto absolute top-[max(0.65rem,env(safe-area-inset-top))] left-[max(0.75rem,env(safe-area-inset-left))] z-[58] min-h-9 border border-paper/30 bg-ink/40 px-3 py-1.5 font-ui text-[10px] tracking-[0.18em] text-paper/80 uppercase backdrop-blur-[2px] hover:text-paper"
           onClick={skipIntro}
         >
           Skip intro

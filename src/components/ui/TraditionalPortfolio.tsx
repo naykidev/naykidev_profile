@@ -14,12 +14,12 @@ export function TraditionalPortfolio() {
   const webgl = useAppStore((s) => s.webgl);
 
   return (
-    <main className="h-full overflow-y-auto bg-[#1c1814] text-paper">
-      <div className="mx-auto max-w-3xl px-6 py-16">
+    <main className="h-full overflow-y-auto overscroll-y-contain bg-[#1c1814] text-paper">
+      <div className="mx-auto max-w-3xl px-4 pt-[max(4.5rem,calc(env(safe-area-inset-top)+3.25rem))] pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-16">
         <p className="font-ui text-[11px] tracking-[0.32em] text-paper/60 uppercase">
           Traditional portfolio
         </p>
-        <h1 className="mt-3 font-display text-6xl">{profile.name}</h1>
+        <h1 className="mt-3 font-display text-4xl sm:text-6xl">{profile.name}</h1>
         <p className="mt-3 font-ui tracking-[0.12em] uppercase">{profile.headline}</p>
         <p className="mt-6 max-w-xl text-lg text-paper/85">{profile.intro}</p>
         <p className="mt-4 text-paper/70">{profile.locationPath}</p>

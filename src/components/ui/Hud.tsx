@@ -29,7 +29,7 @@ export function Hud() {
 
   return (
     <div className="pointer-events-none absolute inset-0 z-10">
-      <div className="absolute top-5 left-5 font-ui text-[11px] tracking-[0.32em] text-paper/55 uppercase">
+      <div className="absolute top-[max(1.15rem,env(safe-area-inset-top))] left-[max(1rem,env(safe-area-inset-left))] max-w-[55%] font-ui text-[10px] tracking-[0.28em] text-paper/55 uppercase sm:text-[11px] sm:tracking-[0.32em]">
         {title}
       </div>
       {showHelp ? (
@@ -41,21 +41,21 @@ export function Hud() {
         </div>
       ) : null}
       {mode === "tour" && !cameraTransition && !tourComplete ? (
-        <div className="pointer-events-auto absolute bottom-7 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2">
-          <p className="font-ui text-[11px] tracking-[0.22em] text-paper/55 uppercase">
+        <div className="pointer-events-auto absolute bottom-[max(1.35rem,env(safe-area-inset-bottom))] left-1/2 flex w-[min(100%-1.5rem,22rem)] -translate-x-1/2 flex-col items-center gap-2">
+          <p className="font-ui text-[10px] tracking-[0.18em] text-paper/55 uppercase sm:text-[11px] sm:tracking-[0.22em]">
             {tourStops[tourIndex]?.name ?? "Tour"} · {tourIndex + 1} / {tourStops.length}
           </p>
-          <div className="flex gap-2">
+          <div className="flex w-full justify-center gap-2">
             <button
               type="button"
-              className="rounded-full border border-white/15 bg-black/25 px-4 py-2 font-ui text-[10px] tracking-[0.22em] text-paper uppercase backdrop-blur-[10px] transition hover:bg-white/10"
+              className="min-h-11 flex-1 rounded-full border border-white/15 bg-black/25 px-4 py-2 font-ui text-[10px] tracking-[0.22em] text-paper uppercase backdrop-blur-[10px] transition hover:bg-white/10 sm:flex-none"
               onClick={() => advanceTour()}
             >
               Next
             </button>
             <button
               type="button"
-              className="rounded-full border border-white/15 bg-black/25 px-4 py-2 font-ui text-[10px] tracking-[0.22em] text-paper/80 uppercase backdrop-blur-[10px] transition hover:bg-white/10"
+              className="min-h-11 flex-1 rounded-full border border-white/15 bg-black/25 px-4 py-2 font-ui text-[10px] tracking-[0.22em] text-paper/80 uppercase backdrop-blur-[10px] transition hover:bg-white/10 sm:flex-none"
               onClick={() => setMode("intro")}
             >
               Exit tour

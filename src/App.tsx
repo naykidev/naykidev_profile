@@ -93,7 +93,7 @@ export function App() {
       </a>
       <AccessibilityMenu />
       {showTraditional ? (
-        <div id="traditional">
+        <div id="traditional" className="h-full overflow-hidden">
           <TraditionalPortfolio />
         </div>
       ) : (

@@ -16,7 +16,7 @@ export function GalleryModal() {
 
   return (
     <div
-      className="absolute inset-0 z-40 flex items-center justify-center bg-[#1c1814]/55 px-4 backdrop-blur-[3px]"
+      className="absolute inset-0 z-40 flex items-end justify-center bg-[#1c1814]/55 px-3 pt-[max(3.5rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-[3px] sm:items-center sm:px-4"
       onClick={() => close(null)}
       role="presentation"
     >
@@ -24,14 +24,14 @@ export function GalleryModal() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="gallery-piece-title"
-        className="relative max-h-[80vh] w-full max-w-xl overflow-y-auto border border-paper/20 bg-[#1c1814]/92 px-7 py-8 text-paper"
+        className="relative max-h-[min(88dvh,100%)] w-full max-w-xl overflow-y-auto border border-paper/20 bg-[#1c1814]/92 px-5 py-7 text-paper sm:px-7 sm:py-8"
         onClick={(event) => event.stopPropagation()}
       >
         <CloseButton onClick={() => close(null)} />
         <p className="font-ui text-[10px] tracking-[0.32em] text-paper/55 uppercase">
           {hallLabel}
         </p>
-        <h2 id="gallery-piece-title" className="mt-2 font-display text-4xl">
+        <h2 id="gallery-piece-title" className="mt-2 pr-10 font-display text-3xl sm:text-4xl">
           {piece.name}
         </h2>
         {piece.context ? (

@@ -8,25 +8,25 @@ export function TourCompleteOverlay() {
   if (mode !== "tour" || !tourComplete) return null;
 
   return (
-    <div className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-[#1c1814]/72 text-center backdrop-blur-[3px]">
-      <div className="max-w-xl px-6">
-        <h1 className="font-display text-5xl font-semibold tracking-wide text-paper sm:text-6xl">
+    <div className="absolute inset-0 z-[60] flex flex-col items-center justify-center overflow-y-auto bg-[#1c1814]/72 px-4 py-[max(4rem,env(safe-area-inset-top))] text-center backdrop-blur-[3px]">
+      <div className="w-full max-w-xl px-2 sm:px-6">
+        <h1 className="font-display text-[2.15rem] leading-tight font-semibold tracking-wide text-paper sm:text-6xl">
           Thank you for taking a tour!
         </h1>
         <p className="mt-5 font-ui text-sm tracking-[0.08em] text-paper/80">
           You’ve seen About Me, the Projects Gallery, and Awards & Certificates.
         </p>
-        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 sm:mt-10 sm:flex-row sm:items-center">
           <button
             type="button"
-            className="min-w-48 border border-paper/40 bg-paper/10 px-6 py-3 font-ui text-xs tracking-[0.28em] text-paper uppercase backdrop-blur-[2px] transition hover:bg-paper/20"
+            className="min-h-12 w-full border border-paper/40 bg-paper/10 px-6 py-3 font-ui text-xs tracking-[0.28em] text-paper uppercase backdrop-blur-[2px] transition hover:bg-paper/20 sm:w-auto sm:min-w-48"
             onClick={() => setMode("explore")}
           >
             Explore
           </button>
           <button
             type="button"
-            className="min-w-48 border border-paper/40 bg-paper/10 px-6 py-3 font-ui text-xs tracking-[0.28em] text-paper uppercase backdrop-blur-[2px] transition hover:bg-paper/20"
+            className="min-h-12 w-full border border-paper/40 bg-paper/10 px-6 py-3 font-ui text-xs tracking-[0.28em] text-paper uppercase backdrop-blur-[2px] transition hover:bg-paper/20 sm:w-auto sm:min-w-48"
             onClick={() => setMode("tour")}
           >
             Take the tour again

@@ -136,35 +136,50 @@ export function CameraDirector() {
 
   useEffect(() => {
     const el = gl.domElement;
-    const onMove = (event: MouseEvent) => {
+    el.style.touchAction = "none";
+    let lookPointer: number | null = null;
+    let lastX = 0;
+    let lastY = 0;
+    const onMove = (event: PointerEvent) => {
+      if (lookPointer !== event.pointerId) return;
       const { mode, activePanel, setPlayer, player, galleryProjectId, cameraTransition } =
         useAppStore.getState();
       if (mode !== "explore" || activePanel || galleryProjectId || cameraTransition) return;
-      if (event.buttons !== 1) return;
       notePointerMove(event.clientX, event.clientY);
       el.style.cursor = "grabbing";
+      const dx = event.movementX || event.clientX - lastX;
+      const dy = event.movementY || event.clientY - lastY;
+      lastX = event.clientX;
+      lastY = event.clientY;
       setPlayer({
-        yaw: player.yaw - event.movementX * 0.0022,
-        pitch: MathUtils.clamp(player.pitch - event.movementY * 0.0018, -1.1, 0.9),
+        yaw: player.yaw - dx * 0.0022,
+        pitch: MathUtils.clamp(player.pitch - dy * 0.0018, -1.1, 0.9),
       });
     };
     const onDown = (event: PointerEvent) => {
       if (event.button !== 0) return;
       const { mode, activePanel, galleryProjectId, cameraTransition } = useAppStore.getState();
       if (mode !== "explore" || activePanel || galleryProjectId || cameraTransition) return;
+      lookPointer = event.pointerId;
+      lastX = event.clientX;
+      lastY = event.clientY;
+      el.setPointerCapture(event.pointerId);
       el.style.cursor = "grabbing";
       notePointerDown(event.clientX, event.clientY);
     };
-    const onUp = () => {
+    const onUp = (event?: PointerEvent) => {
+      if (event && lookPointer !== null && event.pointerId !== lookPointer) return;
+      lookPointer = null;
       if (useAppStore.getState().mode === "explore") el.style.cursor = "grab";
     };
     const onLock = () => {
       useAppStore.getState().setPointerLocked(document.pointerLockElement === el);
     };
     el.style.cursor = "grab";
-    el.addEventListener("mousemove", onMove);
+    el.addEventListener("pointermove", onMove);
     el.addEventListener("pointerdown", onDown);
     el.addEventListener("pointerup", onUp);
+    el.addEventListener("pointercancel", onUp);
     el.addEventListener("pointerleave", onUp);
     document.addEventListener("pointerlockchange", onLock);
     const onMenu = (event: Event) => {
@@ -177,9 +192,10 @@ export function CameraDirector() {
     };
     el.addEventListener("contextmenu", onMenu);
     return () => {
-      el.removeEventListener("mousemove", onMove);
+      el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerdown", onDown);
       el.removeEventListener("pointerup", onUp);
+      el.removeEventListener("pointercancel", onUp);
       el.removeEventListener("pointerleave", onUp);
       document.removeEventListener("pointerlockchange", onLock);
       el.removeEventListener("contextmenu", onMenu);
