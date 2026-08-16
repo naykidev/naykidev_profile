@@ -1,3 +1,4 @@
+import { profile } from "@/data/profile";
 import { useAppStore } from "@/systems/store";
 
 const chip =
@@ -26,6 +27,15 @@ export function AccessibilityMenu() {
           Enter campus
         </button>
       )}
+      <a
+        className={`${chip} inline-flex items-center`}
+        href={profile.linkedin}
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Aaron Nayki LinkedIn profile"
+      >
+        LinkedIn
+      </a>
     </div>
   );
 }
