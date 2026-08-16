@@ -56,13 +56,6 @@ function AboutPanel() {
       {profile.intro.map((paragraph) => (
         <p key={paragraph}>{paragraph}</p>
       ))}
-      <ul className="grid grid-cols-1 gap-2">
-        {profile.focus.map((item) => (
-          <li key={item} className="border-l border-paper/30 pl-3">
-            {item}
-          </li>
-        ))}
-      </ul>
     </Shell>
   );
 }

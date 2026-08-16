@@ -15,12 +15,5 @@ export const profile = {
     "In my free time, I enjoy working on side projects as a way to volunteer my technical skills, solve problems for others, and create things that can have a meaningful impact.",
     "Outside of engineering, I enjoy playing guitar and following Formula 1.",
   ],
-  focus: [
-    "San Diego → Madison",
-    "Computer Engineering",
-    "Technology",
-    "Accessibility",
-    "Entrepreneurship",
-  ],
   quote: "Technology should adapt to people — not the other way around.",
 } as const;
