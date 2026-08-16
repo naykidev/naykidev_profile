@@ -15,3 +15,23 @@ export function useCoarsePointer() {
 
   return coarse;
 }
+
+/** Stick/touch HUD: phones, coarse pointers, and landscape phone heights. */
+export function useTouchUi() {
+  const coarse = useCoarsePointer();
+  const [compact, setCompact] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      (window.innerWidth < 768 || window.innerHeight < 540),
+  );
+
+  useEffect(() => {
+    const sync = () =>
+      setCompact(window.innerWidth < 768 || window.innerHeight < 540);
+    sync();
+    window.addEventListener("resize", sync);
+    return () => window.removeEventListener("resize", sync);
+  }, []);
+
+  return coarse || compact;
+}

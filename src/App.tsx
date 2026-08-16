@@ -11,6 +11,7 @@ import { MobileControls } from "@/components/ui/MobileControls";
 import { ProfilePanel } from "@/components/ui/ProfilePanel";
 import { TraditionalPortfolio } from "@/components/ui/TraditionalPortfolio";
 import { useKeyboard } from "@/hooks/useKeyboard";
+import { usePortraitLock } from "@/hooks/usePortraitLock";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useWebGLSupport } from "@/hooks/useWebGL";
 import { tryInteract } from "@/systems/interaction";
@@ -37,6 +38,7 @@ export function App() {
 
   useKeyboard();
   usePrefersReducedMotion();
+  usePortraitLock();
 
   useEffect(() => {
     setWebgl(supported);

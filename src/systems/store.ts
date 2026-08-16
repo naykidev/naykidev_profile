@@ -14,6 +14,7 @@ import {
   EXPLORE_SPAWN,
 } from "@/systems/campusLayout";
 import { createIntroPlayback, markIntroSeen } from "@/systems/introSequence";
+import { haptic } from "@/lib/haptics";
 import { getTerrainHeight } from "@/systems/terrain";
 
 export type AppMode = "intro" | "explore" | "tour" | "traditional";
@@ -46,6 +47,7 @@ type AppState = {
   player: { x: number; y: number; z: number; yaw: number; pitch: number };
   look: { x: number; y: number };
   move: { x: number; z: number };
+  gpuShadows: boolean;
   introStartedAt: number;
   introShortened: boolean;
   introForcedEnd: boolean;
@@ -71,6 +73,7 @@ type AppState = {
   setPlayer: (partial: Partial<AppState["player"]>) => void;
   setLook: (look: { x: number; y: number }) => void;
   setMove: (move: { x: number; z: number }) => void;
+  setGpuShadows: (gpuShadows: boolean) => void;
 };
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -97,6 +100,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   look: { x: 0, y: 0 },
   move: { x: 0, z: 0 },
+  gpuShadows: false,
   ...createIntroPlayback(false),
   setMode: (mode) =>
     set({
@@ -141,9 +145,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ nearby: locations.find((location) => location.id === id) ?? null }),
   openPanel: (panel) => {
     if (document.pointerLockElement) document.exitPointerLock();
+    haptic(14);
     set({ activePanel: panel });
   },
-  closePanel: () => set({ activePanel: null }),
+  closePanel: () => {
+    haptic(8);
+    set({ activePanel: null });
+  },
   setInterior: (interior) => set({ interior }),
   enterGallery: () => {
     const state = get();
@@ -298,6 +306,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   setGalleryProject: (galleryProjectId) => {
     if (galleryProjectId && document.pointerLockElement) document.exitPointerLock();
+    haptic(galleryProjectId ? 14 : 8);
     set({ galleryProjectId });
   },
   setTourIndex: (tourIndex) => set({ tourIndex }),
@@ -323,4 +332,5 @@ export const useAppStore = create<AppState>((set, get) => ({
   setPlayer: (partial) => set({ player: { ...get().player, ...partial } }),
   setLook: (look) => set({ look }),
   setMove: (move) => set({ move }),
+  setGpuShadows: (gpuShadows) => set({ gpuShadows }),
 }));

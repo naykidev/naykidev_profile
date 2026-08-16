@@ -41,7 +41,10 @@ export function Hud() {
         </div>
       ) : null}
       {mode === "tour" && !cameraTransition && !tourComplete ? (
-        <div className="pointer-events-auto absolute bottom-[max(1.35rem,env(safe-area-inset-bottom))] left-1/2 flex w-[min(100%-1.5rem,22rem)] -translate-x-1/2 flex-col items-center gap-2">
+        <div
+          data-look-block
+          className="pointer-events-auto absolute bottom-[max(1.35rem,env(safe-area-inset-bottom))] left-1/2 flex w-[min(100%-1.5rem,22rem)] -translate-x-1/2 flex-col items-center gap-2"
+        >
           <p className="font-ui text-[10px] tracking-[0.18em] text-paper/55 uppercase sm:text-[11px] sm:tracking-[0.22em]">
             {tourStops[tourIndex]?.name ?? "Tour"} · {tourIndex + 1} / {tourStops.length}
           </p>

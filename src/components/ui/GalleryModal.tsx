@@ -16,6 +16,7 @@ export function GalleryModal() {
 
   return (
     <div
+      data-look-block
       className="absolute inset-0 z-40 flex items-end justify-center bg-[#1c1814]/55 px-3 pt-[max(3.5rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-[3px] sm:items-center sm:px-4"
       onClick={() => close(null)}
       role="presentation"

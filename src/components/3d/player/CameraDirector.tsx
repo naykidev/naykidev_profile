@@ -35,6 +35,30 @@ const HALL_CAM_PAD = 0.88;
 const HALL_FRAME_Y = 2.52;
 const HALL_WALL_FOV = 74;
 const DEFAULT_FOV = 50;
+const TOUCH_LOOK_YAW = 0.0048;
+const MOUSE_LOOK_YAW = 0.0022;
+const TOUCH_LOOK_PITCH = 0.0038;
+const MOUSE_LOOK_PITCH = 0.0018;
+const LOOK_INERTIA = 9.5;
+
+function exploreFov() {
+  return typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches
+    ? 62
+    : DEFAULT_FOV;
+}
+
+function lookBlockedAt(x: number, y: number) {
+  const hit = document.elementFromPoint(x, y);
+  return Boolean(hit?.closest("[data-look-block]"));
+}
+
+function isTouchLook(event: PointerEvent) {
+  return (
+    event.pointerType === "touch" ||
+    event.pointerType === "pen" ||
+    (typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches)
+  );
+}
 
 function hallWorld(
   hall: "gallery" | "awards",
@@ -133,43 +157,51 @@ export function CameraDirector() {
   const transElapsed = useRef(0);
   const transKey = useRef<string | null>(null);
   const enterCooldown = useRef(0);
+  const lookPointerId = useRef<number | null>(null);
+  const lookLast = useRef({ x: 0, y: 0, t: 0 });
+  const lookVel = useRef({ yaw: 0, pitch: 0 });
 
   useEffect(() => {
     const el = gl.domElement;
     el.style.touchAction = "none";
-    let lookPointer: number | null = null;
-    let lastX = 0;
-    let lastY = 0;
     const onMove = (event: PointerEvent) => {
-      if (lookPointer !== event.pointerId) return;
-      const { mode, activePanel, setPlayer, player, galleryProjectId, cameraTransition } =
+      if (lookPointerId.current !== event.pointerId) return;
+      const { mode, activePanel, setPlayer, player, galleryProjectId, cameraTransition, dismissControlHint } =
         useAppStore.getState();
       if (mode !== "explore" || activePanel || galleryProjectId || cameraTransition) return;
       notePointerMove(event.clientX, event.clientY);
       el.style.cursor = "grabbing";
-      const dx = event.movementX || event.clientX - lastX;
-      const dy = event.movementY || event.clientY - lastY;
-      lastX = event.clientX;
-      lastY = event.clientY;
+      const now = performance.now();
+      const dx = event.movementX || event.clientX - lookLast.current.x;
+      const dy = event.movementY || event.clientY - lookLast.current.y;
+      const dt = Math.max(0.008, (now - lookLast.current.t) / 1000);
+      lookLast.current = { x: event.clientX, y: event.clientY, t: now };
+      const touch = isTouchLook(event);
+      const yawDelta = dx * (touch ? TOUCH_LOOK_YAW : MOUSE_LOOK_YAW);
+      const pitchDelta = dy * (touch ? TOUCH_LOOK_PITCH : MOUSE_LOOK_PITCH);
+      lookVel.current = { yaw: yawDelta / dt, pitch: pitchDelta / dt };
       setPlayer({
-        yaw: player.yaw - dx * 0.0022,
-        pitch: MathUtils.clamp(player.pitch - dy * 0.0018, -1.1, 0.9),
+        yaw: player.yaw - yawDelta,
+        pitch: MathUtils.clamp(player.pitch - pitchDelta, -1.1, 0.9),
       });
+      dismissControlHint();
     };
     const onDown = (event: PointerEvent) => {
       if (event.button !== 0) return;
+      if (lookPointerId.current !== null) return;
       const { mode, activePanel, galleryProjectId, cameraTransition } = useAppStore.getState();
       if (mode !== "explore" || activePanel || galleryProjectId || cameraTransition) return;
-      lookPointer = event.pointerId;
-      lastX = event.clientX;
-      lastY = event.clientY;
+      if (lookBlockedAt(event.clientX, event.clientY)) return;
+      lookPointerId.current = event.pointerId;
+      lookLast.current = { x: event.clientX, y: event.clientY, t: performance.now() };
+      lookVel.current = { yaw: 0, pitch: 0 };
       el.setPointerCapture(event.pointerId);
       el.style.cursor = "grabbing";
       notePointerDown(event.clientX, event.clientY);
     };
     const onUp = (event?: PointerEvent) => {
-      if (event && lookPointer !== null && event.pointerId !== lookPointer) return;
-      lookPointer = null;
+      if (event && lookPointerId.current !== null && event.pointerId !== lookPointerId.current) return;
+      lookPointerId.current = null;
       if (useAppStore.getState().mode === "explore") el.style.cursor = "grab";
     };
     const onLock = () => {
@@ -444,7 +476,7 @@ export function CameraDirector() {
 
     if (state.mode !== "explore") return;
 
-    setCameraFov(camera, DEFAULT_FOV);
+    setCameraFov(camera, exploreFov());
 
     const transition = state.cameraTransition;
     if (transition) {
@@ -484,6 +516,21 @@ export function CameraDirector() {
       state.setLook({ x: 0, y: 0 });
     }
 
+    if (lookPointerId.current === null) {
+      const vel = lookVel.current;
+      const speed = Math.hypot(vel.yaw, vel.pitch);
+      if (speed > 0.08) {
+        state.setPlayer({
+          yaw: state.player.yaw - vel.yaw * capped,
+          pitch: MathUtils.clamp(state.player.pitch - vel.pitch * capped, -1.1, 0.9),
+        });
+        const damp = Math.exp(-LOOK_INERTIA * capped);
+        lookVel.current = { yaw: vel.yaw * damp, pitch: vel.pitch * damp };
+      } else if (speed > 0) {
+        lookVel.current = { yaw: 0, pitch: 0 };
+      }
+    }
+
     if (state.activePanel || state.galleryProjectId) {
       camera.position.set(state.player.x, state.player.y + 1.62, state.player.z);
       camera.rotation.order = "YXZ";
@@ -495,10 +542,10 @@ export function CameraDirector() {
     const keys = movementFromKeys();
     const mx = MathUtils.clamp(keys.x + state.move.x, -1, 1);
     const mz = MathUtils.clamp(keys.z + state.move.z, -1, 1);
-    const length = Math.hypot(mx, mz) || 1;
-    const nx = mx / length;
-    const nz = mz / length;
-    const speed = 7.4 * (keys.x || keys.z || state.move.x || state.move.z ? 1 : 0);
+    const length = Math.hypot(mx, mz);
+    const nx = length > 1e-4 ? mx / length : 0;
+    const nz = length > 1e-4 ? mz / length : 0;
+    const speed = 7.4 * Math.min(1, length);
     const yaw = state.player.yaw;
     const forwardX = -Math.sin(yaw);
     const forwardZ = -Math.cos(yaw);
@@ -523,7 +570,7 @@ export function CameraDirector() {
     camera.rotation.y = yaw;
     camera.rotation.x = state.player.pitch;
 
-    const nearby = findNearby(x, z);
+    const nearby = findNearby(x, y, z);
     const id = nearby?.id ?? null;
     if (id !== lastNearby.current) {
       lastNearby.current = id;

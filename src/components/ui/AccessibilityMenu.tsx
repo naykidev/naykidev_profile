@@ -10,7 +10,10 @@ export function AccessibilityMenu() {
   const setMode = useAppStore((s) => s.setMode);
 
   return (
-    <div className="pointer-events-auto absolute top-[max(0.65rem,env(safe-area-inset-top))] right-[max(0.65rem,env(safe-area-inset-right))] z-[70] flex max-w-[calc(100%-5.5rem)] flex-wrap justify-end gap-1.5 sm:top-4 sm:right-4 sm:gap-2">
+    <div
+      data-look-block
+      className="pointer-events-auto absolute top-[max(0.65rem,env(safe-area-inset-top))] right-[max(0.65rem,env(safe-area-inset-right))] z-[70] flex max-w-[calc(100%-5.5rem)] flex-wrap justify-end gap-1.5 sm:top-4 sm:right-4 sm:gap-2"
+    >
       <button type="button" className={chip} onClick={toggleHighContrast} aria-pressed={highContrast}>
         {highContrast ? "Contrast on" : "High contrast"}
       </button>

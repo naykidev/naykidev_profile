@@ -1,10 +1,11 @@
 import { locations } from "@/data/locations";
 import { useAppStore } from "@/systems/store";
 
-export function findNearby(x: number, z: number) {
+export function findNearby(x: number, y: number, z: number) {
   const interior = useAppStore.getState().interior;
   let best = null as (typeof locations)[number] | null;
   let bestDist = Infinity;
+  const eyeY = y + 1.62;
   for (const location of locations) {
     if (interior === "gallery" && location.id !== "gallery-exit") continue;
     if (interior === "awards" && location.id !== "awards-exit") continue;
@@ -12,9 +13,12 @@ export function findNearby(x: number, z: number) {
     if (interior !== "awards" && location.id === "awards-exit") continue;
     if (location.id === "interests" || location.id === "arcade" || location.id === "axol") continue;
     const dx = x - location.position[0];
+    const dy = eyeY - location.position[1];
     const dz = z - location.position[2];
-    const dist = Math.hypot(dx, dz);
-    if (dist < location.radius && dist < bestDist) {
+    const planar = Math.hypot(dx, dz);
+    const dist = Math.hypot(dx, dy, dz);
+    const reach = location.radius * 1.22;
+    if (planar < location.radius && dist < reach && dist < bestDist) {
       best = location;
       bestDist = dist;
     }

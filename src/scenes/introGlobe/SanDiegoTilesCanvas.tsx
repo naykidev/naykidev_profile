@@ -4,6 +4,7 @@
  */
 import { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
+import { usePageVisible } from "@/hooks/usePageVisible";
 import { SanDiegoWorld } from "./sanDiego/World";
 
 export function SanDiegoTilesCanvas({
@@ -13,6 +14,7 @@ export function SanDiegoTilesCanvas({
   elapsed: number;
   fade?: number;
 }) {
+  const visible = usePageVisible();
   if (fade <= 0.01) return null;
   const lift = 1 - fade;
   return (
@@ -27,6 +29,7 @@ export function SanDiegoTilesCanvas({
       <Canvas
         dpr={[1, 1]}
         shadows={false}
+        frameloop={visible ? "always" : "never"}
         gl={{ antialias: true, stencil: false }}
         camera={{ fov: 50, near: 0.4, far: 280, position: [-20, 20, 16] }}
         style={{ width: "100%", height: "100%", display: "block", background: "#e4ddd0" }}

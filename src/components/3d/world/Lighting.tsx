@@ -3,6 +3,7 @@ import { useAppStore } from "@/systems/store";
 
 export function Lighting() {
   const interior = useAppStore((s) => s.interior);
+  const gpuShadows = useAppStore((s) => s.gpuShadows);
   const museum = interior === "gallery" || interior === "awards";
 
   return (
@@ -22,7 +23,7 @@ export function Lighting() {
         position={[18, 36, 42]}
         intensity={museum ? 0.28 : 1.95}
         color="#ffe0a8"
-        castShadow={!museum}
+        castShadow={!museum && gpuShadows}
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
         shadow-camera-near={2}
