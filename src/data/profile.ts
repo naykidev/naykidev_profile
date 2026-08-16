@@ -1,3 +1,5 @@
+import { asset } from "@/lib/asset";
+
 export const profile = {
   name: "Aaron Nayki",
   headline: "Computer Engineering @ UW–Madison",
@@ -5,6 +7,7 @@ export const profile = {
   locationPath: "San Diego → Madison",
   email: "college.naykiaaron@gmail.com",
   linkedin: "https://www.linkedin.com/in/aaron-nayki",
+  photo: asset("/textures/profile/aaron-nayki.png"),
   intro:
     "I’m a Computer Engineering student interested in software, accessibility, AI, and building technology that solves real problems.",
   focus: [

@@ -47,6 +47,11 @@ function Shell({
 function AboutPanel() {
   return (
     <Shell kicker="About Me" title={profile.name}>
+      <img
+        src={profile.photo}
+        alt={`${profile.name} headshot`}
+        className="h-36 w-36 rounded-full object-cover"
+      />
       <p className="tracking-[0.14em] text-paper/70 uppercase">{profile.headline}</p>
       <p>{profile.intro}</p>
       <ul className="grid grid-cols-1 gap-2">

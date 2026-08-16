@@ -19,6 +19,11 @@ export function TraditionalPortfolio() {
         <p className="font-ui text-[11px] tracking-[0.32em] text-paper/60 uppercase">
           Traditional portfolio
         </p>
+        <img
+          src={profile.photo}
+          alt={`${profile.name} headshot`}
+          className="mt-6 h-36 w-36 rounded-full object-cover sm:h-44 sm:w-44"
+        />
         <h1 className="mt-3 font-display text-4xl sm:text-6xl">{profile.name}</h1>
         <p className="mt-3 font-ui tracking-[0.12em] uppercase">{profile.headline}</p>
         <p className="mt-6 max-w-xl text-lg text-paper/85">{profile.intro}</p>
