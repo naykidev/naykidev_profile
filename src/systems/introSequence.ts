@@ -11,6 +11,12 @@ export const GLOBE_END = 7.35;
 export const CAMPUS_START = 6.85;
 export const INTRO_DURATION = 9.65;
 export const LAYER_FADE = 1.2;
+/** Mount globe under the still-opaque coast so WebGL init is hidden. */
+export const GLOBE_MOUNT = GLOBE_START - 0.5;
+export const GLOBE_UNMOUNT = GLOBE_END + 0.3;
+export const SD_UNMOUNT = SD_END + 0.4;
+/** Start drawing campus while the globe still fully covers it. */
+export const CAMPUS_WARM = GLOBE_END - LAYER_FADE - 0.2;
 
 /** Exact explore/tour handoff pose — do not change. */
 export const INTRO_ARRIVAL = {

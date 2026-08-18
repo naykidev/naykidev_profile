@@ -39,6 +39,7 @@ export function GpuQualityController({ coarse }: { coarse: boolean }) {
 
   useFrame((_, dt) => {
     if (done.current || reducedMotion || !coarse) return;
+    if (useAppStore.getState().mode === "intro") return;
     if (dt > 0 && dt < 0.1) {
       fpsSum.current += 1 / dt;
       frames.current += 1;

@@ -2,44 +2,71 @@
  * Intro beat 1 host: cinematic low-poly San Diego coast.
  * Preview: /?preview=sandiego
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Canvas } from "@react-three/fiber";
+import { subscribeIntroPlayback } from "@/hooks/useIntroSequence";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { usePageVisible } from "@/hooks/usePageVisible";
 import { SanDiegoWorld } from "./sanDiego/World";
+
+const layerStyle: CSSProperties = {
+  transform: "translateZ(0)",
+  backfaceVisibility: "hidden",
+};
+
+function applyFade(el: HTMLElement | null, fade: number) {
+  if (!el) return;
+  el.style.opacity = String(fade);
+}
 
 export function SanDiegoTilesCanvas({
   elapsed,
   fade = 1,
 }: {
-  elapsed: number;
+  elapsed?: number;
   fade?: number;
 }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const followIntro = elapsed === undefined;
   const visible = usePageVisible();
-  if (fade <= 0.01) return null;
-  const lift = 1 - fade;
+  const coarse = useCoarsePointer();
+
+  useEffect(() => {
+    if (!followIntro) {
+      applyFade(wrapRef.current, fade);
+      return;
+    }
+    return subscribeIntroPlayback((sample) => applyFade(wrapRef.current, sample.sdFade));
+  }, [followIntro, fade]);
+
+  if (!followIntro && fade <= 0.01) return null;
+
   return (
     <div
+      ref={wrapRef}
       className="pointer-events-none absolute inset-0 z-[56] overflow-hidden"
-      style={{
-        opacity: fade,
-        filter: `blur(${lift * 16}px) brightness(${1 + lift * 0.35}) saturate(${1 - lift * 0.25})`,
-        transform: `scale(${1 + lift * 0.28})`,
-      }}
+      style={{ ...layerStyle, opacity: followIntro ? 1 : fade }}
     >
       <Canvas
         dpr={[1, 1]}
         shadows={false}
         frameloop={visible ? "always" : "never"}
-        gl={{ antialias: true, stencil: false }}
+        gl={{
+          antialias: !coarse,
+          stencil: false,
+          alpha: false,
+          powerPreference: "high-performance",
+        }}
         camera={{ fov: 50, near: 0.4, far: 280, position: [-20, 20, 16] }}
         style={{ width: "100%", height: "100%", display: "block", background: "#e4ddd0" }}
       >
-        <SanDiegoWorld elapsed={elapsed} fade={fade} />
+        <SanDiegoWorld
+          elapsed={elapsed ?? 0}
+          fade={followIntro ? 1 : fade}
+          followIntro={followIntro}
+        />
       </Canvas>
-      <div
-        className="absolute bottom-6 left-1/2 z-[56] -translate-x-1/2 font-ui text-[11px] tracking-[0.28em] text-ink/50 uppercase"
-        style={{ opacity: Math.max(0, 1 - lift * 1.6) }}
-      >
+      <div className="absolute bottom-6 left-1/2 z-[56] -translate-x-1/2 font-ui text-[11px] tracking-[0.28em] text-ink/50 uppercase">
         San Diego
       </div>
     </div>

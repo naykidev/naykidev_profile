@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { profile } from "@/data/profile";
-import { useIntroSequenceFrame } from "@/hooks/useIntroSequence";
+import { useIntroSequenceUi } from "@/hooks/useIntroSequence";
 import { markIntroSeen } from "@/systems/introSequence";
 import { useAppStore } from "@/systems/store";
 
 export function IntroOverlay() {
   const mode = useAppStore((s) => s.mode);
   const setMode = useAppStore((s) => s.setMode);
-  const frame = useIntroSequenceFrame();
+  const frame = useIntroSequenceUi();
   const titleVisible = mode === "intro" && (frame?.titleVisible ?? false);
 
   useEffect(() => {

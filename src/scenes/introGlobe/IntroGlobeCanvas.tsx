@@ -2,7 +2,8 @@
  * Isolated globe intro layer using globe.gl (own WebGL canvas, not the campus scene).
  * Preview: /?preview=globe
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { readIntroPlayback, subscribeIntroPlayback } from "@/hooks/useIntroSequence";
 import Globe, { type GlobeInstance } from "globe.gl";
 import {
   AmbientLight,
@@ -98,7 +99,7 @@ function applyBeat(
 ) {
   const beat = globeBeatAt(elapsed, { liftOff });
   if (beat.id === lastId.current) return;
-  const instant = lastId.current === null || elapsed < 0.08;
+  const instant = lastId.current === null;
   lastId.current = beat.id;
 
   globe.controls().autoRotate = beat.autoRotate;
@@ -181,6 +182,8 @@ function createGlobe(el: HTMLElement) {
   controls.autoRotate = true;
 
   globe.pointOfView({ lat: 32.72, lng: -117.45, altitude: 0.38 }, 0);
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  globe.renderer().setPixelRatio(Math.min(window.devicePixelRatio || 1, coarse ? 1 : 1.5));
   return { globe, stars, moon };
 }
 
@@ -200,21 +203,52 @@ async function loadPreciseLand(globe: GlobeInstance, signal: AbortSignal) {
   globe.polygonsData(land);
 }
 
+const layerStyle: CSSProperties = {
+  transform: "translateZ(0)",
+  backfaceVisibility: "hidden",
+};
+
+function applyFade(el: HTMLElement | null, fade: number) {
+  if (!el) return;
+  el.style.opacity = String(fade);
+}
+
+const GLOBE_ASSETS = [
+  asset("/intro/earth-blue-marble.jpg"),
+  asset("/intro/earth-topology.png"),
+  asset("/intro/night-sky.png"),
+  asset("/intro/earth-water.png"),
+  asset("/intro/moon.jpg"),
+];
+
+export function preloadIntroGlobeAssets() {
+  if (typeof window === "undefined") return;
+  for (const url of GLOBE_ASSETS) {
+    const img = new Image();
+    img.decoding = "async";
+    img.src = url;
+  }
+}
+
+preloadIntroGlobeAssets();
+
 export function IntroGlobeCanvas({
   elapsed,
   fade = 1,
   liftOff = false,
 }: {
-  elapsed: number;
+  elapsed?: number;
   fade?: number;
   liftOff?: boolean;
 }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
   const globeRef = useRef<GlobeInstance | null>(null);
   const beatIdRef = useRef<GlobeBeatId | null>(null);
-  const elapsedRef = useRef(elapsed);
+  const elapsedRef = useRef(elapsed ?? 0);
   const liftOffRef = useRef(liftOff);
-  elapsedRef.current = elapsed;
+  const followIntro = elapsed === undefined;
+  elapsedRef.current = elapsed ?? elapsedRef.current;
   liftOffRef.current = liftOff;
 
   useEffect(() => {
@@ -223,7 +257,10 @@ export function IntroGlobeCanvas({
     const { globe, stars, moon } = createGlobe(el);
     globeRef.current = globe;
     beatIdRef.current = null;
-    applyBeat(globe, elapsedRef.current, beatIdRef, liftOffRef.current);
+    const startElapsed = followIntro
+      ? readIntroPlayback().globeElapsed
+      : elapsedRef.current;
+    applyBeat(globe, startElapsed, beatIdRef, liftOffRef.current);
 
     const ac = new AbortController();
     loadPreciseLand(globe, ac.signal).catch((error) => {
@@ -254,22 +291,25 @@ export function IntroGlobeCanvas({
   }, []);
 
   useEffect(() => {
+    if (followIntro) {
+      return subscribeIntroPlayback((sample) => {
+        const globe = globeRef.current;
+        if (globe) applyBeat(globe, sample.globeElapsed, beatIdRef, liftOffRef.current);
+        applyFade(wrapRef.current, sample.globeFade);
+      });
+    }
+    applyFade(wrapRef.current, fade);
     const globe = globeRef.current;
-    if (!globe) return;
-    if (elapsed < 0.08) beatIdRef.current = null;
-    applyBeat(globe, elapsed, beatIdRef, liftOff);
-  }, [elapsed, liftOff]);
+    if (globe) applyBeat(globe, elapsedRef.current, beatIdRef, liftOff);
+  }, [followIntro, fade, elapsed, liftOff]);
 
-  if (fade <= 0.01) return null;
+  if (!followIntro && fade <= 0.01) return null;
 
   return (
     <div
+      ref={wrapRef}
       className="pointer-events-none absolute inset-0 z-[54] overflow-hidden"
-      style={{
-        opacity: fade,
-        filter: fade < 1 ? `blur(${(1 - fade) * 5}px)` : undefined,
-        transform: `scale(${1.12 - fade * 0.12})`,
-      }}
+      style={{ ...layerStyle, opacity: followIntro ? 0 : fade }}
     >
       <div ref={hostRef} className="h-full w-full" />
     </div>

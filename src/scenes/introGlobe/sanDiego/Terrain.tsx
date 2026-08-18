@@ -48,9 +48,14 @@ function makeLayer(width: number, depth: number, segX: number, segZ: number) {
 }
 
 export function Terrain() {
-  const land = useMemo(() => makeLayer(170, 150, 140, 120), []);
+  const coarse =
+    typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
+  const land = useMemo(
+    () => makeLayer(170, 150, coarse ? 72 : 110, coarse ? 60 : 96),
+    [coarse],
+  );
   return (
-    <mesh geometry={land} receiveShadow>
+    <mesh geometry={land}>
       <meshLambertMaterial vertexColors flatShading />
     </mesh>
   );
