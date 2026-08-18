@@ -2,7 +2,16 @@ import { profile } from "@/data/profile";
 import { useAppStore } from "@/systems/store";
 
 const chip =
-  "overlay-chip inline-flex min-h-11 items-center rounded-full px-3 py-2 font-ui text-[9px] tracking-[0.16em] uppercase sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[10px] sm:tracking-[0.18em]";
+  "overlay-chip overlay-nav-chip inline-flex items-center rounded-full font-ui uppercase";
+
+function NavLabel({ full, short }: { full: string; short: string }) {
+  return (
+    <>
+      <span className="nav-full">{full}</span>
+      <span className="nav-short">{short}</span>
+    </>
+  );
+}
 
 export function AccessibilityMenu() {
   const mode = useAppStore((s) => s.mode);
@@ -24,7 +33,7 @@ export function AccessibilityMenu() {
   return (
     <div
       data-look-block
-      className="pointer-events-auto absolute top-[max(0.65rem,env(safe-area-inset-top))] right-[max(0.65rem,env(safe-area-inset-right))] z-[70] flex max-w-[calc(100%-5.5rem)] flex-wrap justify-end gap-2 sm:top-4 sm:right-4 sm:gap-2"
+      className="overlay-nav-bar pointer-events-auto absolute top-[max(0.5rem,env(safe-area-inset-top))] right-0 left-0 z-[70] w-full max-w-none px-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] sm:top-4 sm:right-4 sm:left-auto sm:w-auto sm:max-w-[calc(100%-6rem)] sm:px-0"
     >
       <button type="button" className={chip} onClick={goHome}>
         Home
@@ -38,7 +47,7 @@ export function AccessibilityMenu() {
           else openPanel("about");
         }}
       >
-        About Me
+        <NavLabel full="About Me" short="About" />
       </button>
       {mode !== "traditional" ? (
         <button type="button" className={chip} onClick={() => setMode("traditional")}>
@@ -46,17 +55,17 @@ export function AccessibilityMenu() {
         </button>
       ) : (
         <button type="button" className={chip} onClick={goHome}>
-          Enter campus
+          <NavLabel full="Enter campus" short="Campus" />
         </button>
       )}
       <a
-        className={`${chip}`}
+        className={chip}
         href={profile.linkedin}
         target="_blank"
         rel="noreferrer"
         aria-label="Aaron Nayki LinkedIn profile"
       >
-        LinkedIn
+        <NavLabel full="LinkedIn" short="Link" />
       </a>
     </div>
   );

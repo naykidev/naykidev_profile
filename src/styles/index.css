@@ -128,6 +128,53 @@
     border-color: #fff;
     color: #fff;
   }
+
+  .overlay-nav-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .overlay-nav-chip {
+    min-height: 2.25rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+
+  .overlay-nav-bar .nav-short {
+    display: none;
+  }
+
+  @media (max-width: 600px) {
+    .overlay-nav-bar {
+      justify-content: center;
+    }
+
+    .overlay-nav-chip {
+      min-height: 36px;
+      padding: 4px 8px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+    }
+
+    .overlay-nav-bar .nav-full {
+      display: none;
+    }
+
+    .overlay-nav-bar .nav-short {
+      display: inline;
+    }
+
+    .overlay-scene-title {
+      padding: 0.25rem 0.55rem;
+      letter-spacing: 0.14em;
+    }
+  }
 }
 
 .sr-only {

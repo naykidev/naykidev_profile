@@ -29,7 +29,7 @@ export function Hud() {
 
   return (
     <div className="pointer-events-none absolute inset-0 z-10">
-      <div className="overlay-label absolute top-[max(1.15rem,env(safe-area-inset-top))] left-[max(1rem,env(safe-area-inset-left))] max-w-[55%] font-ui text-[10px] uppercase sm:text-[11px]">
+      <div className="overlay-label overlay-scene-title absolute top-[max(6rem,calc(env(safe-area-inset-top)+5.25rem))] left-1/2 max-w-[calc(100%-1.25rem)] -translate-x-1/2 font-ui text-[10px] uppercase sm:top-[max(1.15rem,env(safe-area-inset-top))] sm:left-[max(1rem,env(safe-area-inset-left))] sm:max-w-[55%] sm:translate-x-0 sm:text-[11px]">
         {title}
       </div>
       {showHelp ? (
