@@ -179,7 +179,7 @@ export function MobileControls() {
         }}
       >
         <div
-          className={`flex h-full w-full items-center justify-center rounded-full border border-white/25 bg-white/[0.08] shadow-[0_8px_28px_rgba(0,0,0,0.35)] backdrop-blur-[8px] transition-[transform,opacity] duration-150 ease-out ${
+          className={`flex h-full w-full items-center justify-center rounded-full border border-white/20 bg-black/50 shadow-[0_8px_28px_rgba(0,0,0,0.45)] backdrop-blur-[8px] transition-[transform,opacity] duration-150 ease-out ${
             dragging ? "scale-105 opacity-100" : "scale-100 opacity-90"
           }`}
         >
@@ -197,7 +197,7 @@ export function MobileControls() {
       <button
         type="button"
         data-look-block
-        className={`pointer-events-auto absolute left-1/2 z-10 min-h-11 -translate-x-1/2 rounded-full border border-white/20 bg-black/45 px-5 py-3 font-ui text-[11px] tracking-[0.18em] text-paper uppercase backdrop-blur-[10px] transition duration-200 ease-out landscape:left-[62%] ${
+        className={`overlay-chip pointer-events-auto absolute left-1/2 z-10 min-h-11 -translate-x-1/2 rounded-full px-5 py-3 font-ui text-[11px] tracking-[0.18em] uppercase transition duration-200 ease-out landscape:left-[62%] ${
           openVisible ? "scale-100 opacity-100" : "pointer-events-none scale-90 opacity-0"
         } bottom-[max(7.75rem,calc(env(safe-area-inset-bottom)+6.5rem))] landscape:bottom-[max(1.4rem,env(safe-area-inset-bottom))]`}
         onPointerDown={(event) => event.stopPropagation()}
@@ -209,7 +209,7 @@ export function MobileControls() {
         Open {openLabel}
       </button>
       <p
-        className={`absolute left-[max(0.85rem,env(safe-area-inset-left))] max-w-[12rem] font-ui text-[11px] leading-4 text-paper/75 transition duration-300 ${
+        className={`overlay-label absolute left-[max(0.85rem,env(safe-area-inset-left))] max-w-[12rem] font-ui text-[11px] leading-4 tracking-[0.12em] normal-case transition duration-300 ${
           controlHint && !openVisible ? "opacity-100" : "pointer-events-none opacity-0"
         } bottom-[max(9.25rem,calc(env(safe-area-inset-bottom)+8rem))] landscape:bottom-[max(7.2rem,calc(env(safe-area-inset-bottom)+6rem))]`}
       >

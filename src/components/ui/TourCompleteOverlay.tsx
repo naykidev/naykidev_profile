@@ -10,23 +10,23 @@ export function TourCompleteOverlay() {
   return (
     <div className="absolute inset-0 z-[60] flex flex-col items-center justify-center overflow-y-auto bg-[#1c1814]/72 px-4 py-[max(4rem,env(safe-area-inset-top))] text-center backdrop-blur-[3px]">
       <div className="w-full max-w-xl px-2 sm:px-6">
-        <h1 className="font-display text-[2.15rem] leading-tight font-semibold tracking-wide text-paper sm:text-6xl">
+        <h1 className="overlay-hero-text font-display text-[2.15rem] leading-tight font-semibold tracking-wide text-paper sm:text-6xl">
           Thank you for taking a tour!
         </h1>
-        <p className="mt-5 font-ui text-sm tracking-[0.08em] text-paper/80">
+        <p className="overlay-hero-text mt-5 font-ui text-sm font-semibold tracking-[0.08em] text-paper">
           You’ve seen About Me, the Projects Gallery, and Awards & Certificates.
         </p>
         <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 sm:mt-10 sm:flex-row sm:items-center">
           <button
             type="button"
-            className="min-h-12 w-full border border-paper/40 bg-paper/10 px-6 py-3 font-ui text-xs tracking-[0.28em] text-paper uppercase backdrop-blur-[2px] transition hover:bg-paper/20 sm:w-auto sm:min-w-48"
+            className="overlay-chip min-h-12 w-full px-6 py-3 font-ui text-xs tracking-[0.28em] uppercase sm:w-auto sm:min-w-48"
             onClick={() => setMode("explore")}
           >
             Explore
           </button>
           <button
             type="button"
-            className="min-h-12 w-full border border-paper/40 bg-paper/10 px-6 py-3 font-ui text-xs tracking-[0.28em] text-paper uppercase backdrop-blur-[2px] transition hover:bg-paper/20 sm:w-auto sm:min-w-48"
+            className="overlay-chip min-h-12 w-full px-6 py-3 font-ui text-xs tracking-[0.28em] uppercase sm:w-auto sm:min-w-48"
             onClick={() => setMode("tour")}
           >
             Take the tour again
@@ -34,7 +34,7 @@ export function TourCompleteOverlay() {
         </div>
         <button
           type="button"
-          className="mt-6 font-ui text-[11px] tracking-[0.18em] text-paper/60 uppercase underline-offset-4 hover:text-paper hover:underline"
+          className="overlay-chip mt-6 rounded-full px-4 py-2 font-ui text-[11px] tracking-[0.18em] uppercase"
           onClick={() => setMode("intro")}
         >
           Back to start

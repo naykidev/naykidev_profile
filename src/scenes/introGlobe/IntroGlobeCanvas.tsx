@@ -29,7 +29,7 @@ import {
 function makeLabelEl(text: string) {
   const el = document.createElement("div");
   el.className =
-    "pointer-events-none bg-ink/85 px-2 py-1 font-ui text-[10px] tracking-[0.28em] text-paper uppercase";
+    "overlay-label pointer-events-none font-ui text-[10px] uppercase";
   el.textContent = text;
   return el;
 }
