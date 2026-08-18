@@ -44,6 +44,7 @@ type AppState = {
   galleryProjectId: string | null;
   tourIndex: number;
   tourComplete: boolean;
+  tourExhibit: string | null;
   player: { x: number; y: number; z: number; yaw: number; pitch: number };
   look: { x: number; y: number };
   move: { x: number; z: number };
@@ -69,6 +70,7 @@ type AppState = {
   completeCameraTransition: () => void;
   setGalleryProject: (id: string | null) => void;
   setTourIndex: (index: number) => void;
+  setTourExhibit: (name: string | null) => void;
   advanceTour: () => void;
   setPlayer: (partial: Partial<AppState["player"]>) => void;
   setLook: (look: { x: number; y: number }) => void;
@@ -91,6 +93,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   galleryProjectId: null,
   tourIndex: 0,
   tourComplete: false,
+  tourExhibit: null,
   player: {
     x: EXPLORE_SPAWN.x,
     y: getTerrainHeight(EXPLORE_SPAWN.x, EXPLORE_SPAWN.z),
@@ -111,6 +114,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       galleryProjectId: null,
       tourIndex: 0,
       tourComplete: false,
+      tourExhibit: null,
       pointerLocked: false,
       exploreNav: false,
       controlHint: mode === "explore",
@@ -315,7 +319,11 @@ export const useAppStore = create<AppState>((set, get) => ({
     haptic(galleryProjectId ? 14 : 8);
     set({ galleryProjectId });
   },
-  setTourIndex: (tourIndex) => set({ tourIndex }),
+  setTourIndex: (tourIndex) => set({ tourIndex, tourExhibit: null }),
+  setTourExhibit: (tourExhibit) => {
+    if (get().tourExhibit === tourExhibit) return;
+    set({ tourExhibit });
+  },
   advanceTour: () => {
     const { tourIndex } = get();
     if (tourIndex >= tourStops.length - 1) {
@@ -324,6 +332,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         activePanel: null,
         galleryProjectId: null,
         cameraTransition: null,
+        tourExhibit: null,
       });
       return;
     }
@@ -333,6 +342,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       interior: null,
       galleryProjectId: null,
       tourComplete: false,
+      tourExhibit: null,
     });
   },
   setPlayer: (partial) => set({ player: { ...get().player, ...partial } }),

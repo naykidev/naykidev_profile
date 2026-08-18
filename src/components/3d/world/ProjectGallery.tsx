@@ -24,6 +24,17 @@ import {
   awardsDoorX,
   galleryDoorX,
 } from "@/systems/campusLayout";
+import {
+  CERT_H,
+  CERT_W,
+  FRAME_H,
+  FRAME_W,
+  FRAME_Y,
+  HALL_HALF_X as HALF_X,
+  HALL_HALF_Z as HALF_Z,
+  awardFrameSlots,
+  museumFrameSlots,
+} from "@/systems/hallFrames";
 import { interactLocation } from "@/systems/interaction";
 import { wasLookDrag } from "@/systems/lookDrag";
 import { useAppStore, type InteriorId } from "@/systems/store";
@@ -47,96 +58,17 @@ import {
 import { awardsSignMap, gallerySignMap, makePlaqueTexture } from "./textures";
 import { asset } from "@/lib/asset";
 
-const HALF_X = GALLERY_SIZE_X / 2;
-const HALF_Z = GALLERY_SIZE_Z / 2;
 const WALL = 0.3;
 const DOOR_W = GALLERY_DOOR_WIDTH;
 const DOOR_H = GALLERY_DOOR_HEIGHT;
-const FRAME_W = 2.32;
-const FRAME_H = 1.62;
 const FRAME_D = 0.16;
 const CANVAS_W = 2.02;
 const CANVAS_H = 1.34;
-const FRAME_GAP = 1.35;
-const CORNER_INSET = 0.72;
-const FRAME_Y = 2.52;
-const FRAME_INSET = 0.26;
-
-type FrameSlot = {
-  position: [number, number, number];
-  rotation: [number, number, number];
-  scale?: number;
-  tiny?: boolean;
-  pieceIndex?: number;
-};
-
-function centersOnSpan(count: number, a: number, b: number, size: number, gap: number) {
-  const lo = Math.min(a, b);
-  const hi = Math.max(a, b);
-  const mid = (lo + hi) / 2;
-  if (count <= 0) return [];
-  if (count === 1) return [mid];
-  const total = count * size + (count - 1) * gap;
-  const first = mid - total / 2 + size / 2;
-  const step = size + gap;
-  return Array.from({ length: count }, (_, i) => first + i * step);
-}
-
-function museumFrameSlots(count: number): FrameSlot[] {
-  const eastZ = centersOnSpan(3, -HALF_Z + CORNER_INSET, HALF_Z - CORNER_INSET, FRAME_W, FRAME_GAP);
-  const northX = centersOnSpan(2, -HALF_X + CORNER_INSET, HALF_X - CORNER_INSET, FRAME_W, FRAME_GAP);
-  const southX = centersOnSpan(2, -HALF_X + CORNER_INSET, HALF_X - CORNER_INSET, FRAME_W, FRAME_GAP);
-  const slots: FrameSlot[] = [
-    ...eastZ.map((z) => ({
-      position: [HALF_X - FRAME_INSET, FRAME_Y, z] as [number, number, number],
-      rotation: [0, -Math.PI / 2, 0] as [number, number, number],
-    })),
-    ...northX.map((x) => ({
-      position: [x, FRAME_Y, HALF_Z - FRAME_INSET] as [number, number, number],
-      rotation: [0, Math.PI, 0] as [number, number, number],
-    })),
-    ...southX.map((x) => ({
-      position: [x, FRAME_Y, -HALF_Z + FRAME_INSET] as [number, number, number],
-      rotation: [0, 0, 0] as [number, number, number],
-    })),
-  ];
-  return slots.slice(0, count);
-}
-
-const CERT_W = 1.64;
-const CERT_H = 1.16;
-const CERT_GAP_Z = 0.5;
-const CERT_GAP_Y = 0.38;
-const CERT_CENTER_Y = 3.22;
 
 function containInMat(maxW: number, maxH: number, aspect: number) {
   const box = maxW / maxH;
   if (aspect >= box) return { w: maxW, h: maxW / aspect };
   return { w: maxH * aspect, h: maxH };
-}
-
-function awardFrameSlots(pieces: GalleryPiece[]): FrameSlot[] {
-  const colZ = centersOnSpan(3, -1, 1, CERT_W, CERT_GAP_Z).map((z) => -z);
-  const rowCount = Math.ceil(pieces.length / 3);
-  const rowStep = CERT_H + CERT_GAP_Y;
-  const rowY = Array.from(
-    { length: rowCount },
-    (_, row) => CERT_CENTER_Y + ((rowCount - 1) / 2 - row) * rowStep,
-  );
-  const wallX = HALF_X - FRAME_INSET;
-  const yaw: [number, number, number] = [0, -Math.PI / 2, 0];
-  return pieces.map((_, index) => {
-    const row = Math.floor(index / 3);
-    const col = index % 3;
-    const itemsInRow = row === rowCount - 1 ? pieces.length - row * 3 : 3;
-    const z = itemsInRow === 1 ? 0 : colZ[col];
-    return {
-      position: [wallX, rowY[row], z] as [number, number, number],
-      rotation: yaw,
-      tiny: true,
-      pieceIndex: index,
-    };
-  });
 }
 
 const fixtureMetal = new MeshStandardMaterial({
@@ -752,7 +684,7 @@ function MuseumHall({ hall }: { hall: Exclude<InteriorId, null> }) {
       {hall === "awards" ? <AwardsHiddenLighting lit={hallLit} /> : null}
 
       <Suspense fallback={null}>
-        {(hall === "awards" ? awardFrameSlots(pieces) : museumFrameSlots(pieces.length)).map(
+        {(hall === "awards" ? awardFrameSlots(pieces.length) : museumFrameSlots(pieces.length)).map(
           (slot, index) => {
             const piece = pieces[slot.pieceIndex ?? index];
             if (!piece) return null;

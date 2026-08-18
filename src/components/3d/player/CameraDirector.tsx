@@ -4,17 +4,12 @@ import { MathUtils, PerspectiveCamera, Vector3 } from "three";
 import { tourStops } from "@/data/locations";
 import { movementFromKeys } from "@/hooks/useKeyboard";
 import {
-  AWARDS_X,
   GALLERY_DOOR_WIDTH,
-  GALLERY_HEIGHT,
-  GALLERY_SIZE_X,
-  GALLERY_SIZE_Z,
-  GALLERY_X,
   GALLERY_Z,
   awardsDoorX,
   galleryDoorX,
-  galleryInteriorSpawn,
 } from "@/systems/campusLayout";
+import { hallExhibitShots, type TourShot } from "@/systems/hallFrames";
 import { resolveCollision } from "@/systems/collision";
 import { findNearby } from "@/systems/interaction";
 import { notePointerDown, notePointerMove } from "@/systems/lookDrag";
@@ -29,12 +24,8 @@ const toPos = new Vector3();
 const fromLook = new Vector3();
 const toLook = new Vector3();
 
-const HALL_HALF_X = GALLERY_SIZE_X / 2;
-const HALL_HALF_Z = GALLERY_SIZE_Z / 2;
-const HALL_CAM_PAD = 0.88;
-const HALL_FRAME_Y = 2.52;
-const HALL_WALL_FOV = 74;
 const DEFAULT_FOV = 50;
+const PIECE_HOLD = 10;
 const TOUCH_LOOK_YAW = 0.0048;
 const MOUSE_LOOK_YAW = 0.0022;
 const TOUCH_LOOK_PITCH = 0.0038;
@@ -53,16 +44,14 @@ function exploreFov() {
 function tourPacing(reducedMotion: boolean) {
   if (reducedMotion) {
     return {
-      moveDur: 0.08,
-      holdDur: 0.35,
+      pieceMove: 0.1,
+      pieceHold: 0.4,
+      enterMove: 0.08,
+      enterHold: 0.12,
       exitMove: 0.08,
       exitHold: 0.08,
       lastExitMove: 0.08,
       lastExitHold: 0.2,
-      awardsMove0: 0.1,
-      awardsMove1: 0.1,
-      awardsHold0: 0.12,
-      awardsHold1: 0.7,
       doorWait: 0,
       pathDur: 0.12,
       approachSpeed: 8,
@@ -73,16 +62,14 @@ function tourPacing(reducedMotion: boolean) {
   }
   const coarse = isCoarsePointer();
   return {
-    moveDur: coarse ? 2.7 : 1.85,
-    holdDur: coarse ? 4.6 : 2.8,
+    pieceMove: coarse ? 2.4 : 2.15,
+    pieceHold: PIECE_HOLD,
+    enterMove: coarse ? 2.2 : 1.85,
+    enterHold: coarse ? 1.1 : 0.8,
     exitMove: coarse ? 1.85 : 1.25,
     exitHold: coarse ? 0.35 : 0.18,
     lastExitMove: coarse ? 1.95 : 1.35,
     lastExitHold: coarse ? 0.8 : 0.45,
-    awardsMove0: coarse ? 2.25 : 1.55,
-    awardsMove1: coarse ? 2.45 : 1.7,
-    awardsHold0: coarse ? 0.7 : 0.35,
-    awardsHold1: coarse ? 7.5 : 4.6,
     doorWait: coarse ? 1.25 : 0.85,
     pathDur: coarse ? 5.4 : 3.6,
     approachSpeed: coarse ? 0.82 : 1.35,
@@ -103,86 +90,6 @@ function isTouchLook(event: PointerEvent) {
     event.pointerType === "pen" ||
     (typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches)
   );
-}
-
-function hallWorld(
-  hall: "gallery" | "awards",
-  lx: number,
-  y: number,
-  lz: number,
-): [number, number, number] {
-  if (hall === "gallery") return [GALLERY_X + lx, y, GALLERY_Z + lz];
-  return [AWARDS_X - lx, y, GALLERY_Z - lz];
-}
-
-function hallWallShot(
-  hall: "gallery" | "awards",
-  wall: "left" | "back" | "right",
-  eye: number,
-  floor: number,
-) {
-  const lookY = floor + HALL_FRAME_Y;
-  if (wall === "left") {
-    return {
-      pos: hallWorld(hall, 0, eye, -HALL_HALF_Z + HALL_CAM_PAD),
-      look: hallWorld(hall, 0, lookY, HALL_HALF_Z),
-    };
-  }
-  if (wall === "back") {
-    return {
-      pos: hallWorld(hall, -HALL_HALF_X + HALL_CAM_PAD, eye, 0),
-      look: hallWorld(hall, HALL_HALF_X, lookY, 0),
-    };
-  }
-  return {
-    pos: hallWorld(hall, 0, eye, HALL_HALF_Z - HALL_CAM_PAD),
-    look: hallWorld(hall, 0, lookY, -HALL_HALF_Z),
-  };
-}
-
-/** Centered shot of the awards/certificates grid on the back wall. */
-function awardsCertificateWallShot(floor: number) {
-  const eye = floor + 2.42;
-  return {
-    pos: hallWorld("awards", -HALL_HALF_X + 1.2, eye, 0),
-    look: hallWorld("awards", HALL_HALF_X - 0.26, floor + 3.22, 0),
-  };
-}
-
-function hallDoorExitShots(hall: "gallery" | "awards", floor: number) {
-  const eye = floor + 1.62;
-  const outside =
-    hall === "gallery"
-      ? ({
-          pos: [galleryDoorX() - 2.6, eye, GALLERY_Z] as [number, number, number],
-          look: [0, eye + 0.06, GALLERY_Z] as [number, number, number],
-        })
-      : ({
-          pos: [awardsDoorX() + 2.6, eye, GALLERY_Z] as [number, number, number],
-          look: [0, eye + 0.06, GALLERY_Z] as [number, number, number],
-        });
-  return [
-    {
-      pos: hallWorld(hall, -HALL_HALF_X + 1.55, eye, 0),
-      look: hallWorld(hall, -HALL_HALF_X - 4.4, eye, 0),
-    },
-    {
-      pos: hallWorld(hall, -HALL_HALF_X - 0.18, eye, 0),
-      look: hallWorld(hall, -HALL_HALF_X - 5.6, eye, 0),
-    },
-    outside,
-  ];
-}
-
-function awardsDoorEnterShots(floor: number) {
-  const eye = floor + 1.62;
-  return [
-    {
-      pos: hallWorld("awards", -HALL_HALF_X + 0.35, eye, 0),
-      look: hallWorld("awards", HALL_HALF_X - 0.26, floor + 3.22, 0),
-    },
-    awardsCertificateWallShot(floor),
-  ];
 }
 
 function setCameraFov(camera: { fov?: number; updateProjectionMatrix: () => void }, fov: number) {
@@ -346,63 +253,23 @@ export function CameraDirector() {
           hall === "gallery" ? galleryDoorX() : awardsDoorX(),
           GALLERY_Z,
         );
-        const eye = floor + GALLERY_HEIGHT * 0.42;
-        const spawn = galleryInteriorSpawn();
-        const enterShot = {
-          pos: [spawn.x, floor + 1.62, spawn.z] as [number, number, number],
-          look: [
-            GALLERY_X + GALLERY_SIZE_X / 2 - 0.35,
-            floor + 2.48,
-            GALLERY_Z,
-          ] as [number, number, number],
-        };
-        const shots =
-          hall === "awards"
-            ? awardsDoorEnterShots(floor)
-            : [
-                enterShot,
-                hallWallShot(hall, "left", eye, floor),
-                hallWallShot(hall, "back", eye, floor),
-                hallWallShot(hall, "right", eye, floor),
-                ...hallDoorExitShots("gallery", floor),
-              ];
-        const awardsFov = 58;
-        const moves =
-          hall === "awards"
-            ? [pacing.awardsMove0, pacing.awardsMove1]
-            : [
-                pacing.moveDur,
-                pacing.moveDur,
-                pacing.moveDur,
-                pacing.moveDur,
-                pacing.exitMove,
-                pacing.exitMove,
-                pacing.lastExitMove,
-              ];
-        const holds =
-          hall === "awards"
-            ? [pacing.awardsHold0, pacing.awardsHold1]
-            : [
-                pacing.holdDur,
-                pacing.holdDur,
-                pacing.holdDur,
-                pacing.holdDur,
-                pacing.exitHold,
-                pacing.exitHold,
-                pacing.lastExitHold,
-              ];
-        const fovs =
-          hall === "awards"
-            ? [DEFAULT_FOV, awardsFov]
-            : [
-                DEFAULT_FOV,
-                HALL_WALL_FOV,
-                HALL_WALL_FOV,
-                HALL_WALL_FOV,
-                DEFAULT_FOV,
-                DEFAULT_FOV,
-                DEFAULT_FOV,
-              ];
+        const shots = hallExhibitShots(hall, floor);
+        const exhibitCount = Math.max(0, shots.length - 4);
+        const moves = [
+          pacing.enterMove,
+          ...Array.from({ length: exhibitCount }, () => pacing.pieceMove),
+          pacing.exitMove,
+          pacing.exitMove,
+          pacing.lastExitMove,
+        ];
+        const holds = [
+          pacing.enterHold,
+          ...Array.from({ length: exhibitCount }, () => pacing.pieceHold),
+          pacing.exitHold,
+          pacing.exitHold,
+          pacing.lastExitHold,
+        ];
+        const fovs = shots.map((shot) => shot.fov);
         const doorWait = pacing.doorWait;
         const pathDur = pacing.pathDur;
 
@@ -459,14 +326,17 @@ export function CameraDirector() {
         elapsed -= doorWait;
 
         for (let i = 0; i < shots.length; i += 1) {
-          const fromShot = i === 0 ? { pos: outdoorCam, look: stop.lookAt } : shots[i - 1];
+          const fromShot: TourShot =
+            i === 0 ? { pos: outdoorCam, look: stop.lookAt, fov: DEFAULT_FOV } : shots[i - 1];
           const toShot = shots[i];
           const hold = holds[i];
-          const move = moves[i] ?? pacing.moveDur;
+          const move = moves[i] ?? pacing.pieceMove;
           const fromFov = i === 0 ? DEFAULT_FOV : fovs[i - 1];
           const toFov = fovs[i];
+          const exhibit = toShot.label ?? null;
+          if (state.tourExhibit !== exhibit) state.setTourExhibit(exhibit);
 
-          if (hall === "gallery" && i === shots.length - 1 && elapsed >= move && state.interior) {
+          if (i === shots.length - 1 && elapsed >= move && state.interior) {
             state.setInterior(null);
           }
 

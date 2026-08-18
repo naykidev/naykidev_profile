@@ -8,6 +8,7 @@ export function Hud() {
   const cameraTransition = useAppStore((s) => s.cameraTransition);
   const tourIndex = useAppStore((s) => s.tourIndex);
   const tourComplete = useAppStore((s) => s.tourComplete);
+  const tourExhibit = useAppStore((s) => s.tourExhibit);
   const setMode = useAppStore((s) => s.setMode);
   const advanceTour = useAppStore((s) => s.advanceTour);
   const activePanel = useAppStore((s) => s.activePanel);
@@ -16,7 +17,7 @@ export function Hud() {
 
   const title =
     mode === "tour"
-      ? (tourStops[tourIndex]?.name ?? "Guided Tour")
+      ? (tourExhibit ?? tourStops[tourIndex]?.name ?? "Guided Tour")
       : interior === "awards"
         ? "Awards & Certificates"
         : interior === "gallery"
@@ -46,7 +47,7 @@ export function Hud() {
           className="pointer-events-auto absolute bottom-[max(1.35rem,env(safe-area-inset-bottom))] left-1/2 flex w-[min(100%-1.5rem,22rem)] -translate-x-1/2 flex-col items-center gap-2"
         >
           <p className="overlay-label font-ui text-[10px] uppercase sm:text-[11px]">
-            {tourStops[tourIndex]?.name ?? "Tour"} · {tourIndex + 1} / {tourStops.length}
+            {tourExhibit ?? tourStops[tourIndex]?.name ?? "Tour"} · {tourIndex + 1} / {tourStops.length}
           </p>
           <div className="flex w-full justify-center gap-2">
             <button
