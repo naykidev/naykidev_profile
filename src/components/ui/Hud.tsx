@@ -30,7 +30,7 @@ export function Hud() {
 
   return (
     <div className="pointer-events-none absolute inset-0 z-10">
-      <div className="overlay-label overlay-scene-title absolute top-[max(6rem,calc(env(safe-area-inset-top)+5.25rem))] left-1/2 max-w-[calc(100%-1.25rem)] -translate-x-1/2 font-ui text-[10px] uppercase sm:top-[max(1.15rem,env(safe-area-inset-top))] sm:left-[max(1rem,env(safe-area-inset-left))] sm:max-w-[55%] sm:translate-x-0 sm:text-[11px]">
+      <div className="overlay-label overlay-scene-title absolute top-[max(6rem,calc(env(safe-area-inset-top)+5.25rem))] left-1/2 m-0 max-w-[calc(100%-1.25rem)] -translate-x-1/2 truncate whitespace-nowrap font-ui text-[10px] tracking-[0.14em] uppercase sm:top-[max(1.15rem,env(safe-area-inset-top))] sm:left-[max(1rem,env(safe-area-inset-left))] sm:max-w-[min(55%,20rem)] sm:translate-x-0 sm:text-[11px]">
         {title}
       </div>
       {showHelp ? (
@@ -44,10 +44,10 @@ export function Hud() {
       {mode === "tour" && !cameraTransition && !tourComplete ? (
         <div
           data-look-block
-          className="pointer-events-auto absolute bottom-[max(1.35rem,env(safe-area-inset-bottom))] left-1/2 flex w-[min(100%-1.5rem,22rem)] -translate-x-1/2 flex-col items-center gap-2"
+          className="pointer-events-auto absolute bottom-[max(1.35rem,env(safe-area-inset-bottom))] left-1/2 flex w-[min(100%-1.5rem,24rem)] -translate-x-1/2 flex-col items-center gap-2"
         >
-          <p className="overlay-label font-ui text-[10px] uppercase sm:text-[11px]">
-            {tourExhibit ?? tourStops[tourIndex]?.name ?? "Tour"} · {tourIndex + 1} / {tourStops.length}
+          <p className="overlay-label m-0 max-w-full truncate whitespace-nowrap font-ui text-[10px] tracking-[0.14em] uppercase sm:text-[11px]">
+            {tourStops[tourIndex]?.name ?? "Tour"} · {tourIndex + 1} / {tourStops.length}
           </p>
           <div className="flex w-full justify-center gap-2">
             <button
