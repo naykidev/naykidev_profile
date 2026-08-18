@@ -143,7 +143,7 @@ function createGlobe(el: HTMLElement) {
     .arcAltitude(0.22)
     .arcDashLength(0.45)
     .arcDashGap(0.18)
-    .arcDashAnimateTime(700)
+    .arcDashAnimateTime(1100)
     .htmlLat("lat")
     .htmlLng("lng")
     .htmlAltitude(0.04)

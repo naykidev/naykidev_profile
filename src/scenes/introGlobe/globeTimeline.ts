@@ -12,7 +12,7 @@ export const MADISON = {
   id: "madison",
 } as const;
 
-export const GLOBE_BEAT_DURATION = 3.2;
+export const GLOBE_BEAT_DURATION = 4.6;
 
 export type GlobePin = { lat: number; lng: number; label: string; id: string };
 
@@ -35,9 +35,9 @@ function clamp01(t: number) {
   return Math.min(1, Math.max(0, t));
 }
 
-function easeOutCubic(t: number) {
+function smoothstep(t: number) {
   const u = clamp01(t);
-  return 1 - (1 - u) ** 3;
+  return u * u * (3 - 2 * u);
 }
 
 function lerp(a: number, b: number, t: number) {
@@ -58,7 +58,7 @@ function sampleKeys(t: number, keys: PovKey[]): GlobePov {
     if (t > keys[i].t) continue;
     const a = keys[i - 1];
     const b = keys[i];
-    const u = easeOutCubic((t - a.t) / Math.max(0.0001, b.t - a.t));
+    const u = smoothstep((t - a.t) / Math.max(0.0001, b.t - a.t));
     return {
       lat: lerp(a.lat, b.lat, u),
       lng: lerpLng(a.lng, b.lng, u),
@@ -70,17 +70,18 @@ function sampleKeys(t: number, keys: PovKey[]): GlobePov {
 
 const LIFT_OFF_POV: PovKey[] = [
   { t: 0, lat: 32.72, lng: -117.45, altitude: 0.38 },
-  { t: 0.55, lat: 33.55, lng: -119.8, altitude: 1.12 },
-  { t: 1.15, lat: 39.1, lng: -103.8, altitude: 2.02 },
-  { t: 2.0, lat: MADISON.lat, lng: MADISON.lng, altitude: 1.18 },
-  { t: 2.55, lat: MADISON.lat, lng: MADISON.lng, altitude: 1.08 },
+  { t: 0.7, lat: 32.9, lng: -117.9, altitude: 0.55 },
+  { t: 1.45, lat: 33.7, lng: -120.2, altitude: 1.15 },
+  { t: 2.25, lat: 38.8, lng: -104.2, altitude: 1.95 },
+  { t: 3.5, lat: MADISON.lat, lng: MADISON.lng, altitude: 1.2 },
+  { t: 4.25, lat: MADISON.lat, lng: MADISON.lng, altitude: 1.08 },
 ];
 
 const PREVIEW_POV: PovKey[] = [
   { t: 0, lat: 22, lng: -108, altitude: 2.45 },
-  { t: 0.85, lat: SAN_DIEGO.lat, lng: SAN_DIEGO.lng, altitude: 1.12 },
-  { t: 1.9, lat: MADISON.lat, lng: MADISON.lng, altitude: 1.15 },
-  { t: 2.6, lat: MADISON.lat, lng: MADISON.lng, altitude: 1.12 },
+  { t: 1.2, lat: SAN_DIEGO.lat, lng: SAN_DIEGO.lng, altitude: 1.12 },
+  { t: 2.6, lat: MADISON.lat, lng: MADISON.lng, altitude: 1.15 },
+  { t: 3.4, lat: MADISON.lat, lng: MADISON.lng, altitude: 1.12 },
 ];
 
 /** Frame-driven camera so globe.gl d3 tweens cannot stall or overlap. */
@@ -92,7 +93,7 @@ export function globeBeatAt(elapsed: number, options?: { liftOff?: boolean }): G
   const t = Math.max(0, elapsed);
   const pov = globePovAt(t, options);
   if (options?.liftOff) {
-    if (t < 1.15) {
+    if (t < 2.25) {
       return {
         id: "coast",
         pov,
@@ -102,7 +103,7 @@ export function globeBeatAt(elapsed: number, options?: { liftOff?: boolean }): G
         showArc: false,
       };
     }
-    if (t < 2.05) {
+    if (t < 3.55) {
       return {
         id: "arc",
         pov,
@@ -121,7 +122,7 @@ export function globeBeatAt(elapsed: number, options?: { liftOff?: boolean }): G
       showArc: true,
     };
   }
-  if (t < 0.85) {
+  if (t < 1.2) {
     return {
       id: "wide",
       pov,
@@ -131,7 +132,7 @@ export function globeBeatAt(elapsed: number, options?: { liftOff?: boolean }): G
       showArc: false,
     };
   }
-  if (t < 1.9) {
+  if (t < 2.6) {
     return {
       id: "sandiego",
       pov,

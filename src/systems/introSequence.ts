@@ -5,12 +5,12 @@ import { SAN_DIEGO } from "@/scenes/introGlobe/globeTimeline";
 
 export const INTRO_SEEN_KEY = "aaron-nayki-campus-intro-seen";
 
-export const SD_END = 2.85;
-export const GLOBE_START = 2.4;
-export const GLOBE_END = 5.55;
-export const CAMPUS_START = 5.2;
-export const INTRO_DURATION = 6.7;
-export const LAYER_FADE = 0.42;
+export const SD_END = 3.3;
+export const GLOBE_START = 2.55;
+export const GLOBE_END = 6.9;
+export const CAMPUS_START = 6.4;
+export const INTRO_DURATION = 8.5;
+export const LAYER_FADE = 0.75;
 /** Mount globe under the still-opaque coast so WebGL init is hidden. */
 export const GLOBE_MOUNT = GLOBE_START - 0.8;
 export const GLOBE_UNMOUNT = GLOBE_END + 0.2;
@@ -59,20 +59,15 @@ function hasPhotorealisticTiles() {
   return true;
 }
 
-function easeOutCubic(t: number) {
+function smoothstep(t: number) {
   const u = clamp01(t);
-  return 1 - (1 - u) ** 3;
-}
-
-function easeInCubic(t: number) {
-  const u = clamp01(t);
-  return u * u * u;
+  return u * u * (3 - 2 * u);
 }
 
 function fadeWindow(t: number, start: number, end: number, fadeIn: boolean) {
   if (t < start || t > end) return 0;
-  const inn = fadeIn && t < start + LAYER_FADE ? easeOutCubic((t - start) / LAYER_FADE) : 1;
-  const out = t > end - LAYER_FADE ? 1 - easeInCubic((t - (end - LAYER_FADE)) / LAYER_FADE) : 1;
+  const inn = fadeIn && t < start + LAYER_FADE ? smoothstep((t - start) / LAYER_FADE) : 1;
+  const out = t > end - LAYER_FADE ? 1 - smoothstep((t - (end - LAYER_FADE)) / LAYER_FADE) : 1;
   return clamp01(inn * out);
 }
 
@@ -92,7 +87,7 @@ export function sampleIntroCamera(elapsed: number): IntroCameraSample {
       fov: INTRO_ARRIVAL.fov,
     };
   }
-  const u = easeOutCubic((t - CAMPUS_START) / (INTRO_DURATION - CAMPUS_START));
+  const u = smoothstep((t - CAMPUS_START) / (INTRO_DURATION - CAMPUS_START));
   return {
     position: [
       lerp(CAMPUS_FROM[0], INTRO_ARRIVAL.position[0], u),
@@ -109,8 +104,8 @@ export function sampleIntroOverlay(elapsed: number): IntroOverlaySample {
   const tiles = hasPhotorealisticTiles();
   return {
     beat: t < GLOBE_START ? "sandiego" : t < CAMPUS_START ? "globe" : "campus",
-    titleVisible: t >= CAMPUS_START + 1.05,
-    showSkip: t < CAMPUS_START + 0.85,
+    titleVisible: t >= CAMPUS_START + 1.55,
+    showSkip: t < CAMPUS_START + 1.15,
     sdFade: tiles ? fadeWindow(t, 0, SD_END, false) : 0,
     globeFade: fadeWindow(t, GLOBE_START, GLOBE_END, true),
     sdElapsed: t,

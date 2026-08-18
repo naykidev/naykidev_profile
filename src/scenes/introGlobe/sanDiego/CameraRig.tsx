@@ -34,8 +34,8 @@ export function CameraRig({
       f = sample.sdFade;
     }
     t = Math.max(0, t);
-    const drift = smooth(t / 2.15);
-    const lift = smooth((1 - f) * 1.45);
+    const drift = smooth(t / 2.55);
+    const lift = smooth((1 - f) * 1.2);
     camera.position.set(
       -26 + drift * 4 + lift * 8,
       22 + drift * 3 + lift * 36,
