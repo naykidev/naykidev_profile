@@ -4,12 +4,13 @@ import { InstancedMesh, Mesh, Object3D } from "three";
 import { coastHeight, hash2, shoreXAt } from "./noise";
 import { asset } from "@/lib/asset";
 
-const PALM_URL = asset("/models/san-diego-palm.glb");
+const DRACO = true;
+const PALM_URL = asset("/models/nature/coconut-palm.glb");
 const PALM_COUNT = 10;
 const dummy = new Object3D();
 
 export function Palms() {
-  const { scene } = useGLTF(PALM_URL);
+  const { scene } = useGLTF(PALM_URL, DRACO);
   const source = useMemo(() => {
     let found: Mesh | undefined;
     scene.traverse((object) => {
@@ -59,4 +60,4 @@ export function Palms() {
   );
 }
 
-useGLTF.preload(PALM_URL);
+useGLTF.preload(PALM_URL, DRACO);
