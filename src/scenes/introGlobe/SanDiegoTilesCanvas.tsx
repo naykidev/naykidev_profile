@@ -8,6 +8,7 @@ import { subscribeIntroPlayback } from "@/hooks/useIntroSequence";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { usePageVisible } from "@/hooks/usePageVisible";
 import { SanDiegoWorld } from "./sanDiego/World";
+import { COAST_CAMERA_START } from "./sanDiego/CameraRig";
 
 const layerStyle: CSSProperties = {
   transform: "translateZ(0)",
@@ -66,7 +67,7 @@ export function SanDiegoTilesCanvas({
           alpha: false,
           powerPreference: "high-performance",
         }}
-        camera={{ fov: 50, near: 0.4, far: 280, position: [-20, 20, 16] }}
+        camera={{ fov: 50, near: 0.4, far: 280, position: [...COAST_CAMERA_START] }}
         style={{ width: "100%", height: "100%", display: "block", background: "#e4ddd0" }}
       >
         <SanDiegoWorld

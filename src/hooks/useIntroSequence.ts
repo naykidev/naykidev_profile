@@ -38,7 +38,10 @@ function pump() {
   const state = useAppStore.getState();
   const elapsed = (performance.now() - state.introStartedAt) / 1000;
   const playing =
-    !state.introForcedEnd && !state.introShortened && elapsed < INTRO_DURATION + 0.4;
+    !state.introForcedEnd &&
+    !state.introShortened &&
+    !state.reducedMotion &&
+    elapsed < INTRO_DURATION + 0.4;
   if (listeners.size > 0 && playing) {
     raf = requestAnimationFrame(pump);
     return;
@@ -78,7 +81,8 @@ export function useIntroSequenceUi(): IntroUiState | null {
   const introStartedAt = useAppStore((s) => s.introStartedAt);
   const introShortened = useAppStore((s) => s.introShortened);
   const introForcedEnd = useAppStore((s) => s.introForcedEnd);
-  const shortened = introShortened || introForcedEnd;
+  const reducedMotion = useAppStore((s) => s.reducedMotion);
+  const shortened = introShortened || introForcedEnd || reducedMotion;
 
   const [ui, setUi] = useState<IntroUiState | null>(() =>
     mode === "intro" ? uiFrom(readIntroPlayback(), shortened) : null,
@@ -112,7 +116,8 @@ export function useIntroCampusLive() {
   const introStartedAt = useAppStore((s) => s.introStartedAt);
   const introShortened = useAppStore((s) => s.introShortened);
   const introForcedEnd = useAppStore((s) => s.introForcedEnd);
-  const shortened = introShortened || introForcedEnd;
+  const reducedMotion = useAppStore((s) => s.reducedMotion);
+  const shortened = introShortened || introForcedEnd || reducedMotion;
   const [live, setLive] = useState(() => mode !== "intro" || shortened);
 
   useEffect(() => {

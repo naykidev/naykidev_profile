@@ -13,13 +13,12 @@ export function AccessibilityMenu() {
   const closePanel = useAppStore((s) => s.closePanel);
 
   const goHome = () => {
+    closePanel();
     if (mode === "intro") {
       skipIntro();
-      closePanel();
       return;
     }
     setMode("intro");
-    useAppStore.getState().skipIntro();
   };
 
   return (

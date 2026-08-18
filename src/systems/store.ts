@@ -13,7 +13,7 @@ import {
   awardsOutdoorRestore,
   EXPLORE_SPAWN,
 } from "@/systems/campusLayout";
-import { createIntroPlayback, markIntroSeen } from "@/systems/introSequence";
+import { createIntroPlayback, markIntroSeen, prefersReducedMotion } from "@/systems/introSequence";
 import { haptic } from "@/lib/haptics";
 import { getTerrainHeight } from "@/systems/terrain";
 
@@ -80,7 +80,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   mode: "intro",
   webgl: true,
   highContrast: false,
-  reducedMotion: false,
+  reducedMotion: prefersReducedMotion(),
   pointerLocked: false,
   exploreNav: false,
   controlHint: false,
@@ -101,7 +101,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   look: { x: 0, y: 0 },
   move: { x: 0, z: 0 },
   gpuShadows: false,
-  ...createIntroPlayback(false),
+  ...createIntroPlayback(prefersReducedMotion()),
   setMode: (mode) =>
     set({
       mode,
@@ -114,7 +114,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       pointerLocked: false,
       exploreNav: false,
       controlHint: mode === "explore",
-      ...(mode === "intro" ? createIntroPlayback(get().reducedMotion) : {}),
+      ...(mode === "intro"
+        ? createIntroPlayback(get().reducedMotion, { skipCinematic: true })
+        : {}),
       ...(mode === "explore"
         ? {
             player: {
@@ -133,7 +135,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   setWebgl: (webgl) => set({ webgl, mode: webgl ? get().mode : "traditional" }),
   toggleHighContrast: () => set({ highContrast: !get().highContrast }),
-  setReducedMotion: (reducedMotion) => set({ reducedMotion }),
+  setReducedMotion: (reducedMotion) =>
+    set({
+      reducedMotion,
+      ...(reducedMotion && get().mode === "intro" ? { introShortened: true } : {}),
+    }),
   setPointerLocked: (pointerLocked) => set({ pointerLocked }),
   setExploreNav: (exploreNav) =>
     set({

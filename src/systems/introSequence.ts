@@ -55,10 +55,6 @@ function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
 }
 
-function hasPhotorealisticTiles() {
-  return true;
-}
-
 function smoothstep(t: number) {
   const u = clamp01(t);
   return u * u * (3 - 2 * u);
@@ -101,12 +97,11 @@ export function sampleIntroCamera(elapsed: number): IntroCameraSample {
 
 export function sampleIntroOverlay(elapsed: number): IntroOverlaySample {
   const t = Math.max(0, elapsed);
-  const tiles = hasPhotorealisticTiles();
   return {
     beat: t < GLOBE_START ? "sandiego" : t < CAMPUS_START ? "globe" : "campus",
     titleVisible: t >= CAMPUS_START + 1.55,
     showSkip: t < CAMPUS_START + 1.15,
-    sdFade: tiles ? fadeWindow(t, 0, SD_END, false) : 0,
+    sdFade: fadeWindow(t, 0, SD_END, false),
     globeFade: fadeWindow(t, GLOBE_START, GLOBE_END, true),
     sdElapsed: t,
     globeElapsed: Math.max(0, t - GLOBE_START),
@@ -132,8 +127,7 @@ export function sampleIntroSequence(
     };
   }
 
-  const timeline = elapsed + (hasPhotorealisticTiles() ? 0 : GLOBE_START);
-  return { ...sampleIntroCamera(timeline), ...sampleIntroOverlay(timeline) };
+  return { ...sampleIntroCamera(elapsed), ...sampleIntroOverlay(elapsed) };
 }
 
 export function sampleIntroFromPlayback(state: {
@@ -142,13 +136,22 @@ export function sampleIntroFromPlayback(state: {
   introForcedEnd: boolean;
   reducedMotion: boolean;
 }): IntroSequenceSample {
-  const shortened = state.introShortened || state.introForcedEnd;
+  const shortened = state.introShortened || state.introForcedEnd || state.reducedMotion;
   const elapsed = shortened
     ? INTRO_DURATION
     : (performance.now() - state.introStartedAt) / 1000;
   return sampleIntroSequence(elapsed, {
     shortened,
+    reducedMotion: state.reducedMotion,
   });
+}
+
+export function prefersReducedMotion(): boolean {
+  try {
+    return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch {
+    return false;
+  }
 }
 
 export function hasSeenIntro(): boolean {
@@ -167,10 +170,15 @@ export function markIntroSeen() {
   }
 }
 
-export function createIntroPlayback(_reducedMotion: boolean) {
+export function createIntroPlayback(
+  reducedMotion: boolean,
+  options?: { skipCinematic?: boolean },
+) {
+  const skip = Boolean(reducedMotion || options?.skipCinematic);
+  if (skip) markIntroSeen();
   return {
     introStartedAt: typeof performance !== "undefined" ? performance.now() : 0,
-    introShortened: false,
+    introShortened: skip,
     introForcedEnd: false,
   };
 }

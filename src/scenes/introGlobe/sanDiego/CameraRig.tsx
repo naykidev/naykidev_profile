@@ -11,6 +11,8 @@ function smooth(t: number) {
 }
 
 /** High wide aerial over rolling hills toward the Pacific — then lift into the globe. */
+export const COAST_CAMERA_START = [-26, 22, 18] as const;
+
 export function CameraRig({
   elapsed = 0,
   fade = 1,
@@ -37,9 +39,9 @@ export function CameraRig({
     const drift = smooth(t / 2.55);
     const lift = smooth((1 - f) * 1.2);
     camera.position.set(
-      -26 + drift * 4 + lift * 8,
-      22 + drift * 3 + lift * 36,
-      18 - drift * 3 - lift * 6,
+      COAST_CAMERA_START[0] + drift * 4 + lift * 8,
+      COAST_CAMERA_START[1] + drift * 3 + lift * 36,
+      COAST_CAMERA_START[2] - drift * 3 - lift * 6,
     );
     look.set(10 + drift * 6 + lift * 18, -1.2 + lift * 10, -2 - drift * 2);
     camera.lookAt(look);
