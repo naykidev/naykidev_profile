@@ -35,7 +35,7 @@ export function ProjectPhoto({
 
   return (
     <figure
-      className="relative mt-4"
+        className="relative mt-0 w-full"
       tabIndex={multi ? 0 : undefined}
       onKeyDown={(event) => {
         if (!multi) return;

@@ -8,7 +8,7 @@ export function FramedCertificate({
   href?: string;
 }) {
   return (
-    <figure className="mt-4 max-w-xl">
+    <figure className="mt-0 max-w-xl">
       <div className="bg-gradient-to-br from-[#e8d3a8] via-[#8f6b45] to-[#3a2418] p-[11px] shadow-[0_10px_28px_rgba(0,0,0,0.35)]">
         <div className="bg-[#f7f1e4] p-2.5">
           <img src={src} alt={alt} className="block w-full" />

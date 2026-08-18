@@ -40,6 +40,7 @@ export type TourShot = {
   look: Vec3;
   fov: number;
   label?: string;
+  pieceId?: string;
 };
 
 export function centersOnSpan(count: number, a: number, b: number, size: number, gap: number) {
@@ -163,10 +164,14 @@ export function hallExhibitShots(hall: HallId, floor: number): TourShot[] {
   const slots = hall === "gallery" ? museumFrameSlots(pieces.length) : awardFrameSlots(pieces.length);
   return [
     hallEnterShot(hall, floor, slots[0]),
-    ...slots.map((slot, index) => ({
-      ...frameZoomShot(hall, slot, floor),
-      label: pieces[slot.pieceIndex ?? index]?.name,
-    })),
+    ...slots.map((slot, index) => {
+      const piece = pieces[slot.pieceIndex ?? index];
+      return {
+        ...frameZoomShot(hall, slot, floor),
+        label: piece?.name,
+        pieceId: piece?.id,
+      };
+    }),
     ...hallDoorExitShots(hall, floor),
   ];
 }

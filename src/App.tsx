@@ -5,6 +5,7 @@ import { Hud } from "@/components/ui/Hud";
 import { IntroCinematicLayer } from "@/components/ui/IntroJourneyOverlay";
 import { IntroOverlay } from "@/components/ui/IntroOverlay";
 import { TourCompleteOverlay } from "@/components/ui/TourCompleteOverlay";
+import { TourExhibitOverlay } from "@/components/ui/TourExhibitOverlay";
 import { isGlobePreviewQuery, IntroGlobePreview } from "@/scenes/introGlobe/IntroGlobeCanvas";
 import { isSanDiegoPreviewQuery, SanDiegoPreview } from "@/scenes/introGlobe/SanDiegoTilesCanvas";
 import { MobileControls } from "@/components/ui/MobileControls";
@@ -123,6 +124,7 @@ export function App() {
             </>
           )}
           <Hud />
+          <TourExhibitOverlay />
           <GalleryModal />
           <MobileControls />
         </>

@@ -333,7 +333,7 @@ export function CameraDirector() {
           const move = moves[i] ?? pacing.pieceMove;
           const fromFov = i === 0 ? DEFAULT_FOV : fovs[i - 1];
           const toFov = fovs[i];
-          const exhibit = toShot.label ?? null;
+          const exhibit = toShot.pieceId ?? null;
           if (state.tourExhibit !== exhibit) state.setTourExhibit(exhibit);
 
           if (i === shots.length - 1 && elapsed >= move && state.interior) {
