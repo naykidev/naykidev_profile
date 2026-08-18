@@ -41,10 +41,55 @@ const TOUCH_LOOK_PITCH = 0.0038;
 const MOUSE_LOOK_PITCH = 0.0018;
 const LOOK_INERTIA = 9.5;
 
+function isCoarsePointer() {
+  return typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
+}
+
 function exploreFov() {
-  return typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches
-    ? 62
-    : DEFAULT_FOV;
+  return isCoarsePointer() ? 62 : DEFAULT_FOV;
+}
+
+/** Touch tours linger longer; reduced motion still snaps. */
+function tourPacing(reducedMotion: boolean) {
+  if (reducedMotion) {
+    return {
+      moveDur: 0.08,
+      holdDur: 0.35,
+      exitMove: 0.08,
+      exitHold: 0.08,
+      lastExitMove: 0.08,
+      lastExitHold: 0.2,
+      awardsMove0: 0.1,
+      awardsMove1: 0.1,
+      awardsHold0: 0.12,
+      awardsHold1: 0.7,
+      doorWait: 0,
+      pathDur: 0.12,
+      approachSpeed: 8,
+      approachTimeout: 4.2,
+      outdoorDwell: 1.2,
+      pauseForPanel: false,
+    };
+  }
+  const coarse = isCoarsePointer();
+  return {
+    moveDur: coarse ? 2.7 : 1.85,
+    holdDur: coarse ? 4.6 : 2.8,
+    exitMove: coarse ? 1.85 : 1.25,
+    exitHold: coarse ? 0.35 : 0.18,
+    lastExitMove: coarse ? 1.95 : 1.35,
+    lastExitHold: coarse ? 0.8 : 0.45,
+    awardsMove0: coarse ? 2.25 : 1.55,
+    awardsMove1: coarse ? 2.45 : 1.7,
+    awardsHold0: coarse ? 0.7 : 0.35,
+    awardsHold1: coarse ? 7.5 : 4.6,
+    doorWait: coarse ? 1.25 : 0.85,
+    pathDur: coarse ? 5.4 : 3.6,
+    approachSpeed: coarse ? 0.82 : 1.35,
+    approachTimeout: coarse ? 7.5 : 4.2,
+    outdoorDwell: coarse ? 8.5 : 5.2,
+    pauseForPanel: coarse,
+  };
 }
 
 function lookBlockedAt(x: number, y: number) {
@@ -294,6 +339,7 @@ export function CameraDirector() {
         stop.position[1] + 2.2,
         stop.position[2] + 6.5,
       ];
+      const pacing = tourPacing(state.reducedMotion);
 
       if (hall) {
         const floor = getTerrainHeight(
@@ -301,8 +347,6 @@ export function CameraDirector() {
           GALLERY_Z,
         );
         const eye = floor + GALLERY_HEIGHT * 0.42;
-        const moveDur = state.reducedMotion ? 0.08 : 1.85;
-        const holdDur = state.reducedMotion ? 0.35 : 2.8;
         const spawn = galleryInteriorSpawn();
         const enterShot = {
           pos: [spawn.x, floor + 1.62, spawn.z] as [number, number, number],
@@ -312,8 +356,6 @@ export function CameraDirector() {
             GALLERY_Z,
           ] as [number, number, number],
         };
-        const exitMove = state.reducedMotion ? 0.08 : 1.25;
-        const exitHold = state.reducedMotion ? 0.08 : 0.18;
         const shots =
           hall === "awards"
             ? awardsDoorEnterShots(floor)
@@ -327,20 +369,28 @@ export function CameraDirector() {
         const awardsFov = 58;
         const moves =
           hall === "awards"
-            ? [state.reducedMotion ? 0.1 : 1.55, state.reducedMotion ? 0.1 : 1.7]
+            ? [pacing.awardsMove0, pacing.awardsMove1]
             : [
-                moveDur,
-                moveDur,
-                moveDur,
-                moveDur,
-                exitMove,
-                exitMove,
-                state.reducedMotion ? 0.08 : 1.35,
+                pacing.moveDur,
+                pacing.moveDur,
+                pacing.moveDur,
+                pacing.moveDur,
+                pacing.exitMove,
+                pacing.exitMove,
+                pacing.lastExitMove,
               ];
         const holds =
           hall === "awards"
-            ? [state.reducedMotion ? 0.12 : 0.35, state.reducedMotion ? 0.7 : 4.6]
-            : [holdDur, holdDur, holdDur, holdDur, exitHold, exitHold, state.reducedMotion ? 0.2 : 0.45];
+            ? [pacing.awardsHold0, pacing.awardsHold1]
+            : [
+                pacing.holdDur,
+                pacing.holdDur,
+                pacing.holdDur,
+                pacing.holdDur,
+                pacing.exitHold,
+                pacing.exitHold,
+                pacing.lastExitHold,
+              ];
         const fovs =
           hall === "awards"
             ? [DEFAULT_FOV, awardsFov]
@@ -353,8 +403,8 @@ export function CameraDirector() {
                 DEFAULT_FOV,
                 DEFAULT_FOV,
               ];
-        const doorWait = state.reducedMotion ? 0 : 0.85;
-        const pathDur = state.reducedMotion ? 0.12 : 3.6;
+        const doorWait = pacing.doorWait;
+        const pathDur = pacing.pathDur;
 
         if (!arrived.current) {
           if (hall === "awards") {
@@ -380,14 +430,13 @@ export function CameraDirector() {
           }
 
           desired.set(...outdoorCam);
-          const speed = state.reducedMotion ? 8 : 1.35;
-          camera.position.lerp(desired, 1 - Math.exp(-speed * capped));
+          camera.position.lerp(desired, 1 - Math.exp(-pacing.approachSpeed * capped));
           lookTarget.set(...stop.lookAt);
           camera.lookAt(lookTarget);
           setCameraFov(camera, DEFAULT_FOV);
           tourTime.current += capped;
           const dist = camera.position.distanceTo(desired);
-          if (dist < 0.7 || tourTime.current > 4.2) {
+          if (dist < 0.7 || tourTime.current > pacing.approachTimeout) {
             arrived.current = true;
             tourTime.current = 0;
             state.setInterior("gallery");
@@ -413,7 +462,7 @@ export function CameraDirector() {
           const fromShot = i === 0 ? { pos: outdoorCam, look: stop.lookAt } : shots[i - 1];
           const toShot = shots[i];
           const hold = holds[i];
-          const move = moves[i] ?? moveDur;
+          const move = moves[i] ?? pacing.moveDur;
           const fromFov = i === 0 ? DEFAULT_FOV : fovs[i - 1];
           const toFov = fovs[i];
 
@@ -454,19 +503,25 @@ export function CameraDirector() {
       }
 
       desired.set(...outdoorCam);
-      const speed = state.reducedMotion ? 8 : 1.35;
-      camera.position.lerp(desired, 1 - Math.exp(-speed * capped));
+      camera.position.lerp(desired, 1 - Math.exp(-pacing.approachSpeed * capped));
       lookTarget.set(...stop.lookAt);
       camera.lookAt(lookTarget);
       setCameraFov(camera, DEFAULT_FOV);
-      tourTime.current += capped;
-      const dist = camera.position.distanceTo(desired);
-      if (!arrived.current && (dist < 0.7 || tourTime.current > 4.2)) {
-        arrived.current = true;
-        tourTime.current = 0;
-        state.openPanel(stop.panel);
+      if (!arrived.current) {
+        tourTime.current += capped;
+        const dist = camera.position.distanceTo(desired);
+        if (dist < 0.7 || tourTime.current > pacing.approachTimeout) {
+          arrived.current = true;
+          tourTime.current = 0;
+          state.openPanel(stop.panel);
+        }
+        return;
       }
-      if (arrived.current && tourTime.current > (state.reducedMotion ? 1.2 : 5.2)) {
+      if (pacing.pauseForPanel && state.activePanel) {
+        return;
+      }
+      tourTime.current += capped;
+      if (tourTime.current > pacing.outdoorDwell) {
         arrived.current = false;
         tourTime.current = 0;
         state.advanceTour();

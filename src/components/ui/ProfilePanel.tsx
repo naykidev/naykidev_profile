@@ -22,6 +22,8 @@ function Shell({
   children: ReactNode;
 }) {
   const closePanel = useAppStore((s) => s.closePanel);
+  const mode = useAppStore((s) => s.mode);
+  const tourContinue = mode === "tour";
   return (
     <aside
       role="dialog"
@@ -30,7 +32,7 @@ function Shell({
       data-look-block
       className="absolute inset-0 z-[65] flex h-full w-full max-w-none flex-col border-r border-paper/15 bg-[#1c1814]/90 px-5 pt-[max(3.75rem,calc(env(safe-area-inset-top)+2.75rem))] pb-[max(1.25rem,env(safe-area-inset-bottom))] text-paper backdrop-blur-[6px] sm:inset-auto sm:top-0 sm:left-0 sm:max-w-md sm:w-[28rem] sm:px-7 sm:pt-8 sm:pb-8"
     >
-      <CloseButton onClick={closePanel} />
+      <CloseButton onClick={closePanel} label={tourContinue ? "Continue tour" : "Close"} />
       <p className="font-ui text-[10px] tracking-[0.32em] text-paper/60 uppercase">
         {kicker}
       </p>
@@ -40,6 +42,15 @@ function Shell({
       <div className="mt-6 flex-1 space-y-5 overflow-y-auto pr-1 font-ui text-sm leading-relaxed text-paper/85">
         {children}
       </div>
+      {tourContinue ? (
+        <button
+          type="button"
+          className="overlay-chip mt-4 min-h-11 w-full rounded-full px-4 py-2 font-ui text-[11px] tracking-[0.18em] uppercase"
+          onClick={closePanel}
+        >
+          Continue tour
+        </button>
+      ) : null}
     </aside>
   );
 }
