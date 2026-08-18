@@ -73,7 +73,24 @@ export function museumFrameSlots(count: number): FrameSlot[] {
       rotation: [0, 0, 0] as Vec3,
     })),
   ];
-  return slots.slice(0, count);
+  return slots.slice(0, count).map((slot, index) => ({ ...slot, pieceIndex: index }));
+}
+
+/** Left wall → back wall → right wall, each left-to-right from inside the room. */
+export function museumTourSlots(count: number): FrameSlot[] {
+  const north: FrameSlot[] = [];
+  const east: FrameSlot[] = [];
+  const south: FrameSlot[] = [];
+  for (const slot of museumFrameSlots(count)) {
+    const yaw = slot.rotation[1];
+    if (Math.abs(yaw - Math.PI) < 0.2) north.push(slot);
+    else if (Math.abs(yaw + Math.PI / 2) < 0.2) east.push(slot);
+    else south.push(slot);
+  }
+  north.sort((a, b) => a.position[0] - b.position[0]);
+  east.sort((a, b) => b.position[2] - a.position[2]);
+  south.sort((a, b) => b.position[0] - a.position[0]);
+  return [...north, ...east, ...south];
 }
 
 export function awardFrameSlots(count: number): FrameSlot[] {
@@ -161,7 +178,7 @@ export function hallDoorExitShots(hall: HallId, floor: number): TourShot[] {
 
 export function hallExhibitShots(hall: HallId, floor: number): TourShot[] {
   const pieces = hall === "gallery" ? galleryPieces : awardPieces;
-  const slots = hall === "gallery" ? museumFrameSlots(pieces.length) : awardFrameSlots(pieces.length);
+  const slots = hall === "gallery" ? museumTourSlots(pieces.length) : awardFrameSlots(pieces.length);
   return [
     hallEnterShot(hall, floor, slots[0]),
     ...slots.map((slot, index) => {

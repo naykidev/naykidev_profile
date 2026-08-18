@@ -57,7 +57,7 @@ function tourPacing(reducedMotion: boolean) {
       approachSpeed: 8,
       approachTimeout: 4.2,
       outdoorDwell: 1.2,
-      pauseForPanel: false,
+      pauseForPanel: true,
     };
   }
   const coarse = isCoarsePointer();
@@ -75,7 +75,7 @@ function tourPacing(reducedMotion: boolean) {
     approachSpeed: coarse ? 0.82 : 1.35,
     approachTimeout: coarse ? 7.5 : 4.2,
     outdoorDwell: coarse ? 8.5 : 5.2,
-    pauseForPanel: coarse,
+    pauseForPanel: true,
   };
 }
 
