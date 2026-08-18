@@ -98,19 +98,22 @@ function applyBeat(
   liftOff = false,
 ) {
   const beat = globeBeatAt(elapsed, { liftOff });
+  globe.pointOfView(beat.pov, 0);
   if (beat.id === lastId.current) return;
-  const instant = lastId.current === null;
   lastId.current = beat.id;
 
-  globe.controls().autoRotate = beat.autoRotate;
-  globe.pointOfView(beat.pov, instant ? 0 : beat.transitionMs);
+  globe.controls().autoRotate = false;
   globe.pointsData(beat.pins);
   globe.htmlElementsData(beat.pins);
   globe.arcsData(beat.showArc ? [JOURNEY_ARC] : []);
 }
 
 function createGlobe(el: HTMLElement) {
-  const globe = new Globe(el, { animateIn: false, waitForGlobeReady: true })
+  const globe = new Globe(el, {
+    animateIn: false,
+    waitForGlobeReady: true,
+    rendererConfig: { antialias: false, alpha: false, powerPreference: "high-performance" },
+  })
     .width(el.clientWidth)
     .height(el.clientHeight)
     .backgroundColor("#03060d")
@@ -140,7 +143,7 @@ function createGlobe(el: HTMLElement) {
     .arcAltitude(0.22)
     .arcDashLength(0.45)
     .arcDashGap(0.18)
-    .arcDashAnimateTime(1400)
+    .arcDashAnimateTime(700)
     .htmlLat("lat")
     .htmlLng("lng")
     .htmlAltitude(0.04)
@@ -178,12 +181,12 @@ function createGlobe(el: HTMLElement) {
   const controls = globe.controls();
   controls.enableZoom = false;
   controls.enablePan = false;
-  controls.autoRotateSpeed = 0.55;
-  controls.autoRotate = true;
+  controls.enableDamping = false;
+  controls.autoRotate = false;
+  controls.enabled = false;
 
   globe.pointOfView({ lat: 32.72, lng: -117.45, altitude: 0.38 }, 0);
-  const coarse = window.matchMedia("(pointer: coarse)").matches;
-  globe.renderer().setPixelRatio(Math.min(window.devicePixelRatio || 1, coarse ? 1 : 1.5));
+  globe.renderer().setPixelRatio(1);
   return { globe, stars, moon };
 }
 
@@ -263,11 +266,13 @@ export function IntroGlobeCanvas({
     applyBeat(globe, startElapsed, beatIdRef, liftOffRef.current);
 
     const ac = new AbortController();
-    loadPreciseLand(globe, ac.signal).catch((error) => {
-      if ((error as { name?: string }).name !== "AbortError") {
-        console.warn("[introGlobe] failed to load country outlines", error);
-      }
-    });
+    if (!liftOffRef.current) {
+      loadPreciseLand(globe, ac.signal).catch((error) => {
+        if ((error as { name?: string }).name !== "AbortError") {
+          console.warn("[introGlobe] failed to load country outlines", error);
+        }
+      });
+    }
 
     const ro = new ResizeObserver(() => {
       globe.width(el.clientWidth).height(el.clientHeight);

@@ -30,13 +30,22 @@ export function SanDiegoTilesCanvas({
   const followIntro = elapsed === undefined;
   const visible = usePageVisible();
   const coarse = useCoarsePointer();
+  const liveRef = useRef(true);
+  const [live, setLive] = useState(true);
 
   useEffect(() => {
     if (!followIntro) {
       applyFade(wrapRef.current, fade);
       return;
     }
-    return subscribeIntroPlayback((sample) => applyFade(wrapRef.current, sample.sdFade));
+    return subscribeIntroPlayback((sample) => {
+      applyFade(wrapRef.current, sample.sdFade);
+      const next = sample.sdFade > 0.06;
+      if (next !== liveRef.current) {
+        liveRef.current = next;
+        setLive(next);
+      }
+    });
   }, [followIntro, fade]);
 
   if (!followIntro && fade <= 0.01) return null;
@@ -50,7 +59,7 @@ export function SanDiegoTilesCanvas({
       <Canvas
         dpr={[1, 1]}
         shadows={false}
-        frameloop={visible ? "always" : "never"}
+        frameloop={visible && live ? "always" : "never"}
         gl={{
           antialias: !coarse,
           stencil: false,
