@@ -8,10 +8,11 @@ import { useAppStore } from "@/systems/store";
 const GALLERY_FRAME = { width: 2.32, height: 1.62, fov: 46, dist: 2.58 };
 const AWARDS_FRAME = { width: 1.64, height: 1.16, fov: 42, dist: 1.68 };
 const STACK_BREAKPOINT = 900;
-const DESCRIPTION_WIDTH = 340;
-const IMAGES_WIDTH = 260;
+const DESCRIPTION_MAX = 340;
+const IMAGES_MAX = 260;
+const DESCRIPTION_MIN = 200;
+const IMAGES_MIN = 180;
 const COLUMN_GAP = 48;
-const OUTER_PAD = 32;
 
 let viewportSnapshot = { w: 1280, h: 720 };
 
@@ -105,60 +106,79 @@ export function TourExhibitOverlay() {
   const photos = supplementalPhotos(piece);
   const hasPhotos = photos.length > 0;
 
+  // Projected portrait bounds — this becomes the CENTER GRID COLUMN only.
   const portraitWidth = Math.ceil(
-    projectedPixels(frameSpec.width, frameSpec.dist, frameSpec.fov, viewport.h) * 1.05,
+    projectedPixels(frameSpec.width, frameSpec.dist, frameSpec.fov, viewport.h) * 1.08,
   );
   const portraitHeight = Math.ceil(
-    projectedPixels(frameSpec.height, frameSpec.dist, frameSpec.fov, viewport.h) * 1.05,
+    projectedPixels(frameSpec.height, frameSpec.dist, frameSpec.fov, viewport.h) * 1.08,
   );
 
-  const imagesWidth = hasPhotos ? IMAGES_WIDTH : 0;
-  const rowWidth =
-    DESCRIPTION_WIDTH + COLUMN_GAP + portraitWidth + (hasPhotos ? COLUMN_GAP + imagesWidth : 0);
-  const useThreeColumn = viewport.w >= STACK_BREAKPOINT && rowWidth <= viewport.w - OUTER_PAD;
+  // Side gutters = leftover viewport after portrait column + gaps.
+  const sideGutter = Math.max(0, (viewport.w - portraitWidth - COLUMN_GAP * 2) / 2);
+  const descriptionWidth = Math.min(DESCRIPTION_MAX, Math.floor(sideGutter - 16));
+  const imagesWidth = hasPhotos
+    ? Math.min(IMAGES_MAX, Math.floor(sideGutter - 16))
+    : 0;
+
+  const useThreeColumn =
+    viewport.w >= STACK_BREAKPOINT &&
+    descriptionWidth >= DESCRIPTION_MIN &&
+    (!hasPhotos || imagesWidth >= IMAGES_MIN);
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-40 px-4 pt-[max(4.5rem,calc(env(safe-area-inset-top)+3.25rem))] pb-[8.75rem]">
+    <div className="pointer-events-none absolute inset-0 z-40 pt-[max(4.5rem,calc(env(safe-area-inset-top)+3.25rem))] pb-[8.75rem]">
       <section key={piece.id} data-look-block className="pointer-events-auto h-full w-full text-paper">
         {useThreeColumn ? (
+          /*
+           * THREE SEPARATE SIBLINGS in a 3-column grid.
+           * Column 2 is reserved for the 3D portrait — nothing with a background may render there.
+           * Panels only ever live in the left/right gutters.
+           */
           <div
-            className="gallery-overlay-row flex h-full w-full items-center justify-center"
-            style={{ gap: COLUMN_GAP }}
+            className="gallery-overlay-row h-full w-full"
+            style={{
+              display: "grid",
+              gridTemplateColumns: `1fr ${portraitWidth}px 1fr`,
+              alignItems: "center",
+              columnGap: COLUMN_GAP,
+            }}
           >
+            {/* 1. Description panel — own card, left gutter only */}
             <div
-              className="description-panel shrink-0 grow-0 overflow-y-auto rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
+              className="description-panel justify-self-end overflow-y-auto rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
               style={{
-                flex: `0 0 ${DESCRIPTION_WIDTH}px`,
-                width: DESCRIPTION_WIDTH,
-                maxWidth: DESCRIPTION_WIDTH,
+                width: descriptionWidth,
                 height: "80%",
                 padding: 32,
+                marginLeft: 16,
               }}
             >
               <ExhibitCopy piece={piece} />
             </div>
 
+            {/* 2. Portrait spacer — empty, no chrome, portrait shows through */}
             <div
-              className="portrait-spacer pointer-events-none shrink-0 grow-0"
+              className="portrait-spacer pointer-events-none"
               aria-hidden
               style={{
-                flex: `0 0 ${portraitWidth}px`,
-                width: portraitWidth,
-                height: Math.max(portraitHeight, Math.round(viewport.h * 0.45)),
-                background: "transparent",
+                width: "100%",
+                height: Math.max(portraitHeight, Math.round(viewport.h * 0.5)),
+                background: "none",
                 border: "none",
                 boxShadow: "none",
               }}
             />
 
+            {/* 3. Images panel — own card, right gutter only */}
             {hasPhotos ? (
               <div
-                className="images-panel shrink-0 grow-0 overflow-hidden rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] p-3 shadow-[0_16px_48px_rgba(0,0,0,0.4)] backdrop-blur-[8px]"
+                className="images-panel justify-self-start overflow-hidden rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] shadow-[0_16px_48px_rgba(0,0,0,0.4)] backdrop-blur-[8px]"
                 style={{
-                  flex: `0 0 ${IMAGES_WIDTH}px`,
-                  width: IMAGES_WIDTH,
-                  maxWidth: IMAGES_WIDTH,
+                  width: imagesWidth,
                   height: "40%",
+                  marginRight: 16,
+                  padding: 12,
                   display: "flex",
                   flexDirection: "column",
                   gap: 16,
@@ -168,47 +188,49 @@ export function TourExhibitOverlay() {
                   <figure
                     key={photo.src}
                     className="m-0 overflow-hidden rounded-lg border border-white/20 bg-black/40"
-                    style={{ width: "100%", flex: "1 1 auto", minHeight: 120 }}
+                    style={{ width: "100%", flex: "1 1 0", minHeight: 140 }}
                   >
                     <img
                       src={photo.src}
                       alt={photo.alt}
-                      className="block"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        position: "static",
-                      }}
+                      className="block h-full w-full"
+                      style={{ objectFit: "cover", position: "static" }}
                       loading="lazy"
                     />
                   </figure>
                 ))}
               </div>
-            ) : null}
+            ) : (
+              <div aria-hidden />
+            )}
           </div>
         ) : (
-          <div className="mx-auto flex h-full max-w-[720px] flex-col items-center gap-5 overflow-y-auto pb-4">
+          /*
+           * Narrow / portrait-too-wide fallback: keep the portrait fully clear,
+           * then place description + images BELOW it (never over it).
+           */
+          <div className="mx-auto flex h-full w-full max-w-[720px] flex-col items-center gap-5 overflow-y-auto px-4 pb-4">
             <div
               className="portrait-spacer pointer-events-none shrink-0"
               aria-hidden
               style={{
-                width: Math.min(viewport.w - 48, Math.max(220, portraitWidth * 0.8)),
-                height: Math.max(140, Math.min(portraitHeight * 0.9, viewport.h * 0.34)),
-                background: "transparent",
+                width: Math.min(viewport.w - 32, portraitWidth),
+                height: Math.min(portraitHeight, viewport.h * 0.62),
+                background: "none",
               }}
             />
             <div
               className="description-panel w-full shrink-0 overflow-y-auto rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
-              style={{ padding: 32, maxWidth: 520 }}
+              style={{ padding: 32, maxWidth: DESCRIPTION_MAX }}
             >
               <ExhibitCopy piece={piece} />
             </div>
             {hasPhotos ? (
               <div
-                className="images-panel w-full shrink-0 rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] p-3 shadow-[0_16px_48px_rgba(0,0,0,0.4)] backdrop-blur-[8px]"
+                className="images-panel w-full shrink-0 rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] shadow-[0_16px_48px_rgba(0,0,0,0.4)] backdrop-blur-[8px]"
                 style={{
-                  maxWidth: IMAGES_WIDTH,
+                  maxWidth: IMAGES_MAX,
+                  padding: 12,
                   display: "flex",
                   flexDirection: "column",
                   gap: 16,
