@@ -321,6 +321,7 @@ export function CameraDirector() {
           setCameraFov(camera, DEFAULT_FOV);
           if (hall === "awards" && state.interior !== "awards") state.setInterior("awards");
           if (hall === "gallery" && state.interior !== "gallery") state.setInterior("gallery");
+          if (state.tourExhibit) state.setTourExhibit(null);
           return;
         }
         elapsed -= doorWait;
@@ -333,14 +334,13 @@ export function CameraDirector() {
           const move = moves[i] ?? pacing.pieceMove;
           const fromFov = i === 0 ? DEFAULT_FOV : fovs[i - 1];
           const toFov = fovs[i];
-          const exhibit = toShot.pieceId ?? null;
-          if (state.tourExhibit !== exhibit) state.setTourExhibit(exhibit);
 
           if (i === shots.length - 1 && elapsed >= move && state.interior) {
             state.setInterior(null);
           }
 
           if (elapsed < move) {
+            if (state.tourExhibit) state.setTourExhibit(null);
             const t = elapsed / move;
             const ease = t * t * (3 - 2 * t);
             fromPos.set(...fromShot.pos);
@@ -355,6 +355,8 @@ export function CameraDirector() {
           }
           elapsed -= move;
           if (elapsed < hold) {
+            const exhibit = toShot.pieceId ?? null;
+            if (state.tourExhibit !== exhibit) state.setTourExhibit(exhibit);
             camera.position.set(...toShot.pos);
             lookTarget.set(...toShot.look);
             camera.lookAt(lookTarget);
@@ -368,6 +370,7 @@ export function CameraDirector() {
         tourTime.current = 0;
         pathFrom.current = null;
         pathLookFrom.current = null;
+        if (state.tourExhibit) state.setTourExhibit(null);
         state.advanceTour();
         return;
       }

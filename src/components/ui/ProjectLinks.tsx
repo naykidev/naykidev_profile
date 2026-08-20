@@ -2,12 +2,12 @@ import { useState } from "react";
 import type { ProjectLink } from "@/data/projects";
 
 const linkClass =
-  "border border-paper/30 px-3 py-2 font-ui text-[10px] tracking-[0.18em] text-paper uppercase hover:bg-paper/10";
+  "overlay-chip inline-flex min-h-11 items-center rounded-full px-4 py-2.5 font-ui text-[11px] tracking-[0.16em] text-paper uppercase";
 
 export function ProjectLinks({ links }: { links?: readonly ProjectLink[] }) {
   if (!links?.length) return null;
   return (
-    <div className="mt-4 flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2">
       {links.map((link) => (
         <a key={link.href} href={link.href} target="_blank" rel="noreferrer" className={linkClass}>
           {link.label}

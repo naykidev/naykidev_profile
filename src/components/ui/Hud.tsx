@@ -19,7 +19,7 @@ export function Hud() {
   const exhibit = findExhibitPiece(tourExhibit);
   const title =
     mode === "tour"
-      ? (exhibit?.name ?? tourStops[tourIndex]?.name ?? "Guided Tour")
+      ? (tourStops[tourIndex]?.name ?? "Guided Tour")
       : interior === "awards"
         ? "Awards & Certificates"
         : interior === "gallery"
@@ -49,33 +49,26 @@ export function Hud() {
       {mode === "tour" && !cameraTransition && !tourComplete ? (
         <div
           data-look-block
-          className="pointer-events-auto absolute bottom-[max(1.35rem,env(safe-area-inset-bottom))] left-1/2 flex w-[min(100%-1.5rem,24rem)] -translate-x-1/2 flex-col items-center gap-3"
+          className="pointer-events-auto fixed bottom-[max(20px,env(safe-area-inset-bottom))] left-1/2 z-[100] flex w-[min(100%-1.5rem,22rem)] -translate-x-1/2 flex-col items-center gap-2"
         >
-          {exhibit ? (
-            <p className="overlay-label m-0 max-w-full truncate whitespace-nowrap font-ui text-[10px] tracking-[0.14em] uppercase sm:text-[11px]">
-              {exhibit.name}
-            </p>
-          ) : null}
-          <div className="flex w-full flex-col items-center gap-2">
-            <p className="overlay-label m-0 max-w-full truncate whitespace-nowrap font-ui text-[10px] tracking-[0.14em] uppercase sm:text-[11px]">
-              {tourStops[tourIndex]?.name ?? "Tour"} · {tourIndex + 1} / {tourStops.length}
-            </p>
-            <div className="flex w-full justify-center gap-2">
-              <button
-                type="button"
-                className="overlay-chip min-h-11 flex-1 rounded-full px-4 py-2 font-ui text-[10px] tracking-[0.22em] uppercase sm:flex-none"
-                onClick={() => advanceTour()}
-              >
-                Next
-              </button>
-              <button
-                type="button"
-                className="overlay-chip min-h-11 flex-1 rounded-full px-4 py-2 font-ui text-[10px] tracking-[0.22em] uppercase sm:flex-none"
-                onClick={() => setMode("intro")}
-              >
-                Exit tour
-              </button>
-            </div>
+          <p className="overlay-label m-0 max-w-full truncate whitespace-nowrap font-ui text-[10px] tracking-[0.14em] uppercase sm:text-[11px]">
+            {tourStops[tourIndex]?.name ?? "Tour"} · {tourIndex + 1} / {tourStops.length}
+          </p>
+          <div className="flex w-full justify-center gap-2">
+            <button
+              type="button"
+              className="overlay-chip min-h-11 flex-1 rounded-full px-4 py-2 font-ui text-[10px] tracking-[0.22em] uppercase sm:flex-none"
+              onClick={() => advanceTour()}
+            >
+              Next
+            </button>
+            <button
+              type="button"
+              className="overlay-chip min-h-11 flex-1 rounded-full px-4 py-2 font-ui text-[10px] tracking-[0.22em] uppercase sm:flex-none"
+              onClick={() => setMode("intro")}
+            >
+              Exit tour
+            </button>
           </div>
         </div>
       ) : null}
