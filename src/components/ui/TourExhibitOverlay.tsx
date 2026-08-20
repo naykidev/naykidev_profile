@@ -12,24 +12,30 @@ const RIGHT_WIDTH = 300;
 const PORTRAIT_EDGE_GAP = 28;
 const OUTER_PAD = 32;
 
+let viewportSnapshot = { w: 1280, h: 720 };
+
+function syncViewport() {
+  if (typeof window === "undefined") return viewportSnapshot;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  if (w !== viewportSnapshot.w || h !== viewportSnapshot.h) {
+    viewportSnapshot = { w, h };
+  }
+  return viewportSnapshot;
+}
+
 function subscribeViewport(onStoreChange: () => void) {
-  window.addEventListener("resize", onStoreChange);
-  return () => window.removeEventListener("resize", onStoreChange);
-}
-
-function getViewport() {
-  return {
-    w: window.innerWidth,
-    h: window.innerHeight,
+  const onResize = () => {
+    syncViewport();
+    onStoreChange();
   };
-}
-
-function getServerViewport() {
-  return { w: 1280, h: 720 };
+  syncViewport();
+  window.addEventListener("resize", onResize);
+  return () => window.removeEventListener("resize", onResize);
 }
 
 function useViewport() {
-  return useSyncExternalStore(subscribeViewport, getViewport, getServerViewport);
+  return useSyncExternalStore(subscribeViewport, syncViewport, () => viewportSnapshot);
 }
 
 /** Project a world-space size through the same vertical FOV used by frameZoomShot. */
