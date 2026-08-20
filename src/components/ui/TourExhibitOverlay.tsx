@@ -13,6 +13,7 @@ const NARROW_DESCRIPTION = new Set([
   "surf-del-mar",
   "weather-report",
   "accessibility-surfer",
+  "freddy-takes-flight",
 ]);
 const IMAGES_MAX = 320;
 const IMAGES_TARGET = 290;
