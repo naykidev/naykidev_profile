@@ -36,7 +36,7 @@ export function Palms() {
       const shore = shoreXAt(z);
       const x = shore - 1.45 - hash2(i, 3) * 1.7;
       if (x > shore - 1.2) continue;
-      const s = 0.72 + hash2(i, 7) * 0.38;
+      const s = 0.42 + hash2(i, 7) * 0.2;
       dummy.position.set(x, coastHeight(x, z) - minY * s - 0.28 * s, z);
       dummy.rotation.set(0, hash2(i, 4) * 6.28, 0);
       dummy.scale.setScalar(s);
