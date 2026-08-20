@@ -71,7 +71,7 @@ function ExhibitCopy({ piece }: { piece: GalleryPiece }) {
       <h2 className="mb-4 font-display text-[1.85rem] leading-tight font-semibold tracking-wide">
         {piece.name}
       </h2>
-      <p className="mb-5 font-ui text-[15px] leading-[1.55] text-pretty text-paper/95">
+      <p className="mb-4 font-ui text-[15px] leading-[1.5] text-pretty text-paper/95">
         {piece.summary}
       </p>
       {piece.technologies.length > 0 ? (
@@ -140,19 +140,25 @@ export function TourExhibitOverlay() {
       )
     : 0;
 
+  const overlayPadTop = 72;
+  const overlayPadBottom = 140;
+  const descriptionMaxHeight = Math.max(320, viewport.h - overlayPadTop - overlayPadBottom);
+
   return (
     <div className="pointer-events-none absolute inset-0 z-40 pt-[max(4.5rem,calc(env(safe-area-inset-top)+3.25rem))] pb-[8.75rem]">
-      <section key={piece.id} data-look-block className="pointer-events-auto relative h-full w-full text-paper">
-        {/* LEFT of portrait — never centered */}
+      <section key={piece.id} data-look-block className="pointer-events-auto relative h-full w-full overflow-visible text-paper">
+        {/* LEFT of portrait — sized to content so the full copy is visible */}
         <div
-          className="description-panel absolute overflow-y-auto rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
+          className="description-panel absolute rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
           style={{
             left: descriptionLeft,
             top: "50%",
             transform: "translateY(-50%)",
             width: descriptionWidth,
-            height: "80%",
-            padding: 32,
+            height: "fit-content",
+            maxHeight: descriptionMaxHeight,
+            overflow: "visible",
+            padding: 28,
           }}
         >
           <ExhibitCopy piece={piece} />
