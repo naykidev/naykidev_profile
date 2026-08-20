@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { awardPieces } from "@/data/achievements";
+import { galleryPieces } from "@/data/projects";
 import { locations, tourStops, type PanelKind, type WorldLocation } from "@/data/locations";
 import {
   GALLERY_X,
@@ -19,6 +21,7 @@ import { getTerrainHeight } from "@/systems/terrain";
 
 export type AppMode = "intro" | "explore" | "tour" | "traditional";
 export type InteriorId = "gallery" | "awards" | null;
+export type TourKind = "full" | "projects" | "awards";
 
 export type CameraTransition = {
   kind: "enter-gallery" | "exit-gallery" | "enter-awards" | "exit-awards";
@@ -43,6 +46,8 @@ type AppState = {
   cameraTransition: CameraTransition | null;
   galleryProjectId: string | null;
   tourIndex: number;
+  tourKind: TourKind;
+  tourShotIndex: number;
   tourComplete: boolean;
   tourExhibit: string | null;
   player: { x: number; y: number; z: number; yaw: number; pitch: number };
@@ -71,7 +76,11 @@ type AppState = {
   setGalleryProject: (id: string | null) => void;
   setTourIndex: (index: number) => void;
   setTourExhibit: (name: string | null) => void;
+  startProjectsTour: () => void;
+  startAwardsTour: () => void;
   advanceTour: () => void;
+  advanceTourPiece: () => void;
+  retreatTourPiece: () => void;
   setPlayer: (partial: Partial<AppState["player"]>) => void;
   setLook: (look: { x: number; y: number }) => void;
   setMove: (move: { x: number; z: number }) => void;
@@ -92,6 +101,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   cameraTransition: null,
   galleryProjectId: null,
   tourIndex: 0,
+  tourKind: "full",
+  tourShotIndex: 0,
   tourComplete: false,
   tourExhibit: null,
   player: {
@@ -113,6 +124,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       cameraTransition: null,
       galleryProjectId: null,
       tourIndex: 0,
+      tourKind: "full",
+      tourShotIndex: 0,
       tourComplete: false,
       tourExhibit: null,
       pointerLocked: false,
@@ -319,13 +332,59 @@ export const useAppStore = create<AppState>((set, get) => ({
     haptic(galleryProjectId ? 14 : 8);
     set({ galleryProjectId });
   },
-  setTourIndex: (tourIndex) => set({ tourIndex, tourExhibit: null }),
+  setTourIndex: (tourIndex) => set({ tourIndex, tourExhibit: null, tourShotIndex: 0 }),
   setTourExhibit: (tourExhibit) => {
     if (get().tourExhibit === tourExhibit) return;
     set({ tourExhibit });
   },
+  startProjectsTour: () => {
+    const tourIndex = tourStops.findIndex((stop) => stop.tourInterior === "gallery");
+    if (tourIndex < 0) return;
+    if (document.pointerLockElement) document.exitPointerLock();
+    haptic(14);
+    set({
+      mode: "tour",
+      tourKind: "projects",
+      tourIndex,
+      tourShotIndex: 0,
+      tourComplete: false,
+      tourExhibit: null,
+      activePanel: null,
+      interior: null,
+      cameraTransition: null,
+      galleryProjectId: null,
+      pointerLocked: false,
+      exploreNav: false,
+      controlHint: false,
+    });
+  },
+  startAwardsTour: () => {
+    const tourIndex = tourStops.findIndex((stop) => stop.tourInterior === "awards");
+    if (tourIndex < 0) return;
+    if (document.pointerLockElement) document.exitPointerLock();
+    haptic(14);
+    set({
+      mode: "tour",
+      tourKind: "awards",
+      tourIndex,
+      tourShotIndex: 0,
+      tourComplete: false,
+      tourExhibit: null,
+      activePanel: null,
+      interior: null,
+      cameraTransition: null,
+      galleryProjectId: null,
+      pointerLocked: false,
+      exploreNav: false,
+      controlHint: false,
+    });
+  },
   advanceTour: () => {
-    const { tourIndex } = get();
+    const { tourIndex, tourKind } = get();
+    if (tourKind !== "full") {
+      get().advanceTourPiece();
+      return;
+    }
     if (tourIndex >= tourStops.length - 1) {
       set({
         tourComplete: true,
@@ -339,9 +398,37 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({
       activePanel: null,
       tourIndex: tourIndex + 1,
+      tourShotIndex: 0,
       interior: null,
       galleryProjectId: null,
       tourComplete: false,
+      tourExhibit: null,
+    });
+  },
+  advanceTourPiece: () => {
+    const { tourKind, tourShotIndex } = get();
+    const count = tourKind === "awards" ? awardPieces.length : galleryPieces.length;
+    if (tourShotIndex >= count - 1) {
+      set({
+        tourComplete: true,
+        activePanel: null,
+        galleryProjectId: null,
+        cameraTransition: null,
+        tourExhibit: null,
+        interior: null,
+      });
+      return;
+    }
+    set({
+      tourShotIndex: tourShotIndex + 1,
+      tourExhibit: null,
+    });
+  },
+  retreatTourPiece: () => {
+    const { tourShotIndex } = get();
+    if (tourShotIndex <= 0) return;
+    set({
+      tourShotIndex: tourShotIndex - 1,
       tourExhibit: null,
     });
   },

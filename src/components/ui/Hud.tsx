@@ -1,3 +1,5 @@
+import { awardPieces } from "@/data/achievements";
+import { galleryPieces } from "@/data/projects";
 import { tourStops } from "@/data/locations";
 import { findExhibitPiece } from "@/components/ui/ProjectView";
 import { useAppStore } from "@/systems/store";
@@ -8,18 +10,28 @@ export function Hud() {
   const interior = useAppStore((s) => s.interior);
   const cameraTransition = useAppStore((s) => s.cameraTransition);
   const tourIndex = useAppStore((s) => s.tourIndex);
+  const tourKind = useAppStore((s) => s.tourKind);
+  const tourShotIndex = useAppStore((s) => s.tourShotIndex);
   const tourComplete = useAppStore((s) => s.tourComplete);
   const tourExhibit = useAppStore((s) => s.tourExhibit);
   const setMode = useAppStore((s) => s.setMode);
   const advanceTour = useAppStore((s) => s.advanceTour);
+  const advanceTourPiece = useAppStore((s) => s.advanceTourPiece);
+  const retreatTourPiece = useAppStore((s) => s.retreatTourPiece);
   const activePanel = useAppStore((s) => s.activePanel);
   const galleryProjectId = useAppStore((s) => s.galleryProjectId);
   if (mode === "traditional" || mode === "intro" || tourComplete) return null;
 
   const exhibit = findExhibitPiece(tourExhibit);
+  const pieceCount =
+    tourKind === "awards" ? awardPieces.length : tourKind === "projects" ? galleryPieces.length : 0;
   const title =
     mode === "tour"
-      ? (tourStops[tourIndex]?.name ?? "Guided Tour")
+      ? tourKind === "projects"
+        ? "Projects Gallery"
+        : tourKind === "awards"
+          ? "Awards & Certificates"
+          : (tourStops[tourIndex]?.name ?? "Guided Tour")
       : interior === "awards"
         ? "Awards & Certificates"
         : interior === "gallery"
@@ -30,6 +42,7 @@ export function Hud() {
 
   const showHelp = mode === "explore" && !activePanel && !galleryProjectId && !cameraTransition;
   const showTopTitle = mode !== "tour" || !exhibit;
+  const pieceTour = mode === "tour" && (tourKind === "projects" || tourKind === "awards");
 
   return (
     <div className="pointer-events-none absolute inset-0 z-30">
@@ -49,22 +62,44 @@ export function Hud() {
       {mode === "tour" && !cameraTransition && !tourComplete ? (
         <div
           data-look-block
-          className="pointer-events-auto fixed bottom-[max(20px,env(safe-area-inset-bottom))] left-1/2 z-[100] flex w-[min(100%-1.5rem,22rem)] -translate-x-1/2 flex-col items-center gap-2"
+          className="pointer-events-auto fixed bottom-[max(20px,env(safe-area-inset-bottom))] left-1/2 z-[100] flex w-[min(100%-1.5rem,28rem)] -translate-x-1/2 flex-col items-center gap-2"
         >
           <p className="overlay-label m-0 max-w-full truncate whitespace-nowrap font-ui text-[10px] tracking-[0.14em] uppercase sm:text-[11px]">
-            {tourStops[tourIndex]?.name ?? "Tour"} · {tourIndex + 1} / {tourStops.length}
+            {pieceTour
+              ? `${tourKind === "awards" ? "Award" : "Project"} · ${tourShotIndex + 1} / ${pieceCount}`
+              : `${tourStops[tourIndex]?.name ?? "Tour"} · ${tourIndex + 1} / ${tourStops.length}`}
           </p>
-          <div className="flex w-full justify-center gap-2">
+          <div className="flex w-full flex-wrap justify-center gap-2">
+            {pieceTour ? (
+              <>
+                <button
+                  type="button"
+                  className="overlay-chip min-h-11 flex-1 rounded-full px-3 py-2 font-ui text-[10px] tracking-[0.14em] uppercase sm:flex-none"
+                  onClick={() => retreatTourPiece()}
+                  disabled={tourShotIndex <= 0}
+                >
+                  {tourKind === "awards" ? "Previous certificate/award" : "Previous project"}
+                </button>
+                <button
+                  type="button"
+                  className="overlay-chip min-h-11 flex-1 rounded-full px-3 py-2 font-ui text-[10px] tracking-[0.14em] uppercase sm:flex-none"
+                  onClick={() => advanceTourPiece()}
+                >
+                  {tourKind === "awards" ? "Next certificate/award" : "Next project"}
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="overlay-chip min-h-11 flex-1 rounded-full px-4 py-2 font-ui text-[10px] tracking-[0.18em] uppercase sm:flex-none"
+                onClick={() => advanceTour()}
+              >
+                Next gallery
+              </button>
+            )}
             <button
               type="button"
-              className="overlay-chip min-h-11 flex-1 rounded-full px-4 py-2 font-ui text-[10px] tracking-[0.22em] uppercase sm:flex-none"
-              onClick={() => advanceTour()}
-            >
-              Next
-            </button>
-            <button
-              type="button"
-              className="overlay-chip min-h-11 flex-1 rounded-full px-4 py-2 font-ui text-[10px] tracking-[0.22em] uppercase sm:flex-none"
+              className="overlay-chip min-h-11 flex-1 rounded-full px-4 py-2 font-ui text-[10px] tracking-[0.18em] uppercase sm:flex-none"
               onClick={() => setMode("intro")}
             >
               Exit tour

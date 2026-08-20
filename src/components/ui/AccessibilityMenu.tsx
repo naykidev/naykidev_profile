@@ -20,6 +20,8 @@ export function AccessibilityMenu() {
   const activePanel = useAppStore((s) => s.activePanel);
   const openPanel = useAppStore((s) => s.openPanel);
   const closePanel = useAppStore((s) => s.closePanel);
+  const startProjectsTour = useAppStore((s) => s.startProjectsTour);
+  const startAwardsTour = useAppStore((s) => s.startAwardsTour);
 
   const goHome = () => {
     closePanel();
@@ -50,9 +52,17 @@ export function AccessibilityMenu() {
         <NavLabel full="About Me" short="About" />
       </button>
       {mode !== "traditional" ? (
-        <button type="button" className={chip} onClick={() => setMode("traditional")}>
-          Resume
-        </button>
+        <>
+          <button type="button" className={chip} onClick={() => startProjectsTour()}>
+            Projects
+          </button>
+          <button type="button" className={chip} onClick={() => startAwardsTour()}>
+            <NavLabel full="Awards & Certificates" short="Awards" />
+          </button>
+          <button type="button" className={chip} onClick={() => setMode("traditional")}>
+            Resume
+          </button>
+        </>
       ) : (
         <button type="button" className={chip} onClick={goHome}>
           <NavLabel full="Enter campus" short="Campus" />

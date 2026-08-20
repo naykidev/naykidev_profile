@@ -102,6 +102,7 @@ function setCameraFov(camera: { fov?: number; updateProjectionMatrix: () => void
 export function CameraDirector() {
   const { camera, gl } = useThree();
   const tourTime = useRef(0);
+  const piecePhaseTime = useRef(0);
   const arrived = useRef(false);
   const pathFrom = useRef<Vector3 | null>(null);
   const pathLookFrom = useRef<Vector3 | null>(null);
@@ -112,6 +113,7 @@ export function CameraDirector() {
   const lookPointerId = useRef<number | null>(null);
   const lookLast = useRef({ x: 0, y: 0, t: 0 });
   const lookVel = useRef({ yaw: 0, pitch: 0 });
+  const lastPieceShot = useRef(-1);
 
   useEffect(() => {
     const el = gl.domElement;
@@ -198,11 +200,21 @@ export function CameraDirector() {
       if (state.tourIndex !== prev.tourIndex) {
         arrived.current = false;
         tourTime.current = 0;
+        piecePhaseTime.current = 0;
+        lastPieceShot.current = -1;
         pathFrom.current = null;
         pathLookFrom.current = null;
       }
-      if (state.mode !== prev.mode) {
+      if (state.tourShotIndex !== prev.tourShotIndex) {
+        piecePhaseTime.current = 0;
+        lastPieceShot.current = -1;
+        pathFrom.current = camera.position.clone();
+        pathLookFrom.current = lookTarget.clone();
+      }
+      if (state.mode !== prev.mode || state.tourKind !== prev.tourKind) {
         tourTime.current = 0;
+        piecePhaseTime.current = 0;
+        lastPieceShot.current = -1;
         arrived.current = false;
         pathFrom.current = null;
         pathLookFrom.current = null;
@@ -218,7 +230,7 @@ export function CameraDirector() {
       }
     });
     return unsub;
-  }, []);
+  }, [camera]);
 
   useFrame((_, dt) => {
     const state = useAppStore.getState();
@@ -325,6 +337,51 @@ export function CameraDirector() {
           return;
         }
         elapsed -= doorWait;
+
+        // Projects / awards tours: button-driven piece flipping (no auto advance).
+        if (state.tourKind === "projects" || state.tourKind === "awards") {
+          const pieceShots = shots.slice(1, 1 + exhibitCount);
+          if (pieceShots.length === 0) {
+            state.setMode("intro");
+            return;
+          }
+          const idx = Math.max(0, Math.min(state.tourShotIndex, pieceShots.length - 1));
+          const toShot = pieceShots[idx];
+          const move = pacing.pieceMove;
+
+          if (lastPieceShot.current !== idx) {
+            lastPieceShot.current = idx;
+            piecePhaseTime.current = 0;
+            if (!pathFrom.current) pathFrom.current = camera.position.clone();
+            if (!pathLookFrom.current) pathLookFrom.current = lookTarget.clone();
+          }
+
+          piecePhaseTime.current += capped;
+          if (piecePhaseTime.current < move) {
+            if (state.tourExhibit) state.setTourExhibit(null);
+            const t = Math.min(1, piecePhaseTime.current / move);
+            const ease = t * t * (3 - 2 * t);
+            fromPos.copy(pathFrom.current!);
+            toPos.set(...toShot.pos);
+            fromLook.copy(pathLookFrom.current!);
+            toLook.set(...toShot.look);
+            camera.position.lerpVectors(fromPos, toPos, ease);
+            lookTarget.lerpVectors(fromLook, toLook, ease);
+            camera.lookAt(lookTarget);
+            setCameraFov(camera, MathUtils.lerp(DEFAULT_FOV, toShot.fov, ease));
+            return;
+          }
+
+          const exhibit = toShot.pieceId ?? null;
+          if (state.tourExhibit !== exhibit) state.setTourExhibit(exhibit);
+          camera.position.set(...toShot.pos);
+          lookTarget.set(...toShot.look);
+          camera.lookAt(lookTarget);
+          setCameraFov(camera, toShot.fov);
+          pathFrom.current = camera.position.clone();
+          pathLookFrom.current = lookTarget.clone();
+          return;
+        }
 
         for (let i = 0; i < shots.length; i += 1) {
           const fromShot: TourShot =
