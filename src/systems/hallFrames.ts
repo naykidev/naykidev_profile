@@ -123,7 +123,7 @@ export function hallWorld(hall: HallId, lx: number, y: number, lz: number): Vec3
 }
 
 export function frameZoomShot(hall: HallId, slot: FrameSlot, floor: number): TourShot {
-  const dist = slot.tiny ? 1.68 : 2.58;
+  const dist = slot.tiny ? 1.68 : 3.35;
   const yaw = slot.rotation[1];
   const [lx, ly, lz] = slot.position;
   const lookY = floor + ly - (slot.tiny ? 0.02 : 0.16);

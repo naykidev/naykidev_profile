@@ -5,12 +5,14 @@ import { ProjectLinks } from "@/components/ui/ProjectLinks";
 import { findExhibitPiece } from "@/components/ui/ProjectView";
 import { useAppStore } from "@/systems/store";
 
-const GALLERY_FRAME = { width: 2.32, height: 1.62, fov: 46, dist: 2.58 };
+const GALLERY_FRAME = { width: 2.32, height: 1.62, fov: 46, dist: 3.35 };
 const AWARDS_FRAME = { width: 1.64, height: 1.16, fov: 42, dist: 1.68 };
-const DESCRIPTION_MAX = 400;
+const DESCRIPTION_MAX = 380;
 const IMAGES_MAX = 280;
-const SIDE_INSET = 28;
-const PORTRAIT_GAP = 32;
+const DESCRIPTION_TARGET = 340;
+const IMAGES_TARGET = 250;
+const SIDE_INSET = 24;
+const PORTRAIT_GAP = 28;
 
 let viewportSnapshot = { w: 1280, h: 720 };
 
@@ -108,17 +110,17 @@ export function TourExhibitOverlay() {
   const hasPhotos = photos.length > 0;
 
   const projectedPortraitW = Math.ceil(
-    projectedPixels(frameSpec.width, frameSpec.dist, frameSpec.fov, viewport.h) * 1.08,
+    projectedPixels(frameSpec.width, frameSpec.dist, frameSpec.fov, viewport.h) * 1.02,
   );
 
-  // Use the real projected portrait width so side panels clear it — never shrink
-  // the center below that (that was causing the overlap).
-  const centerWidth = projectedPortraitW;
+  // Pull layout center down if needed so side gutters stay ~340 / ~250 wide.
+  const rightBudget = hasPhotos ? IMAGES_TARGET + PORTRAIT_GAP + SIDE_INSET : SIDE_INSET;
+  const leftBudget = DESCRIPTION_TARGET + PORTRAIT_GAP + SIDE_INSET;
+  const centerWidth = Math.min(projectedPortraitW, Math.max(300, viewport.w - leftBudget - rightBudget));
+
   const portraitLeft = (viewport.w - centerWidth) / 2;
   const portraitRight = portraitLeft + centerWidth;
 
-  // Size panels to the gutters, then park them against the portrait with a gap
-  // so they clear the art and stay inset from the screen edges.
   const descriptionWidth = Math.max(
     0,
     Math.min(DESCRIPTION_MAX, portraitLeft - PORTRAIT_GAP - SIDE_INSET),
@@ -127,6 +129,7 @@ export function TourExhibitOverlay() {
     ? Math.max(0, Math.min(IMAGES_MAX, viewport.w - portraitRight - PORTRAIT_GAP - SIDE_INSET))
     : 0;
 
+  // Sit beside the portrait with a gap; leftover gutter keeps them off the screen edge.
   const descriptionLeft = portraitLeft - PORTRAIT_GAP - descriptionWidth;
   const imagesLeft = hasPhotos ? portraitRight + PORTRAIT_GAP : 0;
 
