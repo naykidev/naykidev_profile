@@ -75,17 +75,17 @@ export function Hud() {
                 <button
                   type="button"
                   className="overlay-chip min-h-11 flex-1 rounded-full px-3 py-2 font-ui text-[10px] tracking-[0.14em] uppercase sm:flex-none"
-                  onClick={() => retreatTourPiece()}
-                  disabled={tourShotIndex <= 0}
+                  onClick={() => advanceTourPiece()}
                 >
-                  {tourKind === "awards" ? "Previous certificate/award" : "Previous project"}
+                  {tourKind === "awards" ? "Next certificate/award" : "Next project"}
                 </button>
                 <button
                   type="button"
                   className="overlay-chip min-h-11 flex-1 rounded-full px-3 py-2 font-ui text-[10px] tracking-[0.14em] uppercase sm:flex-none"
-                  onClick={() => advanceTourPiece()}
+                  onClick={() => retreatTourPiece()}
+                  disabled={tourShotIndex <= 0}
                 >
-                  {tourKind === "awards" ? "Next certificate/award" : "Next project"}
+                  {tourKind === "awards" ? "Previous certificate/award" : "Previous project"}
                 </button>
               </>
             ) : (
