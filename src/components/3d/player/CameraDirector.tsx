@@ -32,6 +32,8 @@ const TOUCH_LOOK_PITCH = 0.0038;
 const MOUSE_LOOK_PITCH = 0.0018;
 const LOOK_INERTIA = 9.5;
 
+type HallPhase = "door" | "enter" | "piece";
+
 function isCoarsePointer() {
   return typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
 }
@@ -40,19 +42,19 @@ function exploreFov() {
   return isCoarsePointer() ? 62 : DEFAULT_FOV;
 }
 
-/** Touch tours linger longer; reduced motion still snaps. */
+/** Touch tours linger longer; reduced motion still snaps between shots. */
 function tourPacing(reducedMotion: boolean) {
   if (reducedMotion) {
     return {
-      pieceMove: 0.1,
-      pieceHold: 0.4,
-      enterMove: 0.08,
-      enterHold: 0.12,
+      pieceMove: 0.35,
+      pieceHold: PIECE_HOLD,
+      enterMove: 0.25,
+      enterHold: 0.35,
       exitMove: 0.08,
       exitHold: 0.08,
       lastExitMove: 0.08,
       lastExitHold: 0.2,
-      doorWait: 0,
+      doorWait: 0.2,
       pathDur: 0.12,
       approachSpeed: 8,
       approachTimeout: 4.2,
@@ -62,15 +64,16 @@ function tourPacing(reducedMotion: boolean) {
   }
   const coarse = isCoarsePointer();
   return {
-    pieceMove: coarse ? 3.4 : 3.0,
+    // Piece-to-piece moves stay deliberate; hold is button-driven (infinite).
+    pieceMove: coarse ? 2.2 : 1.85,
     pieceHold: PIECE_HOLD,
-    enterMove: coarse ? 2.2 : 1.85,
-    enterHold: coarse ? 1.1 : 0.8,
+    enterMove: coarse ? 2.4 : 2.0,
+    enterHold: coarse ? 1.4 : 1.1,
     exitMove: coarse ? 1.85 : 1.25,
     exitHold: coarse ? 0.35 : 0.18,
     lastExitMove: coarse ? 1.95 : 1.35,
     lastExitHold: coarse ? 0.8 : 0.45,
-    doorWait: coarse ? 1.25 : 0.85,
+    doorWait: coarse ? 1.0 : 0.7,
     pathDur: coarse ? 5.4 : 3.6,
     approachSpeed: coarse ? 0.82 : 1.35,
     approachTimeout: coarse ? 7.5 : 4.2,
@@ -114,6 +117,7 @@ export function CameraDirector() {
   const lookLast = useRef({ x: 0, y: 0, t: 0 });
   const lookVel = useRef({ yaw: 0, pitch: 0 });
   const lastPieceShot = useRef(-1);
+  const hallPhase = useRef<HallPhase>("door");
 
   useEffect(() => {
     const el = gl.domElement;
@@ -202,6 +206,7 @@ export function CameraDirector() {
         tourTime.current = 0;
         piecePhaseTime.current = 0;
         lastPieceShot.current = -1;
+        hallPhase.current = "door";
         pathFrom.current = null;
         pathLookFrom.current = null;
       }
@@ -215,6 +220,7 @@ export function CameraDirector() {
         tourTime.current = 0;
         piecePhaseTime.current = 0;
         lastPieceShot.current = -1;
+        hallPhase.current = "door";
         arrived.current = false;
         pathFrom.current = null;
         pathLookFrom.current = null;
@@ -288,6 +294,7 @@ export function CameraDirector() {
             if (t >= 1) {
               arrived.current = true;
               tourTime.current = 0;
+              hallPhase.current = "door";
               state.setInterior("awards");
             }
             return;
@@ -303,15 +310,21 @@ export function CameraDirector() {
           if (dist < 0.7 || tourTime.current > pacing.approachTimeout) {
             arrived.current = true;
             tourTime.current = 0;
+            hallPhase.current = "door";
             state.setInterior("gallery");
           }
           return;
         }
 
-        tourTime.current += capped;
-        let elapsed = tourTime.current;
+        const enterShot = shots[0];
+        const pieceShots = shots.slice(1, 1 + exhibitCount);
+        if (pieceShots.length === 0 || !enterShot) {
+          state.setMode("intro");
+          return;
+        }
 
-        if (elapsed < doorWait) {
+        if (hallPhase.current === "door") {
+          tourTime.current += capped;
           camera.position.set(...outdoorCam);
           lookTarget.set(...stop.lookAt);
           camera.lookAt(lookTarget);
@@ -319,17 +332,53 @@ export function CameraDirector() {
           if (hall === "awards" && state.interior !== "awards") state.setInterior("awards");
           if (hall === "gallery" && state.interior !== "gallery") state.setInterior("gallery");
           if (state.tourExhibit) state.setTourExhibit(null);
+          if (tourTime.current >= doorWait) {
+            hallPhase.current = "enter";
+            tourTime.current = 0;
+            pathFrom.current = camera.position.clone();
+            pathLookFrom.current = lookTarget.clone();
+          }
           return;
         }
-        elapsed -= doorWait;
 
-        // All hall tours are button-driven — never auto-race through portraits.
-        {
-          const pieceShots = shots.slice(1, 1 + exhibitCount);
-          if (pieceShots.length === 0) {
-            state.setMode("intro");
+        if (hallPhase.current === "enter") {
+          tourTime.current += capped;
+          const move = pacing.enterMove;
+          if (tourTime.current < move) {
+            if (state.tourExhibit) state.setTourExhibit(null);
+            const t = Math.min(1, tourTime.current / move);
+            const ease = t * t * (3 - 2 * t);
+            fromPos.copy(pathFrom.current ?? camera.position);
+            toPos.set(...enterShot.pos);
+            fromLook.copy(pathLookFrom.current ?? lookTarget);
+            toLook.set(...enterShot.look);
+            camera.position.lerpVectors(fromPos, toPos, ease);
+            lookTarget.lerpVectors(fromLook, toLook, ease);
+            camera.lookAt(lookTarget);
+            setCameraFov(camera, MathUtils.lerp(DEFAULT_FOV, enterShot.fov, ease));
             return;
           }
+
+          camera.position.set(...enterShot.pos);
+          lookTarget.set(...enterShot.look);
+          camera.lookAt(lookTarget);
+          setCameraFov(camera, enterShot.fov);
+
+          if (tourTime.current < move + pacing.enterHold) {
+            if (state.tourExhibit) state.setTourExhibit(null);
+            return;
+          }
+
+          // Park inside the room, then zoom one portrait at a time (button-driven).
+          hallPhase.current = "piece";
+          tourTime.current = 0;
+          piecePhaseTime.current = 0;
+          lastPieceShot.current = -1;
+          pathFrom.current = camera.position.clone();
+          pathLookFrom.current = lookTarget.clone();
+        }
+
+        {
           const idx = Math.max(0, Math.min(state.tourShotIndex, pieceShots.length - 1));
           const toShot = pieceShots[idx];
           const move = pacing.pieceMove;
@@ -337,23 +386,61 @@ export function CameraDirector() {
           if (lastPieceShot.current !== idx) {
             lastPieceShot.current = idx;
             piecePhaseTime.current = 0;
+            // Prefer the subscribe-captured path; otherwise start from wherever we are.
             if (!pathFrom.current) pathFrom.current = camera.position.clone();
             if (!pathLookFrom.current) pathLookFrom.current = lookTarget.clone();
           }
 
           piecePhaseTime.current += capped;
           if (piecePhaseTime.current < move) {
-            if (state.tourExhibit) state.setTourExhibit(null);
             const t = Math.min(1, piecePhaseTime.current / move);
             const ease = t * t * (3 - 2 * t);
-            fromPos.copy(pathFrom.current!);
-            toPos.set(...toShot.pos);
-            fromLook.copy(pathLookFrom.current!);
-            toLook.set(...toShot.look);
-            camera.position.lerpVectors(fromPos, toPos, ease);
-            lookTarget.lerpVectors(fromLook, toLook, ease);
+            // Long jumps (opposite walls) go via the room hub so we don't skim past neighbors.
+            const hub = enterShot;
+            const from = pathFrom.current!;
+            const fromLookRef = pathLookFrom.current!;
+            const longJump =
+              Math.hypot(toShot.pos[0] - from.x, toShot.pos[2] - from.z) > 5.5;
+
+            if (longJump) {
+              if (t < 0.45) {
+                const u = t / 0.45;
+                const e = u * u * (3 - 2 * u);
+                fromPos.copy(from);
+                toPos.set(...hub.pos);
+                fromLook.copy(fromLookRef);
+                toLook.set(...hub.look);
+                camera.position.lerpVectors(fromPos, toPos, e);
+                lookTarget.lerpVectors(fromLook, toLook, e);
+                setCameraFov(camera, MathUtils.lerp(DEFAULT_FOV, hub.fov, e));
+              } else {
+                const u = (t - 0.45) / 0.55;
+                const e = u * u * (3 - 2 * u);
+                fromPos.set(...hub.pos);
+                toPos.set(...toShot.pos);
+                fromLook.set(...hub.look);
+                toLook.set(...toShot.look);
+                camera.position.lerpVectors(fromPos, toPos, e);
+                lookTarget.lerpVectors(fromLook, toLook, e);
+                setCameraFov(camera, MathUtils.lerp(hub.fov, toShot.fov, e));
+              }
+            } else {
+              fromPos.copy(from);
+              toPos.set(...toShot.pos);
+              fromLook.copy(fromLookRef);
+              toLook.set(...toShot.look);
+              camera.position.lerpVectors(fromPos, toPos, ease);
+              lookTarget.lerpVectors(fromLook, toLook, ease);
+              setCameraFov(camera, MathUtils.lerp(DEFAULT_FOV, toShot.fov, ease));
+            }
             camera.lookAt(lookTarget);
-            setCameraFov(camera, MathUtils.lerp(DEFAULT_FOV, toShot.fov, ease));
+
+            if (t < 0.82) {
+              if (state.tourExhibit) state.setTourExhibit(null);
+            } else {
+              const exhibit = toShot.pieceId ?? null;
+              if (state.tourExhibit !== exhibit) state.setTourExhibit(exhibit);
+            }
             return;
           }
 
@@ -363,8 +450,7 @@ export function CameraDirector() {
           lookTarget.set(...toShot.look);
           camera.lookAt(lookTarget);
           setCameraFov(camera, toShot.fov);
-          pathFrom.current = camera.position.clone();
-          pathLookFrom.current = lookTarget.clone();
+          // Stay on this portrait until Next / Previous — do not auto-advance.
           return;
         }
       }
