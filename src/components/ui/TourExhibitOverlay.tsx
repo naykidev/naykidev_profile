@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { awardPieces } from "@/data/achievements";
 import { type GalleryPiece } from "@/data/projects";
 import { ProjectLinks } from "@/components/ui/ProjectLinks";
@@ -40,7 +39,7 @@ export function TourExhibitOverlay() {
 
   const frameWidthPx = projectedPixels(frameSpec.width, frameSpec.dist, frameSpec.fov, viewportH);
   const frameHeightPx = projectedPixels(frameSpec.height, frameSpec.dist, frameSpec.fov, viewportH);
-  const photos = useMemo(() => supplementalPhotos(piece), [piece]);
+  const photos = supplementalPhotos(piece);
   const hasPhotos = photos.length > 0;
 
   const centerColumnWidth = Math.max(
