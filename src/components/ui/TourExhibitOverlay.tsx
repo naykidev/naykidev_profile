@@ -7,10 +7,9 @@ import { useAppStore } from "@/systems/store";
 
 const GALLERY_FRAME = { width: 2.32, height: 1.62, fov: 46, dist: 2.58 };
 const AWARDS_FRAME = { width: 1.64, height: 1.16, fov: 42, dist: 1.68 };
-const LEFT_WIDTH = 380;
-const RIGHT_WIDTH = 300;
-const PORTRAIT_EDGE_GAP = 28;
-const OUTER_PAD = 32;
+const STACK_BREAKPOINT = 900;
+const COLUMN_GAP = 48;
+const OUTER_PAD_X = 32;
 
 let viewportSnapshot = { w: 1280, h: 720 };
 
@@ -63,7 +62,7 @@ function supplementalPhotos(piece: GalleryPiece) {
 function ExhibitCopy({ piece }: { piece: GalleryPiece }) {
   return (
     <>
-      <p className="mb-2 font-ui text-xs tracking-[0.16em] text-paper/65 uppercase">
+      <p className="mb-3 font-ui text-xs tracking-[0.16em] text-paper/65 uppercase">
         {piece.context ?? "Project spotlight"}
       </p>
       <h2 className="mb-4 font-display text-[1.85rem] leading-tight font-semibold tracking-wide sm:text-[2rem]">
@@ -92,24 +91,15 @@ function ExhibitCopy({ piece }: { piece: GalleryPiece }) {
   );
 }
 
-function PhotoRail({
-  photos,
-  className,
-}: {
-  photos: { src: string; alt: string }[];
-  className?: string;
-}) {
+function PhotoRail({ photos }: { photos: { src: string; alt: string }[] }) {
   return (
-    <div className={className}>
+    <div className="flex h-full flex-col justify-center gap-3">
       {photos.map((photo) => (
-        <figure key={photo.src} className="overflow-hidden rounded-lg border border-white/20 bg-black/55">
-          <img
-            src={photo.src}
-            alt={photo.alt}
-            className="block h-auto w-full object-cover"
-            style={{ minHeight: "160px", maxHeight: "240px" }}
-            loading="lazy"
-          />
+        <figure
+          key={photo.src}
+          className="min-h-0 flex-1 overflow-hidden rounded-lg border border-white/20 bg-black/55"
+        >
+          <img src={photo.src} alt={photo.alt} className="block h-full w-full object-cover" loading="lazy" />
         </figure>
       ))}
     </div>
@@ -129,74 +119,95 @@ export function TourExhibitOverlay() {
   const photos = supplementalPhotos(piece);
   const hasPhotos = photos.length > 0;
 
-  // Never clamp this below the true projected portrait width — clamping is what
-  // caused side panels to slide on top of the image. 1.05 covers frame moulding.
-  const portraitWidthPx = Math.ceil(
+  const overlayTop = 72;
+  const overlayBottom = 140;
+  const availableH = Math.max(320, viewport.h - overlayTop - overlayBottom);
+  const availableW = Math.max(320, viewport.w - OUTER_PAD_X);
+
+  // Center box tracks the real projected portrait bounds.
+  const portraitW = Math.ceil(
     projectedPixels(frameSpec.width, frameSpec.dist, frameSpec.fov, viewport.h) * 1.05,
   );
-  const portraitHeightPx = Math.ceil(
+  const portraitH = Math.ceil(
     projectedPixels(frameSpec.height, frameSpec.dist, frameSpec.fov, viewport.h) * 1.05,
   );
-  const centerSpacerWidth = portraitWidthPx + PORTRAIT_EDGE_GAP * 2;
 
-  const leftWidth = LEFT_WIDTH;
-  const rightWidth = hasPhotos ? RIGHT_WIDTH : 0;
-  const availableWidth = viewport.w - OUTER_PAD;
-  const neededWidth = leftWidth + centerSpacerWidth + rightWidth;
-  const useThreeColumn = neededWidth <= availableWidth;
+  // Wireframe proportions relative to the portrait gap.
+  // description ~29%, portrait ~43.5%, images ~23.5% of the content row.
+  const descriptionW = Math.round(portraitW * (0.29 / 0.435));
+  const imagesW = hasPhotos ? Math.round(portraitW * (0.235 / 0.435)) : 0;
+  const descriptionH = Math.round(Math.min(availableH * 0.9, portraitH * 1.18));
+  const imagesH = Math.round(descriptionH * 0.37);
 
-  const panelMaxHeight = Math.min(viewport.h - 180, 640);
-  const stackPortraitHeight = Math.max(120, Math.min(portraitHeightPx * 1.05, viewport.h * 0.38));
-  const stackPortraitWidth = Math.min(viewport.w - 48, Math.max(200, portraitWidthPx * 0.85));
+  const rowWidth =
+    descriptionW + COLUMN_GAP + portraitW + (hasPhotos ? COLUMN_GAP + imagesW : 0);
+  const useThreeColumn = viewport.w >= STACK_BREAKPOINT && rowWidth <= availableW;
 
   return (
     <div className="pointer-events-none absolute inset-0 z-40 px-4 pt-[max(4.5rem,calc(env(safe-area-inset-top)+3.25rem))] pb-[8.75rem]">
       <section key={piece.id} data-look-block className="pointer-events-auto h-full w-full text-paper">
         {useThreeColumn ? (
-          <div className="flex h-full w-full items-center justify-center">
+          <div
+            className="flex h-full w-full items-center justify-center"
+            style={{ gap: COLUMN_GAP }}
+          >
+            {/* Description — tallest box, content flows from the top */}
             <article
-              className="shrink-0 overflow-y-auto rounded-lg border border-white/18 bg-black/62 p-6 text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px] sm:p-7"
+              className="shrink-0 overflow-y-auto rounded-lg border border-white/18 bg-black/62 text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
               style={{
-                width: leftWidth,
-                maxHeight: panelMaxHeight,
+                width: descriptionW,
+                height: descriptionH,
+                padding: "36px",
               }}
             >
               <ExhibitCopy piece={piece} />
             </article>
 
+            {/* Portrait gap — empty spacer matching projected frame bounds */}
             <div
-              className="pointer-events-none shrink-0 grow-0"
+              className="pointer-events-none shrink-0"
               aria-hidden
               style={{
-                width: centerSpacerWidth,
-                minHeight: Math.max(portraitHeightPx * 0.85, 220),
+                width: portraitW,
+                height: portraitH,
               }}
             />
 
+            {/* Images — shortest box, vertically centered with the portrait */}
             {hasPhotos ? (
               <aside
-                className="shrink-0 overflow-y-auto rounded-lg border border-white/18 bg-black/55 p-4 shadow-[0_16px_48px_rgba(0,0,0,0.4)] backdrop-blur-[8px]"
+                className="shrink-0 overflow-hidden rounded-lg border border-white/18 bg-black/55 p-3 shadow-[0_16px_48px_rgba(0,0,0,0.4)] backdrop-blur-[8px]"
                 style={{
-                  width: rightWidth,
-                  maxHeight: panelMaxHeight,
+                  width: imagesW,
+                  height: imagesH,
                 }}
               >
-                <PhotoRail photos={photos} className="grid grid-cols-1 gap-3" />
+                <PhotoRail photos={photos} />
               </aside>
             ) : null}
           </div>
         ) : (
-          <div className="mx-auto flex h-full max-w-[780px] flex-col gap-4 overflow-y-auto pb-4">
+          <div className="mx-auto flex h-full max-w-[780px] flex-col items-center gap-5 overflow-y-auto pb-4">
             <div
-              className="pointer-events-none mx-auto shrink-0"
-              style={{ width: stackPortraitWidth, height: stackPortraitHeight }}
+              className="pointer-events-none shrink-0"
+              aria-hidden
+              style={{
+                width: Math.min(availableW - 16, Math.max(200, portraitW * 0.85)),
+                height: Math.max(120, Math.min(portraitH * 0.95, availableH * 0.36)),
+              }}
             />
-            <article className="shrink-0 rounded-lg border border-white/18 bg-black/62 p-5 shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px] sm:p-6">
+            <article
+              className="w-full shrink-0 rounded-lg border border-white/18 bg-black/62 text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
+              style={{ padding: "32px" }}
+            >
               <ExhibitCopy piece={piece} />
             </article>
             {hasPhotos ? (
-              <aside className="shrink-0 pb-2">
-                <PhotoRail photos={photos} className="grid grid-cols-1 gap-3 sm:grid-cols-2" />
+              <aside
+                className="w-full max-w-[420px] shrink-0 rounded-lg border border-white/18 bg-black/55 p-3 shadow-[0_16px_48px_rgba(0,0,0,0.4)] backdrop-blur-[8px]"
+                style={{ height: Math.max(160, Math.min(imagesH, 280)) }}
+              >
+                <PhotoRail photos={photos} />
               </aside>
             ) : null}
           </div>
