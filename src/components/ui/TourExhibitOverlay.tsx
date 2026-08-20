@@ -10,9 +10,14 @@ const AWARDS_FRAME = { width: 1.64, height: 1.16, fov: 42, dist: 1.68 };
 const DESCRIPTION_MAX = 420;
 const IMAGES_MAX = 320;
 const DESCRIPTION_TARGET = 380;
+const DESCRIPTION_WIDE_TARGET = 460;
+const DESCRIPTION_WIDE_MAX = 500;
 const IMAGES_TARGET = 290;
 const SIDE_INSET = 24;
 const PORTRAIT_GAP = 28;
+
+const NO_SIDE_IMAGES = new Set(["dodo", "axol-assist", "surf-del-mar", "freddy-takes-flight"]);
+const WIDE_DESCRIPTION = new Set(["dodo", "axol-work"]);
 
 let viewportSnapshot = { w: 1280, h: 720 };
 
@@ -46,8 +51,6 @@ function projectedPixels(worldSize: number, dist: number, fov: number, viewportH
   if (halfFrustumHeight <= 0) return 0;
   return (worldSize / (2 * halfFrustumHeight)) * viewportHeight;
 }
-
-const NO_SIDE_IMAGES = new Set(["dodo", "axol-assist", "surf-del-mar", "freddy-takes-flight"]);
 
 function supplementalPhotos(piece: GalleryPiece) {
   if (NO_SIDE_IMAGES.has(piece.id)) return [];
@@ -108,22 +111,25 @@ export function TourExhibitOverlay() {
   const frameSpec = tiny ? AWARDS_FRAME : GALLERY_FRAME;
   const photos = supplementalPhotos(piece);
   const hasPhotos = photos.length > 0;
+  const wideDesc = WIDE_DESCRIPTION.has(piece.id);
+  const descTarget = wideDesc ? DESCRIPTION_WIDE_TARGET : DESCRIPTION_TARGET;
+  const descMax = wideDesc ? DESCRIPTION_WIDE_MAX : DESCRIPTION_MAX;
 
   const projectedPortraitW = Math.ceil(
     projectedPixels(frameSpec.width, frameSpec.dist, frameSpec.fov, viewport.h) * 1.02,
   );
 
-  // Pull layout center down if needed so side gutters stay ~340 / ~250 wide.
+  // Pull layout center down if needed so side gutters stay readable.
   const rightBudget = hasPhotos ? IMAGES_TARGET + PORTRAIT_GAP + SIDE_INSET : SIDE_INSET;
-  const leftBudget = DESCRIPTION_TARGET + PORTRAIT_GAP + SIDE_INSET;
-  const centerWidth = Math.min(projectedPortraitW, Math.max(300, viewport.w - leftBudget - rightBudget));
+  const leftBudget = descTarget + PORTRAIT_GAP + SIDE_INSET;
+  const centerWidth = Math.min(projectedPortraitW, Math.max(280, viewport.w - leftBudget - rightBudget));
 
   const portraitLeft = (viewport.w - centerWidth) / 2;
   const portraitRight = portraitLeft + centerWidth;
 
   const descriptionWidth = Math.max(
     0,
-    Math.min(DESCRIPTION_MAX, portraitLeft - PORTRAIT_GAP - SIDE_INSET),
+    Math.min(descMax, portraitLeft - PORTRAIT_GAP - SIDE_INSET),
   );
   const imagesWidth = hasPhotos
     ? Math.max(0, Math.min(IMAGES_MAX, viewport.w - portraitRight - PORTRAIT_GAP - SIDE_INSET))
@@ -132,6 +138,13 @@ export function TourExhibitOverlay() {
   // Sit beside the portrait with a gap; leftover gutter keeps them off the screen edge.
   const descriptionLeft = portraitLeft - PORTRAIT_GAP - descriptionWidth;
   const imagesLeft = hasPhotos ? portraitRight + PORTRAIT_GAP : 0;
+  const photoTileH = 148;
+  const imagesPanelHeight = hasPhotos
+    ? Math.min(
+        viewport.h * 0.78,
+        Math.max(viewport.h * 0.52, photos.length * photoTileH + (photos.length - 1) * 12 + 28),
+      )
+    : 0;
 
   return (
     <div className="pointer-events-none absolute inset-0 z-40 pt-[max(4.5rem,calc(env(safe-area-inset-top)+3.25rem))] pb-[8.75rem]">
@@ -170,24 +183,24 @@ export function TourExhibitOverlay() {
         {/* RIGHT of portrait — only real supplemental photos (no portrait duplicate) */}
         {hasPhotos ? (
           <div
-            className="images-panel absolute overflow-hidden rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] shadow-[0_16px_48px_rgba(0,0,0,0.4)] backdrop-blur-[8px]"
+            className="images-panel absolute overflow-y-auto rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] shadow-[0_16px_48px_rgba(0,0,0,0.4)] backdrop-blur-[8px]"
             style={{
               left: imagesLeft,
               top: "50%",
               transform: "translateY(-50%)",
               width: imagesWidth,
-              height: "52%",
+              height: imagesPanelHeight,
               padding: 14,
               display: "flex",
               flexDirection: "column",
-              gap: 14,
+              gap: 12,
             }}
           >
             {photos.map((photo) => (
               <figure
                 key={photo.src}
-                className="m-0 overflow-hidden rounded-lg border border-white/20 bg-black/40"
-                style={{ width: "100%", flex: "1 1 0", minHeight: 160 }}
+                className="m-0 shrink-0 overflow-hidden rounded-lg border border-white/20 bg-black/40"
+                style={{ width: "100%", height: photoTileH }}
               >
                 <img
                   src={photo.src}
