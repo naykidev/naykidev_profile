@@ -406,9 +406,17 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
   },
   advanceTourPiece: () => {
-    const { tourKind, tourShotIndex } = get();
-    const count = tourKind === "awards" ? awardPieces.length : galleryPieces.length;
+    const { tourKind, tourShotIndex, tourIndex } = get();
+    const hall = tourStops[tourIndex]?.tourInterior;
+    const count =
+      tourKind === "awards" || hall === "awards"
+        ? awardPieces.length
+        : galleryPieces.length;
     if (tourShotIndex >= count - 1) {
+      if (tourKind === "full") {
+        get().advanceTour();
+        return;
+      }
       set({
         tourComplete: true,
         activePanel: null,

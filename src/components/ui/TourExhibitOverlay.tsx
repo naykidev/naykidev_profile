@@ -16,14 +16,16 @@ const NARROW_DESCRIPTION = new Set([
 ]);
 const SIDE_INSET = 24;
 const PORTRAIT_GAP = 28;
-const MOBILE_BREAKPOINT = 768;
+/** Stack description under portrait on phones / narrow tablets (incl. "Request Desktop Site"). */
+const MOBILE_BREAKPOINT = 1024;
 
 let viewportSnapshot = { w: 1280, h: 720 };
 
 function syncViewport() {
   if (typeof window === "undefined") return viewportSnapshot;
-  const w = window.innerWidth;
-  const h = window.innerHeight;
+  const vv = window.visualViewport;
+  const w = Math.min(window.innerWidth, vv?.width ?? window.innerWidth);
+  const h = Math.min(window.innerHeight, vv?.height ?? window.innerHeight);
   if (w !== viewportSnapshot.w || h !== viewportSnapshot.h) {
     viewportSnapshot = { w, h };
   }
@@ -37,7 +39,13 @@ function subscribeViewport(onStoreChange: () => void) {
   };
   syncViewport();
   window.addEventListener("resize", onResize);
-  return () => window.removeEventListener("resize", onResize);
+  window.visualViewport?.addEventListener("resize", onResize);
+  window.visualViewport?.addEventListener("scroll", onResize);
+  return () => {
+    window.removeEventListener("resize", onResize);
+    window.visualViewport?.removeEventListener("resize", onResize);
+    window.visualViewport?.removeEventListener("scroll", onResize);
+  };
 }
 
 function useViewport() {
@@ -106,7 +114,8 @@ export function TourExhibitOverlay() {
   const tiny = awardPieces.some((item) => item.id === piece.id);
   if (tiny) return null;
 
-  const mobile = viewport.w < MOBILE_BREAKPOINT;
+  const portraitPhone = viewport.h > viewport.w && viewport.w < 1200;
+  const mobile = viewport.w < MOBILE_BREAKPOINT || portraitPhone;
   const projectedPortraitW = Math.ceil(
     projectedPixels(GALLERY_FRAME.width, GALLERY_FRAME.dist, GALLERY_FRAME.fov, viewport.h) * 1.02,
   );
@@ -126,27 +135,27 @@ export function TourExhibitOverlay() {
   const availableH = Math.max(280, viewport.h - overlayPadTop - overlayPadBottom);
 
   if (mobile) {
-    const portraitGapH = Math.min(projectedPortraitH * 0.72, availableH * 0.34, 220);
-    const descriptionMaxHeight = Math.max(180, availableH - portraitGapH - 12);
+    const portraitGapH = Math.min(projectedPortraitH * 0.55, availableH * 0.28, 200);
+    const descriptionMaxHeight = Math.max(200, availableH - portraitGapH - 8);
 
     return (
       <div className="pointer-events-none absolute inset-0 z-40 px-3 pt-[max(4.75rem,calc(env(safe-area-inset-top)+3.5rem))] pb-[max(9.5rem,calc(env(safe-area-inset-bottom)+8rem))]">
         <section
           key={piece.id}
           data-look-block
-          className="pointer-events-auto mx-auto flex h-full w-full max-w-lg flex-col items-center gap-3 overflow-hidden text-paper"
+          className="pointer-events-auto mx-auto flex h-full w-full max-w-xl flex-col items-stretch gap-2.5 overflow-hidden text-paper"
         >
           <div
-            className="portrait-spacer pointer-events-none w-full shrink-0"
+            className="portrait-spacer pointer-events-none w-full shrink-0 self-center"
             aria-hidden
             style={{
               height: portraitGapH,
-              maxWidth: Math.min(viewport.w - 24, projectedPortraitW * 0.85),
+              maxWidth: Math.min(viewport.w - 24, projectedPortraitW * 0.9),
             }}
           />
           <div
-            className="description-panel w-full min-h-0 flex-1 overflow-y-auto rounded-xl border border-white/18 bg-[rgba(20,20,20,0.88)] text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
-            style={{ maxHeight: descriptionMaxHeight, padding: 20 }}
+            className="description-panel w-full min-h-0 flex-1 overflow-y-auto rounded-xl border border-white/18 bg-[rgba(20,20,20,0.9)] text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
+            style={{ maxHeight: descriptionMaxHeight, padding: "16px 18px", width: "100%" }}
           >
             <ExhibitCopy piece={piece} compact />
           </div>
@@ -157,7 +166,13 @@ export function TourExhibitOverlay() {
 
   const descriptionWidth = Math.min(
     descriptionWidthTarget,
-    Math.max(280, viewport.w - SIDE_INSET * 2 - Math.min(projectedPortraitW, viewport.w * 0.42) - PORTRAIT_GAP),
+    Math.max(
+      320,
+      Math.min(
+        descriptionWidthTarget,
+        viewport.w - SIDE_INSET * 2 - Math.min(projectedPortraitW, viewport.w * 0.42) - PORTRAIT_GAP,
+      ),
+    ),
   );
   const descriptionLeft = SIDE_INSET;
   const midStart = descriptionLeft + descriptionWidth + PORTRAIT_GAP;

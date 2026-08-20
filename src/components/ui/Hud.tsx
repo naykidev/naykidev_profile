@@ -32,13 +32,24 @@ export function Hud() {
   if (mode === "traditional" || mode === "intro" || tourComplete) return null;
 
   const exhibit = findExhibitPiece(tourExhibit);
-  const pieceCount =
-    tourKind === "awards" ? awardPieces.length : tourKind === "projects" ? galleryPieces.length : 0;
+  const hall = mode === "tour" ? tourStops[tourIndex]?.tourInterior : undefined;
+  const awardsHall = hall === "awards" || tourKind === "awards";
+  const pieceTour = mode === "tour" && Boolean(hall);
+  const pieceCount = pieceTour ? (awardsHall ? awardPieces.length : galleryPieces.length) : 0;
+  const onLastPiece = pieceTour && tourShotIndex >= pieceCount - 1;
+  const nextPieceLabel = awardsHall
+    ? onLastPiece && tourKind === "full"
+      ? "Next gallery"
+      : "Next certificate/award"
+    : onLastPiece && tourKind === "full"
+      ? "Next gallery"
+      : "Next project";
+  const prevPieceLabel = awardsHall ? "Previous certificate/award" : "Previous project";
   const title =
     mode === "tour"
-      ? tourKind === "projects"
+      ? tourKind === "projects" || hall === "gallery"
         ? "Projects Gallery"
-        : tourKind === "awards"
+        : tourKind === "awards" || hall === "awards"
           ? "Awards & Certificates"
           : (tourStops[tourIndex]?.name ?? "Guided Tour")
       : interior === "awards"
@@ -51,7 +62,6 @@ export function Hud() {
 
   const showHelp = mode === "explore" && !activePanel && !galleryProjectId && !cameraTransition;
   const showTopTitle = mode !== "tour" || !exhibit;
-  const pieceTour = mode === "tour" && (tourKind === "projects" || tourKind === "awards");
 
   return (
     <div className="pointer-events-none absolute inset-0 z-30">
@@ -75,7 +85,7 @@ export function Hud() {
         >
           <p className="overlay-label m-0 max-w-full truncate whitespace-nowrap font-ui text-[10px] tracking-[0.14em] uppercase sm:text-[11px]">
             {pieceTour
-              ? `${tourKind === "awards" ? "Award" : "Project"} · ${tourShotIndex + 1} / ${pieceCount}`
+              ? `${awardsHall ? "Award" : "Project"} · ${tourShotIndex + 1} / ${pieceCount}`
               : `${tourStops[tourIndex]?.name ?? "Tour"} · ${tourIndex + 1} / ${tourStops.length}`}
           </p>
           <div className="grid w-full grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:justify-center sm:gap-2">
@@ -86,10 +96,7 @@ export function Hud() {
                   className="overlay-chip min-h-11 rounded-full px-2 py-2 font-ui text-[9px] tracking-[0.08em] uppercase sm:flex-1 sm:px-3 sm:text-[10px] sm:tracking-[0.14em] sm:flex-none"
                   onClick={() => advanceTourPiece()}
                 >
-                  <ControlLabel
-                    full={tourKind === "awards" ? "Next certificate/award" : "Next project"}
-                    short="Next"
-                  />
+                  <ControlLabel full={nextPieceLabel} short="Next" />
                 </button>
                 <button
                   type="button"
@@ -97,10 +104,7 @@ export function Hud() {
                   onClick={() => retreatTourPiece()}
                   disabled={tourShotIndex <= 0}
                 >
-                  <ControlLabel
-                    full={tourKind === "awards" ? "Previous certificate/award" : "Previous project"}
-                    short="Prev"
-                  />
+                  <ControlLabel full={prevPieceLabel} short="Prev" />
                 </button>
               </>
             ) : (
