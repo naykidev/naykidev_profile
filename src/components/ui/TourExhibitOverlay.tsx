@@ -49,7 +49,7 @@ function projectedPixels(worldSize: number, dist: number, fov: number, viewportH
   return (worldSize / (2 * halfFrustumHeight)) * viewportHeight;
 }
 
-const NO_SIDE_IMAGES = new Set(["dodo", "axol-assist", "surf-del-mar"]);
+const NO_SIDE_IMAGES = new Set(["dodo", "axol-assist", "surf-del-mar", "freddy-takes-flight"]);
 
 function supplementalPhotos(piece: GalleryPiece) {
   if (NO_SIDE_IMAGES.has(piece.id)) return [];
