@@ -6,7 +6,8 @@ import { findExhibitPiece } from "@/components/ui/ProjectView";
 import { useAppStore } from "@/systems/store";
 
 const GALLERY_FRAME = { width: 2.32, height: 1.62, fov: 46, dist: 3.35 };
-const DESCRIPTION_WIDTH = 480;
+const DESCRIPTION_WIDTH = 460;
+const DESCRIPTION_WIDTH_DODO = 480;
 const IMAGES_MAX = 320;
 const IMAGES_TARGET = 290;
 const SIDE_INSET = 24;
@@ -114,8 +115,10 @@ export function TourExhibitOverlay() {
     projectedPixels(frameSpec.width, frameSpec.dist, frameSpec.fov, viewport.h) * 1.02,
   );
 
+  const descriptionWidthTarget =
+    piece.id === "dodo" ? DESCRIPTION_WIDTH_DODO : DESCRIPTION_WIDTH;
   const descriptionWidth = Math.min(
-    DESCRIPTION_WIDTH,
+    descriptionWidthTarget,
     viewport.w - SIDE_INSET * 2 - (hasPhotos ? IMAGES_TARGET + PORTRAIT_GAP * 2 + 240 : 280),
   );
   const descriptionLeft = SIDE_INSET;
