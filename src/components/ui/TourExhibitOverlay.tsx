@@ -16,6 +16,7 @@ const NARROW_DESCRIPTION = new Set([
 ]);
 const SIDE_INSET = 24;
 const PORTRAIT_GAP = 28;
+const MOBILE_BREAKPOINT = 768;
 
 let viewportSnapshot = { w: 1280, h: 720 };
 
@@ -52,24 +53,32 @@ function projectedPixels(worldSize: number, dist: number, fov: number, viewportH
 
 function ExhibitCopy({
   piece,
+  compact = false,
 }: {
   piece: NonNullable<ReturnType<typeof findExhibitPiece>>;
+  compact?: boolean;
 }) {
   return (
     <>
-      <p className="mb-3 font-ui text-xs tracking-[0.16em] text-paper/65 uppercase">
+      <p
+        className={`font-ui tracking-[0.16em] text-paper/65 uppercase ${compact ? "mb-2 text-[10px]" : "mb-3 text-xs"}`}
+      >
         {piece.context ?? "Project spotlight"}
       </p>
-      <h2 className="mb-4 font-display text-[1.85rem] leading-tight font-semibold tracking-wide">
+      <h2
+        className={`font-display leading-tight font-semibold tracking-wide ${compact ? "mb-3 text-[1.45rem]" : "mb-4 text-[1.85rem]"}`}
+      >
         {piece.name}
       </h2>
-      <p className="mb-4 font-ui text-[15px] leading-[1.5] text-pretty text-paper/95">
+      <p
+        className={`text-pretty text-paper/95 ${compact ? "mb-3 font-ui text-[14px] leading-[1.45]" : "mb-4 font-ui text-[15px] leading-[1.5]"}`}
+      >
         {piece.summary}
       </p>
       {piece.technologies.length > 0 ? (
         <>
           <p className="mb-2 font-ui text-[10px] tracking-[0.22em] text-paper/60 uppercase">Tech stack</p>
-          <ul className="mb-5 flex flex-wrap gap-2">
+          <ul className={`flex flex-wrap gap-2 ${compact ? "mb-3" : "mb-5"}`}>
             {piece.technologies.map((item) => (
               <li
                 key={item}
@@ -95,11 +104,14 @@ export function TourExhibitOverlay() {
   if (mode !== "tour" || !piece) return null;
 
   const tiny = awardPieces.some((item) => item.id === piece.id);
-  // Awards & certificates: portrait only — no overlay cards.
   if (tiny) return null;
 
+  const mobile = viewport.w < MOBILE_BREAKPOINT;
   const projectedPortraitW = Math.ceil(
     projectedPixels(GALLERY_FRAME.width, GALLERY_FRAME.dist, GALLERY_FRAME.fov, viewport.h) * 1.02,
+  );
+  const projectedPortraitH = Math.ceil(
+    projectedPixels(GALLERY_FRAME.height, GALLERY_FRAME.dist, GALLERY_FRAME.fov, viewport.h) * 1.02,
   );
 
   const descriptionWidthTarget =
@@ -108,25 +120,60 @@ export function TourExhibitOverlay() {
       : NARROW_DESCRIPTION.has(piece.id)
         ? DESCRIPTION_WIDTH_NARROW
         : DESCRIPTION_WIDTH;
+
+  const overlayPadTop = mobile ? 88 : 72;
+  const overlayPadBottom = mobile ? 168 : 140;
+  const availableH = Math.max(280, viewport.h - overlayPadTop - overlayPadBottom);
+
+  if (mobile) {
+    const portraitGapH = Math.min(projectedPortraitH * 0.72, availableH * 0.34, 220);
+    const descriptionMaxHeight = Math.max(180, availableH - portraitGapH - 12);
+
+    return (
+      <div className="pointer-events-none absolute inset-0 z-40 px-3 pt-[max(4.75rem,calc(env(safe-area-inset-top)+3.5rem))] pb-[max(9.5rem,calc(env(safe-area-inset-bottom)+8rem))]">
+        <section
+          key={piece.id}
+          data-look-block
+          className="pointer-events-auto mx-auto flex h-full w-full max-w-lg flex-col items-center gap-3 overflow-hidden text-paper"
+        >
+          <div
+            className="portrait-spacer pointer-events-none w-full shrink-0"
+            aria-hidden
+            style={{
+              height: portraitGapH,
+              maxWidth: Math.min(viewport.w - 24, projectedPortraitW * 0.85),
+            }}
+          />
+          <div
+            className="description-panel w-full min-h-0 flex-1 overflow-y-auto rounded-xl border border-white/18 bg-[rgba(20,20,20,0.88)] text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
+            style={{ maxHeight: descriptionMaxHeight, padding: 20 }}
+          >
+            <ExhibitCopy piece={piece} compact />
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   const descriptionWidth = Math.min(
     descriptionWidthTarget,
-    viewport.w - SIDE_INSET * 2 - 280,
+    Math.max(280, viewport.w - SIDE_INSET * 2 - Math.min(projectedPortraitW, viewport.w * 0.42) - PORTRAIT_GAP),
   );
   const descriptionLeft = SIDE_INSET;
-
   const midStart = descriptionLeft + descriptionWidth + PORTRAIT_GAP;
   const midEnd = viewport.w - SIDE_INSET;
   const midSpan = Math.max(200, midEnd - midStart);
   const centerWidth = Math.min(projectedPortraitW, midSpan);
   const portraitLeft = midStart + (midSpan - centerWidth) / 2;
-
-  const overlayPadTop = 72;
-  const overlayPadBottom = 140;
-  const descriptionMaxHeight = Math.max(320, viewport.h - overlayPadTop - overlayPadBottom);
+  const descriptionMaxHeight = Math.max(320, availableH);
 
   return (
     <div className="pointer-events-none absolute inset-0 z-40 pt-[max(4.5rem,calc(env(safe-area-inset-top)+3.25rem))] pb-[8.75rem]">
-      <section key={piece.id} data-look-block className="pointer-events-auto relative h-full w-full overflow-visible text-paper">
+      <section
+        key={piece.id}
+        data-look-block
+        className="pointer-events-auto relative h-full w-full overflow-visible text-paper"
+      >
         <div
           className="description-panel absolute rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
           style={{

@@ -4,6 +4,15 @@ import { tourStops } from "@/data/locations";
 import { findExhibitPiece } from "@/components/ui/ProjectView";
 import { useAppStore } from "@/systems/store";
 
+function ControlLabel({ full, short }: { full: string; short: string }) {
+  return (
+    <>
+      <span className="hidden sm:inline">{full}</span>
+      <span className="sm:hidden">{short}</span>
+    </>
+  );
+}
+
 export function Hud() {
   const mode = useAppStore((s) => s.mode);
   const nearby = useAppStore((s) => s.nearby);
@@ -47,7 +56,7 @@ export function Hud() {
   return (
     <div className="pointer-events-none absolute inset-0 z-30">
       {showTopTitle ? (
-        <div className="overlay-label overlay-scene-title absolute top-[max(6rem,calc(env(safe-area-inset-top)+5.25rem))] left-1/2 m-0 max-w-[calc(100%-1.25rem)] -translate-x-1/2 truncate whitespace-nowrap font-ui text-[10px] tracking-[0.14em] uppercase sm:top-[max(1.15rem,env(safe-area-inset-top))] sm:left-[max(1rem,env(safe-area-inset-left))] sm:max-w-[min(55%,20rem)] sm:translate-x-0 sm:text-[11px]">
+        <div className="overlay-label overlay-scene-title absolute top-[max(6.5rem,calc(env(safe-area-inset-top)+5.75rem))] left-1/2 m-0 max-w-[calc(100%-1.25rem)] -translate-x-1/2 truncate whitespace-nowrap font-ui text-[10px] tracking-[0.14em] uppercase sm:top-[max(1.15rem,env(safe-area-inset-top))] sm:left-[max(1rem,env(safe-area-inset-left))] sm:max-w-[min(55%,20rem)] sm:translate-x-0 sm:text-[11px]">
           {title}
         </div>
       ) : null}
@@ -62,47 +71,53 @@ export function Hud() {
       {mode === "tour" && !cameraTransition && !tourComplete ? (
         <div
           data-look-block
-          className="pointer-events-auto fixed bottom-[max(20px,env(safe-area-inset-bottom))] left-1/2 z-[100] flex w-[min(100%-1.5rem,28rem)] -translate-x-1/2 flex-col items-center gap-2"
+          className="pointer-events-auto fixed bottom-[max(12px,env(safe-area-inset-bottom))] left-1/2 z-[100] flex w-[min(100%-1rem,28rem)] -translate-x-1/2 flex-col items-center gap-1.5 sm:bottom-[max(20px,env(safe-area-inset-bottom))] sm:w-[min(100%-1.5rem,28rem)] sm:gap-2"
         >
           <p className="overlay-label m-0 max-w-full truncate whitespace-nowrap font-ui text-[10px] tracking-[0.14em] uppercase sm:text-[11px]">
             {pieceTour
               ? `${tourKind === "awards" ? "Award" : "Project"} · ${tourShotIndex + 1} / ${pieceCount}`
               : `${tourStops[tourIndex]?.name ?? "Tour"} · ${tourIndex + 1} / ${tourStops.length}`}
           </p>
-          <div className="flex w-full flex-wrap justify-center gap-2">
+          <div className="grid w-full grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:justify-center sm:gap-2">
             {pieceTour ? (
               <>
                 <button
                   type="button"
-                  className="overlay-chip min-h-11 flex-1 rounded-full px-3 py-2 font-ui text-[10px] tracking-[0.14em] uppercase sm:flex-none"
+                  className="overlay-chip min-h-11 rounded-full px-2 py-2 font-ui text-[9px] tracking-[0.08em] uppercase sm:flex-1 sm:px-3 sm:text-[10px] sm:tracking-[0.14em] sm:flex-none"
                   onClick={() => advanceTourPiece()}
                 >
-                  {tourKind === "awards" ? "Next certificate/award" : "Next project"}
+                  <ControlLabel
+                    full={tourKind === "awards" ? "Next certificate/award" : "Next project"}
+                    short="Next"
+                  />
                 </button>
                 <button
                   type="button"
-                  className="overlay-chip min-h-11 flex-1 rounded-full px-3 py-2 font-ui text-[10px] tracking-[0.14em] uppercase sm:flex-none"
+                  className="overlay-chip min-h-11 rounded-full px-2 py-2 font-ui text-[9px] tracking-[0.08em] uppercase disabled:opacity-40 sm:flex-1 sm:px-3 sm:text-[10px] sm:tracking-[0.14em] sm:flex-none"
                   onClick={() => retreatTourPiece()}
                   disabled={tourShotIndex <= 0}
                 >
-                  {tourKind === "awards" ? "Previous certificate/award" : "Previous project"}
+                  <ControlLabel
+                    full={tourKind === "awards" ? "Previous certificate/award" : "Previous project"}
+                    short="Prev"
+                  />
                 </button>
               </>
             ) : (
               <button
                 type="button"
-                className="overlay-chip min-h-11 flex-1 rounded-full px-4 py-2 font-ui text-[10px] tracking-[0.18em] uppercase sm:flex-none"
+                className="overlay-chip col-span-2 min-h-11 rounded-full px-2 py-2 font-ui text-[9px] tracking-[0.1em] uppercase sm:col-span-1 sm:flex-1 sm:px-4 sm:text-[10px] sm:tracking-[0.18em] sm:flex-none"
                 onClick={() => advanceTour()}
               >
-                Next gallery
+                <ControlLabel full="Next gallery" short="Next" />
               </button>
             )}
             <button
               type="button"
-              className="overlay-chip min-h-11 flex-1 rounded-full px-4 py-2 font-ui text-[10px] tracking-[0.18em] uppercase sm:flex-none"
+              className="overlay-chip min-h-11 rounded-full px-2 py-2 font-ui text-[9px] tracking-[0.1em] uppercase sm:flex-1 sm:px-4 sm:text-[10px] sm:tracking-[0.18em] sm:flex-none"
               onClick={() => setMode("intro")}
             >
-              Exit tour
+              <ControlLabel full="Exit tour" short="Exit" />
             </button>
           </div>
         </div>

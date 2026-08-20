@@ -54,7 +54,7 @@ export function AccessibilityMenu() {
       {mode !== "traditional" ? (
         <>
           <button type="button" className={chip} onClick={() => startProjectsTour()}>
-            Projects
+            <NavLabel full="Projects" short="Projects" />
           </button>
           <button type="button" className={chip} onClick={() => startAwardsTour()}>
             <NavLabel full="Awards & Certificates" short="Awards" />
