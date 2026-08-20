@@ -7,14 +7,10 @@ import { useAppStore } from "@/systems/store";
 
 const GALLERY_FRAME = { width: 2.32, height: 1.62, fov: 46, dist: 2.58 };
 const AWARDS_FRAME = { width: 1.64, height: 1.16, fov: 42, dist: 1.68 };
-const DESCRIPTION_MAX = 420;
-const IMAGES_MAX = 300;
-const DESCRIPTION_MIN = 320;
-const IMAGES_MIN = 240;
-const SIDE_INSET = 16;
-const PORTRAIT_GAP = 36;
-/** Keep the open center from eating the side gutters — panels stay readable. */
-const CENTER_MAX_VIEWPORT_FRAC = 0.4;
+const DESCRIPTION_MAX = 400;
+const IMAGES_MAX = 280;
+const SIDE_INSET = 28;
+const PORTRAIT_GAP = 32;
 
 let viewportSnapshot = { w: 1280, h: 720 };
 
@@ -115,32 +111,24 @@ export function TourExhibitOverlay() {
     projectedPixels(frameSpec.width, frameSpec.dist, frameSpec.fov, viewport.h) * 1.08,
   );
 
-  // Cap the reserved center so the description stays readable; only reserve
-  // right-side room when there are real supplemental photos.
-  const rightReserve = hasPhotos ? IMAGES_MIN + PORTRAIT_GAP + SIDE_INSET : SIDE_INSET;
-  const maxCenter = Math.min(
-    projectedPortraitW,
-    Math.floor(viewport.w * CENTER_MAX_VIEWPORT_FRAC),
-    viewport.w - DESCRIPTION_MIN - PORTRAIT_GAP - SIDE_INSET - rightReserve,
-  );
-  const centerWidth = Math.max(280, maxCenter);
-
+  // Use the real projected portrait width so side panels clear it — never shrink
+  // the center below that (that was causing the overlap).
+  const centerWidth = projectedPortraitW;
   const portraitLeft = (viewport.w - centerWidth) / 2;
   const portraitRight = portraitLeft + centerWidth;
 
-  const descriptionWidth = Math.min(
-    DESCRIPTION_MAX,
-    Math.max(DESCRIPTION_MIN, Math.floor(portraitLeft - PORTRAIT_GAP - SIDE_INSET)),
+  // Size panels to the gutters, then park them against the portrait with a gap
+  // so they clear the art and stay inset from the screen edges.
+  const descriptionWidth = Math.max(
+    0,
+    Math.min(DESCRIPTION_MAX, portraitLeft - PORTRAIT_GAP - SIDE_INSET),
   );
   const imagesWidth = hasPhotos
-    ? Math.min(
-        IMAGES_MAX,
-        Math.max(IMAGES_MIN, Math.floor(viewport.w - portraitRight - PORTRAIT_GAP - SIDE_INSET)),
-      )
+    ? Math.max(0, Math.min(IMAGES_MAX, viewport.w - portraitRight - PORTRAIT_GAP - SIDE_INSET))
     : 0;
 
-  const descriptionLeft = Math.max(SIDE_INSET, portraitLeft - PORTRAIT_GAP - descriptionWidth);
-  const imagesLeft = portraitRight + PORTRAIT_GAP;
+  const descriptionLeft = portraitLeft - PORTRAIT_GAP - descriptionWidth;
+  const imagesLeft = hasPhotos ? portraitRight + PORTRAIT_GAP : 0;
 
   return (
     <div className="pointer-events-none absolute inset-0 z-40 pt-[max(4.5rem,calc(env(safe-area-inset-top)+3.25rem))] pb-[8.75rem]">
