@@ -7,10 +7,10 @@ import { useAppStore } from "@/systems/store";
 
 const GALLERY_FRAME = { width: 2.32, height: 1.62, fov: 46, dist: 3.35 };
 const AWARDS_FRAME = { width: 1.64, height: 1.16, fov: 42, dist: 1.68 };
-const DESCRIPTION_MAX = 380;
-const IMAGES_MAX = 280;
-const DESCRIPTION_TARGET = 340;
-const IMAGES_TARGET = 250;
+const DESCRIPTION_MAX = 420;
+const IMAGES_MAX = 320;
+const DESCRIPTION_TARGET = 380;
+const IMAGES_TARGET = 290;
 const SIDE_INSET = 24;
 const PORTRAIT_GAP = 28;
 
@@ -176,18 +176,18 @@ export function TourExhibitOverlay() {
               top: "50%",
               transform: "translateY(-50%)",
               width: imagesWidth,
-              height: "40%",
-              padding: 12,
+              height: "52%",
+              padding: 14,
               display: "flex",
               flexDirection: "column",
-              gap: 16,
+              gap: 14,
             }}
           >
             {photos.map((photo) => (
               <figure
                 key={photo.src}
                 className="m-0 overflow-hidden rounded-lg border border-white/20 bg-black/40"
-                style={{ width: "100%", flex: "1 1 0", minHeight: 140 }}
+                style={{ width: "100%", flex: "1 1 0", minHeight: 160 }}
               >
                 <img
                   src={photo.src}
