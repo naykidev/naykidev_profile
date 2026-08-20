@@ -231,8 +231,6 @@ export const galleryPieces: GalleryPiece[] = [
     summary: arcade("surf-del-mar").summary,
     context: arcade("surf-del-mar").context,
     technologies: [...arcade("surf-del-mar").technologies],
-    photo: arcade("surf-del-mar").photo,
-    photoAlt: arcade("surf-del-mar").photoAlt,
     links: arcade("surf-del-mar").links,
     portrait: asset("/textures/projects/surf-del-mar.png"),
   },
