@@ -6,7 +6,7 @@ import { findExhibitPiece } from "@/components/ui/ProjectView";
 import { useAppStore } from "@/systems/store";
 
 const GALLERY_FRAME = { width: 2.32, height: 1.62, fov: 46, dist: 3.35 };
-const DESCRIPTION_WIDTH = 520;
+const DESCRIPTION_WIDTH = 480;
 const IMAGES_MAX = 320;
 const IMAGES_TARGET = 290;
 const SIDE_INSET = 24;
