@@ -8,8 +8,10 @@ import { useAppStore } from "@/systems/store";
 const GALLERY_FRAME = { width: 2.32, height: 1.62, fov: 46, dist: 2.58 };
 const AWARDS_FRAME = { width: 1.64, height: 1.16, fov: 42, dist: 1.68 };
 const STACK_BREAKPOINT = 900;
+const DESCRIPTION_WIDTH = 340;
+const IMAGES_WIDTH = 260;
 const COLUMN_GAP = 48;
-const OUTER_PAD_X = 32;
+const OUTER_PAD = 32;
 
 let viewportSnapshot = { w: 1280, h: 720 };
 
@@ -37,7 +39,6 @@ function useViewport() {
   return useSyncExternalStore(subscribeViewport, syncViewport, () => viewportSnapshot);
 }
 
-/** Project a world-space size through the same vertical FOV used by frameZoomShot. */
 function projectedPixels(worldSize: number, dist: number, fov: number, viewportHeight: number) {
   const fovRad = (fov * Math.PI) / 180;
   const halfFrustumHeight = dist * Math.tan(fovRad / 2);
@@ -65,10 +66,10 @@ function ExhibitCopy({ piece }: { piece: GalleryPiece }) {
       <p className="mb-3 font-ui text-xs tracking-[0.16em] text-paper/65 uppercase">
         {piece.context ?? "Project spotlight"}
       </p>
-      <h2 className="mb-4 font-display text-[1.85rem] leading-tight font-semibold tracking-wide sm:text-[2rem]">
+      <h2 className="mb-4 font-display text-[1.85rem] leading-tight font-semibold tracking-wide">
         {piece.name}
       </h2>
-      <p className="mb-5 font-ui text-[15px] leading-[1.55] text-pretty text-paper/95 sm:text-base">
+      <p className="mb-5 font-ui text-[15px] leading-[1.55] text-pretty text-paper/95">
         {piece.summary}
       </p>
       {piece.technologies.length > 0 ? (
@@ -91,21 +92,6 @@ function ExhibitCopy({ piece }: { piece: GalleryPiece }) {
   );
 }
 
-function PhotoRail({ photos }: { photos: { src: string; alt: string }[] }) {
-  return (
-    <div className="flex h-full flex-col justify-center gap-3">
-      {photos.map((photo) => (
-        <figure
-          key={photo.src}
-          className="min-h-0 flex-1 overflow-hidden rounded-lg border border-white/20 bg-black/55"
-        >
-          <img src={photo.src} alt={photo.alt} className="block h-full w-full object-cover" loading="lazy" />
-        </figure>
-      ))}
-    </div>
-  );
-}
-
 export function TourExhibitOverlay() {
   const mode = useAppStore((s) => s.mode);
   const tourExhibit = useAppStore((s) => s.tourExhibit);
@@ -119,96 +105,131 @@ export function TourExhibitOverlay() {
   const photos = supplementalPhotos(piece);
   const hasPhotos = photos.length > 0;
 
-  const overlayTop = 72;
-  const overlayBottom = 140;
-  const availableH = Math.max(320, viewport.h - overlayTop - overlayBottom);
-  const availableW = Math.max(320, viewport.w - OUTER_PAD_X);
-
-  // Center box tracks the real projected portrait bounds.
-  const portraitW = Math.ceil(
+  const portraitWidth = Math.ceil(
     projectedPixels(frameSpec.width, frameSpec.dist, frameSpec.fov, viewport.h) * 1.05,
   );
-  const portraitH = Math.ceil(
+  const portraitHeight = Math.ceil(
     projectedPixels(frameSpec.height, frameSpec.dist, frameSpec.fov, viewport.h) * 1.05,
   );
 
-  // Wireframe proportions relative to the portrait gap.
-  // description ~29%, portrait ~43.5%, images ~23.5% of the content row.
-  const descriptionW = Math.round(portraitW * (0.29 / 0.435));
-  const imagesW = hasPhotos ? Math.round(portraitW * (0.235 / 0.435)) : 0;
-  const descriptionH = Math.round(Math.min(availableH * 0.9, portraitH * 1.18));
-  const imagesH = Math.round(descriptionH * 0.37);
-
+  const imagesWidth = hasPhotos ? IMAGES_WIDTH : 0;
   const rowWidth =
-    descriptionW + COLUMN_GAP + portraitW + (hasPhotos ? COLUMN_GAP + imagesW : 0);
-  const useThreeColumn = viewport.w >= STACK_BREAKPOINT && rowWidth <= availableW;
+    DESCRIPTION_WIDTH + COLUMN_GAP + portraitWidth + (hasPhotos ? COLUMN_GAP + imagesWidth : 0);
+  const useThreeColumn = viewport.w >= STACK_BREAKPOINT && rowWidth <= viewport.w - OUTER_PAD;
 
   return (
     <div className="pointer-events-none absolute inset-0 z-40 px-4 pt-[max(4.5rem,calc(env(safe-area-inset-top)+3.25rem))] pb-[8.75rem]">
       <section key={piece.id} data-look-block className="pointer-events-auto h-full w-full text-paper">
         {useThreeColumn ? (
           <div
-            className="flex h-full w-full items-center justify-center"
+            className="gallery-overlay-row flex h-full w-full items-center justify-center"
             style={{ gap: COLUMN_GAP }}
           >
-            {/* Description — tallest box, content flows from the top */}
-            <article
-              className="shrink-0 overflow-y-auto rounded-lg border border-white/18 bg-black/62 text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
+            <div
+              className="description-panel shrink-0 grow-0 overflow-y-auto rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
               style={{
-                width: descriptionW,
-                height: descriptionH,
-                padding: "36px",
+                flex: `0 0 ${DESCRIPTION_WIDTH}px`,
+                width: DESCRIPTION_WIDTH,
+                maxWidth: DESCRIPTION_WIDTH,
+                height: "80%",
+                padding: 32,
               }}
             >
               <ExhibitCopy piece={piece} />
-            </article>
+            </div>
 
-            {/* Portrait gap — empty spacer matching projected frame bounds */}
             <div
-              className="pointer-events-none shrink-0"
+              className="portrait-spacer pointer-events-none shrink-0 grow-0"
               aria-hidden
               style={{
-                width: portraitW,
-                height: portraitH,
+                flex: `0 0 ${portraitWidth}px`,
+                width: portraitWidth,
+                height: Math.max(portraitHeight, Math.round(viewport.h * 0.45)),
+                background: "transparent",
+                border: "none",
+                boxShadow: "none",
               }}
             />
 
-            {/* Images — shortest box, vertically centered with the portrait */}
             {hasPhotos ? (
-              <aside
-                className="shrink-0 overflow-hidden rounded-lg border border-white/18 bg-black/55 p-3 shadow-[0_16px_48px_rgba(0,0,0,0.4)] backdrop-blur-[8px]"
+              <div
+                className="images-panel shrink-0 grow-0 overflow-hidden rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] p-3 shadow-[0_16px_48px_rgba(0,0,0,0.4)] backdrop-blur-[8px]"
                 style={{
-                  width: imagesW,
-                  height: imagesH,
+                  flex: `0 0 ${IMAGES_WIDTH}px`,
+                  width: IMAGES_WIDTH,
+                  maxWidth: IMAGES_WIDTH,
+                  height: "40%",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 16,
                 }}
               >
-                <PhotoRail photos={photos} />
-              </aside>
+                {photos.map((photo) => (
+                  <figure
+                    key={photo.src}
+                    className="m-0 overflow-hidden rounded-lg border border-white/20 bg-black/40"
+                    style={{ width: "100%", flex: "1 1 auto", minHeight: 120 }}
+                  >
+                    <img
+                      src={photo.src}
+                      alt={photo.alt}
+                      className="block"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        position: "static",
+                      }}
+                      loading="lazy"
+                    />
+                  </figure>
+                ))}
+              </div>
             ) : null}
           </div>
         ) : (
-          <div className="mx-auto flex h-full max-w-[780px] flex-col items-center gap-5 overflow-y-auto pb-4">
+          <div className="mx-auto flex h-full max-w-[720px] flex-col items-center gap-5 overflow-y-auto pb-4">
             <div
-              className="pointer-events-none shrink-0"
+              className="portrait-spacer pointer-events-none shrink-0"
               aria-hidden
               style={{
-                width: Math.min(availableW - 16, Math.max(200, portraitW * 0.85)),
-                height: Math.max(120, Math.min(portraitH * 0.95, availableH * 0.36)),
+                width: Math.min(viewport.w - 48, Math.max(220, portraitWidth * 0.8)),
+                height: Math.max(140, Math.min(portraitHeight * 0.9, viewport.h * 0.34)),
+                background: "transparent",
               }}
             />
-            <article
-              className="w-full shrink-0 rounded-lg border border-white/18 bg-black/62 text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
-              style={{ padding: "32px" }}
+            <div
+              className="description-panel w-full shrink-0 overflow-y-auto rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
+              style={{ padding: 32, maxWidth: 520 }}
             >
               <ExhibitCopy piece={piece} />
-            </article>
+            </div>
             {hasPhotos ? (
-              <aside
-                className="w-full max-w-[420px] shrink-0 rounded-lg border border-white/18 bg-black/55 p-3 shadow-[0_16px_48px_rgba(0,0,0,0.4)] backdrop-blur-[8px]"
-                style={{ height: Math.max(160, Math.min(imagesH, 280)) }}
+              <div
+                className="images-panel w-full shrink-0 rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] p-3 shadow-[0_16px_48px_rgba(0,0,0,0.4)] backdrop-blur-[8px]"
+                style={{
+                  maxWidth: IMAGES_WIDTH,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 16,
+                }}
               >
-                <PhotoRail photos={photos} />
-              </aside>
+                {photos.map((photo) => (
+                  <figure
+                    key={photo.src}
+                    className="m-0 overflow-hidden rounded-lg border border-white/20 bg-black/40"
+                    style={{ width: "100%", height: 180 }}
+                  >
+                    <img
+                      src={photo.src}
+                      alt={photo.alt}
+                      className="block h-full w-full"
+                      style={{ objectFit: "cover", position: "static" }}
+                      loading="lazy"
+                    />
+                  </figure>
+                ))}
+              </div>
             ) : null}
           </div>
         )}
