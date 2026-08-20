@@ -63,13 +63,6 @@ function supplementalPhotos(piece: GalleryPiece) {
   );
 }
 
-function exhibitSidePhotos(piece: GalleryPiece) {
-  const extras = supplementalPhotos(piece);
-  if (extras.length > 0) return extras;
-  // Always keep a right-side image card — fall back to the portrait asset.
-  return [{ src: piece.portrait, alt: `${piece.name} portrait` }];
-}
-
 function ExhibitCopy({ piece }: { piece: GalleryPiece }) {
   return (
     <>
@@ -112,17 +105,20 @@ export function TourExhibitOverlay() {
 
   const tiny = awardPieces.some((item) => item.id === piece.id);
   const frameSpec = tiny ? AWARDS_FRAME : GALLERY_FRAME;
-  const photos = exhibitSidePhotos(piece);
+  const photos = supplementalPhotos(piece);
+  const hasPhotos = photos.length > 0;
 
   const projectedPortraitW = Math.ceil(
     projectedPixels(frameSpec.width, frameSpec.dist, frameSpec.fov, viewport.h) * 1.08,
   );
 
-  // Cap the reserved center so left/right panels stay wide enough to read.
+  // Cap the reserved center so the description stays readable; only reserve
+  // right-side room when there are real supplemental photos.
+  const rightReserve = hasPhotos ? IMAGES_MIN + PORTRAIT_GAP + SIDE_INSET : SIDE_INSET;
   const maxCenter = Math.min(
     projectedPortraitW,
     Math.floor(viewport.w * CENTER_MAX_VIEWPORT_FRAC),
-    viewport.w - DESCRIPTION_MIN - IMAGES_MIN - PORTRAIT_GAP * 2 - SIDE_INSET * 2,
+    viewport.w - DESCRIPTION_MIN - PORTRAIT_GAP - SIDE_INSET - rightReserve,
   );
   const centerWidth = Math.max(280, maxCenter);
 
@@ -133,10 +129,12 @@ export function TourExhibitOverlay() {
     DESCRIPTION_MAX,
     Math.max(DESCRIPTION_MIN, Math.floor(portraitLeft - PORTRAIT_GAP - SIDE_INSET)),
   );
-  const imagesWidth = Math.min(
-    IMAGES_MAX,
-    Math.max(IMAGES_MIN, Math.floor(viewport.w - portraitRight - PORTRAIT_GAP - SIDE_INSET)),
-  );
+  const imagesWidth = hasPhotos
+    ? Math.min(
+        IMAGES_MAX,
+        Math.max(IMAGES_MIN, Math.floor(viewport.w - portraitRight - PORTRAIT_GAP - SIDE_INSET)),
+      )
+    : 0;
 
   const descriptionLeft = Math.max(SIDE_INSET, portraitLeft - PORTRAIT_GAP - descriptionWidth);
   const imagesLeft = portraitRight + PORTRAIT_GAP;
@@ -175,37 +173,39 @@ export function TourExhibitOverlay() {
           }}
         />
 
-        {/* RIGHT of portrait — supplemental photos, or portrait fallback */}
-        <div
-          className="images-panel absolute overflow-hidden rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] shadow-[0_16px_48px_rgba(0,0,0,0.4)] backdrop-blur-[8px]"
-          style={{
-            left: imagesLeft,
-            top: "50%",
-            transform: "translateY(-50%)",
-            width: imagesWidth,
-            height: "40%",
-            padding: 12,
-            display: "flex",
-            flexDirection: "column",
-            gap: 16,
-          }}
-        >
-          {photos.map((photo) => (
-            <figure
-              key={photo.src}
-              className="m-0 overflow-hidden rounded-lg border border-white/20 bg-black/40"
-              style={{ width: "100%", flex: "1 1 0", minHeight: 140 }}
-            >
-              <img
-                src={photo.src}
-                alt={photo.alt}
-                className="block h-full w-full"
-                style={{ objectFit: "cover", position: "static" }}
-                loading="lazy"
-              />
-            </figure>
-          ))}
-        </div>
+        {/* RIGHT of portrait — only real supplemental photos (no portrait duplicate) */}
+        {hasPhotos ? (
+          <div
+            className="images-panel absolute overflow-hidden rounded-xl border border-white/18 bg-[rgba(20,20,20,0.85)] shadow-[0_16px_48px_rgba(0,0,0,0.4)] backdrop-blur-[8px]"
+            style={{
+              left: imagesLeft,
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: imagesWidth,
+              height: "40%",
+              padding: 12,
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+            }}
+          >
+            {photos.map((photo) => (
+              <figure
+                key={photo.src}
+                className="m-0 overflow-hidden rounded-lg border border-white/20 bg-black/40"
+                style={{ width: "100%", flex: "1 1 0", minHeight: 140 }}
+              >
+                <img
+                  src={photo.src}
+                  alt={photo.alt}
+                  className="block h-full w-full"
+                  style={{ objectFit: "cover", position: "static" }}
+                  loading="lazy"
+                />
+              </figure>
+            ))}
+          </div>
+        ) : null}
       </section>
     </div>
   );
