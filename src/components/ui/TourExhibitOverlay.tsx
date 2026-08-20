@@ -6,18 +6,13 @@ import { findExhibitPiece } from "@/components/ui/ProjectView";
 import { useAppStore } from "@/systems/store";
 
 const GALLERY_FRAME = { width: 2.32, height: 1.62, fov: 46, dist: 3.35 };
-const AWARDS_FRAME = { width: 1.64, height: 1.16, fov: 42, dist: 1.68 };
-const DESCRIPTION_MAX = 420;
+const DESCRIPTION_WIDTH = 600;
 const IMAGES_MAX = 320;
-const DESCRIPTION_TARGET = 380;
-const DESCRIPTION_WIDE_TARGET = 460;
-const DESCRIPTION_WIDE_MAX = 500;
 const IMAGES_TARGET = 290;
 const SIDE_INSET = 24;
 const PORTRAIT_GAP = 28;
 
 const NO_SIDE_IMAGES = new Set(["dodo", "axol-assist", "surf-del-mar", "freddy-takes-flight"]);
-const WIDE_DESCRIPTION = new Set(["dodo", "axol-work"]);
 
 let viewportSnapshot = { w: 1280, h: 720 };
 
@@ -108,36 +103,35 @@ export function TourExhibitOverlay() {
   if (mode !== "tour" || !piece) return null;
 
   const tiny = awardPieces.some((item) => item.id === piece.id);
-  const frameSpec = tiny ? AWARDS_FRAME : GALLERY_FRAME;
+  // Awards & certificates: portrait only — no overlay cards.
+  if (tiny) return null;
+
+  const frameSpec = GALLERY_FRAME;
   const photos = supplementalPhotos(piece);
   const hasPhotos = photos.length > 0;
-  const wideDesc = WIDE_DESCRIPTION.has(piece.id);
-  const descTarget = wideDesc ? DESCRIPTION_WIDE_TARGET : DESCRIPTION_TARGET;
-  const descMax = wideDesc ? DESCRIPTION_WIDE_MAX : DESCRIPTION_MAX;
 
   const projectedPortraitW = Math.ceil(
     projectedPixels(frameSpec.width, frameSpec.dist, frameSpec.fov, viewport.h) * 1.02,
   );
 
-  // Pull layout center down if needed so side gutters stay readable.
-  const rightBudget = hasPhotos ? IMAGES_TARGET + PORTRAIT_GAP + SIDE_INSET : SIDE_INSET;
-  const leftBudget = descTarget + PORTRAIT_GAP + SIDE_INSET;
-  const centerWidth = Math.min(projectedPortraitW, Math.max(280, viewport.w - leftBudget - rightBudget));
-
-  const portraitLeft = (viewport.w - centerWidth) / 2;
-  const portraitRight = portraitLeft + centerWidth;
-
-  const descriptionWidth = Math.max(
-    0,
-    Math.min(descMax, portraitLeft - PORTRAIT_GAP - SIDE_INSET),
+  const descriptionWidth = Math.min(
+    DESCRIPTION_WIDTH,
+    viewport.w - SIDE_INSET * 2 - (hasPhotos ? IMAGES_TARGET + PORTRAIT_GAP * 2 + 240 : 280),
   );
-  const imagesWidth = hasPhotos
-    ? Math.max(0, Math.min(IMAGES_MAX, viewport.w - portraitRight - PORTRAIT_GAP - SIDE_INSET))
-    : 0;
+  const descriptionLeft = SIDE_INSET;
 
-  // Sit beside the portrait with a gap; leftover gutter keeps them off the screen edge.
-  const descriptionLeft = portraitLeft - PORTRAIT_GAP - descriptionWidth;
-  const imagesLeft = hasPhotos ? portraitRight + PORTRAIT_GAP : 0;
+  const imagesWidth = hasPhotos
+    ? Math.min(IMAGES_MAX, Math.max(IMAGES_TARGET, Math.floor((viewport.w - descriptionWidth - SIDE_INSET * 2 - PORTRAIT_GAP * 2) * 0.28)))
+    : 0;
+  const imagesLeft = hasPhotos ? viewport.w - SIDE_INSET - imagesWidth : 0;
+
+  // Portrait sits in the remaining middle band, centered between the side cards.
+  const midStart = descriptionLeft + descriptionWidth + PORTRAIT_GAP;
+  const midEnd = hasPhotos ? imagesLeft - PORTRAIT_GAP : viewport.w - SIDE_INSET;
+  const midSpan = Math.max(200, midEnd - midStart);
+  const centerWidth = Math.min(projectedPortraitW, midSpan);
+  const portraitLeft = midStart + (midSpan - centerWidth) / 2;
+
   const photoTileH = 148;
   const imagesPanelHeight = hasPhotos
     ? Math.min(
