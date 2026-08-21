@@ -267,11 +267,11 @@ export function ClassicSite() {
                   </a>
                 </div>
               </Reveal>
-              <div className="mt-8 hidden overflow-hidden rounded-xl ring-1 ring-white/10 sm:block">
+              <div className="mt-8 hidden rounded-xl ring-1 ring-white/10 sm:block">
                 <object
-                  data={profile.resume}
+                  data={`${profile.resume}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
                   type="application/pdf"
-                  className="h-[min(70vh,52rem)] w-full bg-white"
+                  className="aspect-[8.5/11] w-full bg-white"
                   aria-label={`${profile.name} resume`}
                 >
                   <p className="bg-ink p-6 font-ui text-sm text-paper/70">
