@@ -19,7 +19,7 @@ import { createIntroPlayback, markIntroSeen, prefersReducedMotion } from "@/syst
 import { haptic } from "@/lib/haptics";
 import { getTerrainHeight } from "@/systems/terrain";
 
-export type AppMode = "intro" | "explore" | "tour" | "traditional";
+export type AppMode = "intro" | "explore" | "tour";
 export type InteriorId = "gallery" | "awards" | null;
 export type TourKind = "full" | "projects" | "awards";
 
@@ -150,7 +150,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     markIntroSeen();
     set({ introForcedEnd: true });
   },
-  setWebgl: (webgl) => set({ webgl, mode: webgl ? get().mode : "traditional" }),
+  setWebgl: (webgl) => set({ webgl }),
   toggleHighContrast: () => set({ highContrast: !get().highContrast }),
   setReducedMotion: (reducedMotion) =>
     set({

@@ -106,10 +106,4 @@ export function SanDiegoPreview() {
   );
 }
 
-export function isSanDiegoPreviewQuery() {
-  try {
-    return new URLSearchParams(window.location.search).get("preview") === "sandiego";
-  } catch {
-    return false;
-  }
-}
+export { isSanDiegoPreviewQuery } from "./previewQuery";

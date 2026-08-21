@@ -29,7 +29,7 @@ export function Hud() {
   const retreatTourPiece = useAppStore((s) => s.retreatTourPiece);
   const activePanel = useAppStore((s) => s.activePanel);
   const galleryProjectId = useAppStore((s) => s.galleryProjectId);
-  if (mode === "traditional" || mode === "intro" || tourComplete) return null;
+  if (mode === "intro" || tourComplete) return null;
 
   const exhibit = findExhibitPiece(tourExhibit);
   const hall = mode === "tour" ? tourStops[tourIndex]?.tourInterior : undefined;

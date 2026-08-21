@@ -1,12 +1,15 @@
 import { useEffect } from "react";
 import { profile } from "@/data/profile";
 import { useIntroSequenceUi } from "@/hooks/useIntroSequence";
+import { useTouchUi } from "@/hooks/useCoarsePointer";
+import { navigate } from "@/lib/appRoute";
 import { markIntroSeen } from "@/systems/introSequence";
 import { useAppStore } from "@/systems/store";
 
 export function IntroOverlay() {
   const mode = useAppStore((s) => s.mode);
   const setMode = useAppStore((s) => s.setMode);
+  const touchUi = useTouchUi();
   const frame = useIntroSequenceUi();
   const titleVisible = mode === "intro" && (frame?.titleVisible ?? false);
 
@@ -51,13 +54,24 @@ export function IntroOverlay() {
             Take the Tour
           </button>
         </div>
-        <button
-          type="button"
-          className="overlay-chip mt-6 rounded-full px-4 py-2 font-ui text-[11px] tracking-[0.18em] uppercase"
-          onClick={() => setMode("traditional")}
-        >
-          View resume
-        </button>
+        <div className="mt-6 flex flex-col items-center gap-3">
+          <button
+            type="button"
+            className="overlay-chip rounded-full px-4 py-2 font-ui text-[11px] tracking-[0.18em] uppercase"
+            onClick={() => navigate("/classic#resume")}
+          >
+            View resume
+          </button>
+          {!touchUi ? (
+            <button
+              type="button"
+              className="font-ui text-[11px] tracking-[0.14em] text-paper/75 uppercase underline decoration-white/25 underline-offset-4"
+              onClick={() => navigate("/classic")}
+            >
+              Prefer a simple version?
+            </button>
+          ) : null}
+        </div>
       </div>
     </div>
   );

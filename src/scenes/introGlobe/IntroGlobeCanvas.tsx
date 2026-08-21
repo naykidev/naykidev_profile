@@ -345,10 +345,4 @@ export function IntroGlobePreview() {
   );
 }
 
-export function isGlobePreviewQuery() {
-  try {
-    return new URLSearchParams(window.location.search).get("preview") === "globe";
-  } catch {
-    return false;
-  }
-}
+export { isGlobePreviewQuery } from "./previewQuery";

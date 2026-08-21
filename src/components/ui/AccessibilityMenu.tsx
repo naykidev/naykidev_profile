@@ -1,4 +1,6 @@
 import { profile } from "@/data/profile";
+import { useTouchUi } from "@/hooks/useCoarsePointer";
+import { navigate } from "@/lib/appRoute";
 import { useAppStore } from "@/systems/store";
 
 const chip =
@@ -22,6 +24,7 @@ export function AccessibilityMenu() {
   const closePanel = useAppStore((s) => s.closePanel);
   const startProjectsTour = useAppStore((s) => s.startProjectsTour);
   const startAwardsTour = useAppStore((s) => s.startAwardsTour);
+  const touchUi = useTouchUi();
 
   const goHome = () => {
     closePanel();
@@ -51,23 +54,15 @@ export function AccessibilityMenu() {
       >
         <NavLabel full="About Me" short="About" />
       </button>
-      {mode !== "traditional" ? (
-        <>
-          <button type="button" className={chip} onClick={() => startProjectsTour()}>
-            <NavLabel full="Projects" short="Projects" />
-          </button>
-          <button type="button" className={chip} onClick={() => startAwardsTour()}>
-            <NavLabel full="Awards & Certificates" short="Awards" />
-          </button>
-          <button type="button" className={chip} onClick={() => setMode("traditional")}>
-            Resume
-          </button>
-        </>
-      ) : (
-        <button type="button" className={chip} onClick={goHome}>
-          <NavLabel full="Enter campus" short="Campus" />
-        </button>
-      )}
+      <button type="button" className={chip} onClick={() => startProjectsTour()}>
+        <NavLabel full="Projects" short="Projects" />
+      </button>
+      <button type="button" className={chip} onClick={() => startAwardsTour()}>
+        <NavLabel full="Awards & Certificates" short="Awards" />
+      </button>
+      <button type="button" className={chip} onClick={() => navigate("/classic#resume")}>
+        Resume
+      </button>
       <a
         className={chip}
         href={profile.linkedin}
@@ -77,6 +72,11 @@ export function AccessibilityMenu() {
       >
         <NavLabel full="LinkedIn" short="Link" />
       </a>
+      {!touchUi ? (
+        <button type="button" className={chip} onClick={() => navigate("/classic")}>
+          <NavLabel full="View as a regular site" short="Classic" />
+        </button>
+      ) : null}
     </div>
   );
 }
