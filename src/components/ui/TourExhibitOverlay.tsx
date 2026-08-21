@@ -2,9 +2,11 @@ import { useSyncExternalStore } from "react";
 import { awardPieces } from "@/data/achievements";
 import { ProjectLinks } from "@/components/ui/ProjectLinks";
 import { findExhibitPiece } from "@/components/ui/ProjectView";
+import { galleryZoomFraming } from "@/systems/hallFrames";
 import { useAppStore } from "@/systems/store";
 
-const GALLERY_FRAME = { width: 2.32, height: 1.62, fov: 46, dist: 3.35 };
+const FRAME_W = 2.32;
+const FRAME_H = 1.62;
 const DESCRIPTION_WIDTH = 440;
 const DESCRIPTION_WIDTH_DODO = 480;
 const DESCRIPTION_WIDTH_NARROW = 400;
@@ -114,13 +116,14 @@ export function TourExhibitOverlay() {
   const tiny = awardPieces.some((item) => item.id === piece.id);
   if (tiny) return null;
 
+  const framing = galleryZoomFraming(false);
   const portraitPhone = viewport.h > viewport.w && viewport.w < 1200;
   const mobile = viewport.w < MOBILE_BREAKPOINT || portraitPhone;
   const projectedPortraitW = Math.ceil(
-    projectedPixels(GALLERY_FRAME.width, GALLERY_FRAME.dist, GALLERY_FRAME.fov, viewport.h) * 1.02,
+    projectedPixels(FRAME_W, framing.dist, framing.fov, viewport.h) * 1.02,
   );
   const projectedPortraitH = Math.ceil(
-    projectedPixels(GALLERY_FRAME.height, GALLERY_FRAME.dist, GALLERY_FRAME.fov, viewport.h) * 1.02,
+    projectedPixels(FRAME_H, framing.dist, framing.fov, viewport.h) * 1.02,
   );
 
   const descriptionWidthTarget =
@@ -130,32 +133,37 @@ export function TourExhibitOverlay() {
         ? DESCRIPTION_WIDTH_NARROW
         : DESCRIPTION_WIDTH;
 
-  const overlayPadTop = mobile ? 88 : 72;
-  const overlayPadBottom = mobile ? 168 : 140;
+  const overlayPadTop = mobile ? 76 : 72;
+  const overlayPadBottom = mobile ? 148 : 140;
   const availableH = Math.max(280, viewport.h - overlayPadTop - overlayPadBottom);
 
   if (mobile) {
-    const portraitGapH = Math.min(projectedPortraitH * 0.55, availableH * 0.28, 200);
-    const descriptionMaxHeight = Math.max(200, availableH - portraitGapH - 8);
+    // Leave a tight window for the 3D frame (camera already recenters it); card takes the rest.
+    const portraitGapH = Math.min(
+      Math.max(projectedPortraitH * 0.72, viewport.h * 0.34),
+      availableH * 0.46,
+      320,
+    );
+    const descriptionMaxHeight = Math.max(160, availableH - portraitGapH - 4);
 
     return (
-      <div className="pointer-events-none absolute inset-0 z-40 px-3 pt-[max(4.75rem,calc(env(safe-area-inset-top)+3.5rem))] pb-[max(9.5rem,calc(env(safe-area-inset-bottom)+8rem))]">
+      <div className="pointer-events-none absolute inset-0 z-40 px-3 pt-[max(4.25rem,calc(env(safe-area-inset-top)+3.25rem))] pb-[max(8.75rem,calc(env(safe-area-inset-bottom)+7.25rem))]">
         <section
           key={piece.id}
           data-look-block
-          className="pointer-events-auto mx-auto flex h-full w-full max-w-xl flex-col items-stretch gap-2.5 overflow-hidden text-paper"
+          className="pointer-events-auto mx-auto flex h-full w-full max-w-xl flex-col items-stretch gap-2 overflow-hidden text-paper"
         >
           <div
             className="portrait-spacer pointer-events-none w-full shrink-0 self-center"
             aria-hidden
             style={{
               height: portraitGapH,
-              maxWidth: Math.min(viewport.w - 24, projectedPortraitW * 0.9),
+              maxWidth: Math.min(viewport.w - 16, projectedPortraitW),
             }}
           />
           <div
-            className="description-panel w-full min-h-0 flex-1 overflow-y-auto rounded-xl border border-white/18 bg-[rgba(20,20,20,0.9)] text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
-            style={{ maxHeight: descriptionMaxHeight, padding: "16px 18px", width: "100%" }}
+            className="description-panel w-full min-h-0 flex-1 overflow-y-auto rounded-xl border border-white/18 bg-[rgba(20,20,20,0.92)] text-left shadow-[0_16px_48px_rgba(0,0,0,0.45)] backdrop-blur-[10px]"
+            style={{ maxHeight: descriptionMaxHeight, padding: "14px 16px", width: "100%" }}
           >
             <ExhibitCopy piece={piece} compact />
           </div>

@@ -136,12 +136,15 @@ function SecondPlaceRibbons() {
     map.userData.punched = true;
   }, [map]);
 
-  const y = -FRAME_H / 2 - 0.42;
+  const y = -FRAME_H / 2 - 0.36;
+  // Slightly smaller than the old desktop-tuned ribbons so they don't dominate on phone zooms.
+  const ribbonW = 0.3;
+  const ribbonH = 0.44;
   return (
     <group>
-      {[-0.78, 0.78].map((x) => (
+      {[-0.7, 0.7].map((x) => (
         <mesh key={x} position={[x, y, 0.05]}>
-          <planeGeometry args={[0.38, 0.56]} />
+          <planeGeometry args={[ribbonW, ribbonH]} />
           <meshStandardMaterial
             map={map}
             transparent

@@ -122,16 +122,31 @@ export function hallWorld(hall: HallId, lx: number, y: number, lz: number): Vec3
   return [AWARDS_X - lx, y, GALLERY_Z - lz];
 }
 
+/** Desktop zoom is tuned for wide screens; phones need more distance + FOV so the frame isn't side-cropped. */
+export function galleryZoomFraming(tiny = false) {
+  if (tiny) return { dist: 1.68, fov: 42, lookDrop: 0.02, camDrop: 0.04 };
+  if (typeof window === "undefined") return { dist: 3.35, fov: 46, lookDrop: 0.16, camDrop: 0.1 };
+  const aspect = window.innerWidth / Math.max(1, window.innerHeight);
+  // Portrait phones / narrow tablets: fit full canvas + plaque + ribbons in view.
+  if (aspect < 0.72) {
+    return { dist: 4.55, fov: 60, lookDrop: 0.34, camDrop: 0.12 };
+  }
+  if (aspect < 0.95) {
+    return { dist: 4.05, fov: 54, lookDrop: 0.26, camDrop: 0.11 };
+  }
+  return { dist: 3.35, fov: 46, lookDrop: 0.16, camDrop: 0.1 };
+}
+
 export function frameZoomShot(hall: HallId, slot: FrameSlot, floor: number): TourShot {
-  const dist = slot.tiny ? 1.68 : 3.35;
+  const framing = galleryZoomFraming(Boolean(slot.tiny));
   const yaw = slot.rotation[1];
   const [lx, ly, lz] = slot.position;
-  const lookY = floor + ly - (slot.tiny ? 0.02 : 0.16);
-  const camY = floor + ly - (slot.tiny ? 0.04 : 0.1);
+  const lookY = floor + ly - framing.lookDrop;
+  const camY = floor + ly - framing.camDrop;
   return {
-    pos: hallWorld(hall, lx + Math.sin(yaw) * dist, camY, lz + Math.cos(yaw) * dist),
+    pos: hallWorld(hall, lx + Math.sin(yaw) * framing.dist, camY, lz + Math.cos(yaw) * framing.dist),
     look: hallWorld(hall, lx, lookY, lz),
-    fov: slot.tiny ? 42 : 46,
+    fov: framing.fov,
   };
 }
 
