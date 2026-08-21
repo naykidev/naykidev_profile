@@ -1,41 +1,15 @@
-import { education } from "@/data/education";
-import { experience } from "@/data/experience";
 import { Reveal, SectionHeading } from "./Reveal";
-
-type JourneyItem = {
-  id: string;
-  kind: "Education" | "Experience";
-  title: string;
-  meta: string;
-  body: string;
-};
-
-function buildJourney(): JourneyItem[] {
-  const edu = education.map((entry) => ({
-    id: `edu-${entry.id}`,
-    kind: "Education" as const,
-    title: entry.institution,
-    meta: `${entry.program} · ${entry.dates} · ${entry.location}`,
-    body: entry.details.join(" "),
-  }));
-  const exp = experience.map((entry) => ({
-    id: `exp-${entry.id}`,
-    kind: "Experience" as const,
-    title: entry.title,
-    meta: entry.org,
-    body: entry.summary,
-  }));
-  return [...edu, ...exp];
-}
+import { buildJourneyTimeline } from "./timeline";
 
 export function JourneyTimeline() {
-  const items = buildJourney();
+  const items = buildJourneyTimeline();
   return (
     <section id="journey" className="scroll-mt-24 border-b border-white/10 bg-[#221c17] px-4 py-14 sm:px-6 sm:py-16">
       <div className="mx-auto max-w-5xl">
         <Reveal>
           <SectionHeading eyebrow="Path" title="Journey">
-            Education and experience in one continuous timeline.
+            Education and experience merged through a small normalizer — experience has no dates in
+            data, so those rows are ordered between high school and UW without inventing labels.
           </SectionHeading>
         </Reveal>
         <ol className="relative space-y-0 border-l border-sand/35 pl-6 sm:pl-8">

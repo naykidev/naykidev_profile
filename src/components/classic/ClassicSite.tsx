@@ -13,8 +13,13 @@ import { Reveal, SectionHeading } from "./Reveal";
 import { SkillsCloud } from "./SkillsCloud";
 import { useClassicMotion } from "./motion";
 
-/** Axol / research story lives in the 3D campus panels — not on the classic site. */
-const CLASSIC_PROJECT_SKIP = new Set(["accessibility-surfer", "axol-assist", "axol-work"]);
+/** Axol / research gallery pieces stay on the 3D campus panels only.
+ * Explicit ID allow-list exclusion so they cannot silently reappear if galleryPieces grows. */
+const CLASSIC_PROJECT_SKIP = new Set([
+  "accessibility-surfer", // Axol product — campus only
+  "axol-assist", // Axol story — campus only
+  "axol-work", // Axol product — campus only
+]);
 
 function useActiveSection(ids: readonly string[]) {
   const [activeId, setActiveId] = useState(ids[0] ?? "about");
@@ -178,7 +183,7 @@ export function ClassicSite() {
             </div>
           </section>
 
-          <SkillsCloud />
+          <SkillsCloud projects={classicProjects} />
           <ProjectGrid projects={classicProjects} />
           <JourneyTimeline />
 
