@@ -186,7 +186,7 @@ export function ClassicSite() {
               <img
                 src={profile.photo}
                 alt={profile.name}
-                className="h-56 w-56 rounded-2xl object-cover shadow-[0_24px_60px_rgba(0,0,0,0.45)] ring-1 ring-white/15 sm:h-72 sm:w-72"
+                className="h-56 w-56 rounded-full object-cover shadow-[0_24px_60px_rgba(0,0,0,0.45)] ring-1 ring-white/15 sm:h-72 sm:w-72"
               />
             </figure>
           </div>
