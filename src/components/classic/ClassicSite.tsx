@@ -1,9 +1,8 @@
 import { achievements } from "@/data/achievements";
 import { education } from "@/data/education";
 import { experience } from "@/data/experience";
-import { axolAssist, galleryPieces } from "@/data/projects";
+import { galleryPieces } from "@/data/projects";
 import { profile } from "@/data/profile";
-import { research } from "@/data/research";
 import { skills } from "@/data/skills";
 import { useTouchUi } from "@/hooks/useCoarsePointer";
 import { navigate } from "@/lib/appRoute";
@@ -15,6 +14,10 @@ const nav = [
   { href: "#awards", label: "Awards", full: "Awards & Certificates" },
   { href: "#resume", label: "Resume", full: "Resume" },
 ] as const;
+
+/** Axol / research story lives in the 3D campus panels — not on the classic site. */
+const CLASSIC_PROJECT_SKIP = new Set(["accessibility-surfer", "axol-assist", "axol-work"]);
+
 
 function SectionHeading({
   eyebrow,
@@ -79,7 +82,8 @@ export function ClassicSite() {
   const touchUi = useTouchUi();
   const awards = achievements.filter((item) => item.kind === "award");
   const certificates = achievements.filter((item) => item.kind === "certificate");
-  const featured = galleryPieces.filter((p) =>
+  const classicProjects = galleryPieces.filter((p) => !CLASSIC_PROJECT_SKIP.has(p.id));
+  const featured = classicProjects.filter((p) =>
     ["weather-report", "surf-del-mar", "freddy-takes-flight", "dodo"].includes(p.id),
   );
 
@@ -231,47 +235,6 @@ export function ClassicSite() {
           </div>
         </section>
 
-        {/* Axol + research */}
-        <section className="border-b border-white/10 bg-[#221c17] px-4 py-14 sm:px-6 sm:py-16">
-          <div className="mx-auto max-w-5xl">
-            <SectionHeading eyebrow="Accessibility" title={axolAssist.name}>
-              {axolAssist.quote}
-            </SectionHeading>
-            <p className="max-w-3xl font-ui text-[15px] leading-7 text-paper/85">{axolAssist.story}</p>
-            <div className="mt-10 grid gap-6 sm:grid-cols-3">
-              {axolAssist.products.map((product) => (
-                <article
-                  key={product.id}
-                  className="border-t border-sand/35 pt-4"
-                >
-                  <h3 className="font-display text-xl text-paper">{product.name}</h3>
-                  <p className="mt-2 font-ui text-sm leading-6 text-paper/70">{product.summary}</p>
-                  <TechPills items={product.highlights.slice(0, 4)} />
-                  {"links" in product && product.links ? <OutLinks links={product.links} /> : null}
-                </article>
-              ))}
-            </div>
-
-            <div className="mt-16 grid gap-8 border-t border-white/10 pt-12 lg:grid-cols-2">
-              <div>
-                <h3 className="font-display text-2xl text-paper">{research.title}</h3>
-                <p className="mt-3 font-ui text-[15px] leading-7 text-paper/80">{research.question}</p>
-                <p className="mt-4 font-ui text-xs tracking-[0.18em] text-sand uppercase">{research.arc}</p>
-              </div>
-              <div>
-                <h4 className="mb-2 font-ui text-[11px] tracking-[0.2em] text-sand uppercase">Findings</h4>
-                <ul className="space-y-3 font-ui text-sm leading-6 text-paper/75">
-                  {research.findings.map((item) => (
-                    <li key={item.slice(0, 40)} className="pl-3 border-l border-white/15">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Projects — varied rhythm */}
         <section id="projects" className="scroll-mt-24 border-b border-white/10 px-4 py-14 sm:px-6 sm:py-16">
           <div className="mx-auto max-w-5xl">
@@ -281,7 +244,8 @@ export function ClassicSite() {
 
             {/* Wide image + text */}
             {(() => {
-              const lead = galleryPieces.find((p) => p.id === "weather-report") ?? galleryPieces[0];
+              const lead = classicProjects.find((p) => p.id === "weather-report") ?? classicProjects[0];
+              if (!lead) return null;
               return (
                 <article className="mb-14 grid items-center gap-8 lg:grid-cols-2">
                   {lead.photo || lead.portrait ? (
@@ -306,30 +270,13 @@ export function ClassicSite() {
               );
             })()}
 
-            {/* Full-width text block */}
-            {(() => {
-              const story = galleryPieces.find((p) => p.id === "axol-assist");
-              if (!story) return null;
-              return (
-                <article className="mb-14 max-w-3xl border-l-2 border-sand/50 pl-5 sm:pl-8">
-                  <h3 className="font-display text-3xl text-paper">{story.name}</h3>
-                  <p className="mt-4 font-ui text-[15px] leading-7 text-paper/80">{story.summary}</p>
-                  <TechPills items={story.technologies} />
-                  <OutLinks links={story.links} />
-                </article>
-              );
-            })()}
-
             {/* Compact list of the rest */}
             <ul className="divide-y divide-white/10 border-y border-white/10">
               {featured
                 .filter((p) => p.id !== "weather-report")
                 .concat(
-                  galleryPieces.filter(
-                    (p) =>
-                      !featured.some((f) => f.id === p.id) &&
-                      p.id !== "weather-report" &&
-                      p.id !== "axol-assist",
+                  classicProjects.filter(
+                    (p) => !featured.some((f) => f.id === p.id) && p.id !== "weather-report",
                   ),
                 )
                 .map((piece) => (
