@@ -8,7 +8,6 @@ import { useAppStore } from "@/systems/store";
 export const CLASSIC_NAV = [
   { id: "about", href: "#about", label: "About", full: "About Me" },
   { id: "projects", href: "#projects", label: "Projects", full: "Projects" },
-  { id: "journey", href: "#journey", label: "Journey", full: "Journey" },
   { id: "awards", href: "#awards", label: "Awards", full: "Awards & Certificates" },
   { id: "resume", href: "#resume", label: "Resume", full: "Resume" },
   { id: "links", href: "#links", label: "Links", full: "Links" },

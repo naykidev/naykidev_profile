@@ -7,7 +7,6 @@ import { useTouchUi } from "@/hooks/useCoarsePointer";
 import { navigate } from "@/lib/appRoute";
 import { ClassicHeader, CLASSIC_NAV } from "./ClassicHeader";
 import { ContactSection } from "./ContactSection";
-import { JourneyTimeline } from "./JourneyTimeline";
 import { ProjectGrid } from "./ProjectGrid";
 import { Reveal, SectionHeading } from "./Reveal";
 import { SkillsCloud } from "./SkillsCloud";
@@ -176,7 +175,6 @@ export function ClassicSite() {
 
           <SkillsCloud projects={galleryPieces} />
           <ProjectGrid projects={galleryPieces} />
-          <JourneyTimeline />
 
           <section
             id="awards"
