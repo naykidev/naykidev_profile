@@ -97,15 +97,16 @@ function AimedSpot({
 }
 
 /**
- * Gooseneck fixture: dark housing + warm emissive bulb (not a white orb),
- * with a soft spotlight aimed at a surface target.
+ * Ground bollard / uplight: fixture sits near the ground and washes upward
+ * with a wide soft spotlight so full sign text / banner cloth is lit.
  */
-function GooseneckFixture({
+function GroundUplight({
   position,
   target,
   glow,
   strength = 1,
-  distance = 6.5,
+  distance = 7,
+  angle = 0.72,
   castShadow = false,
 }: {
   position: [number, number, number];
@@ -113,36 +114,43 @@ function GooseneckFixture({
   glow: number;
   strength?: number;
   distance?: number;
+  angle?: number;
   castShadow?: boolean;
 }) {
   const g = glow * strength;
   if (g < 0.04) return null;
 
-  const dx = target[0] - position[0];
-  const dz = target[2] - position[2];
-  const yaw = Math.atan2(dx, dz);
-
   return (
     <>
       <group position={position}>
-        <mesh position={[0, 0.02, -0.1]} rotation={[0.65, yaw, 0]} material={signHousing}>
-          <cylinderGeometry args={[0.016, 0.02, 0.28, 8]} />
+        {/* Stake / housing */}
+        <mesh position={[0, 0.08, 0]} material={signHousing} castShadow>
+          <cylinderGeometry args={[0.045, 0.055, 0.16, 10]} />
         </mesh>
-        <mesh position={[0, -0.02, 0.02]} material={signHousing}>
-          <cylinderGeometry args={[0.048, 0.055, 0.04, 12]} />
+        <mesh position={[0, 0.175, 0]} material={signHousing}>
+          <cylinderGeometry args={[0.07, 0.06, 0.05, 12]} />
         </mesh>
-        <mesh position={[0, -0.045, 0.04]} material={signLamp}>
-          <sphereGeometry args={[0.038, 12, 10]} />
+        {/* Warm lens — moderate emissive, not a clipped white orb */}
+        <mesh position={[0, 0.21, 0]} material={signLamp}>
+          <sphereGeometry args={[0.042, 12, 10]} />
         </mesh>
       </group>
       <AimedSpot
-        position={[position[0], position[1] - 0.06, position[2] + 0.06]}
+        position={[position[0], position[1] + 0.24, position[2]]}
         target={target}
-        intensity={0.55 + g * 0.85}
+        intensity={0.95 + g * 1.35}
         distance={distance}
-        angle={0.4}
-        penumbra={0.62}
+        angle={angle}
+        penumbra={0.72}
         castShadow={castShadow}
+      />
+      {/* Soft fill so edges of wide signs don't fall off */}
+      <pointLight
+        position={[position[0], position[1] + 0.35, position[2]]}
+        intensity={0.22 + g * 0.35}
+        distance={distance * 0.85}
+        decay={2}
+        color={WARM}
       />
     </>
   );
@@ -153,7 +161,6 @@ function BascomWash({ glow }: { glow: number }) {
   if (i < 0.05) return null;
   return (
     <group>
-      {/* Soft facade washes — warm, short range, physics decay */}
       <pointLight
         position={[0, HALL_Y + 4.8, HALL_Z + 9.2]}
         intensity={i * 0.7}
@@ -182,12 +189,14 @@ function BascomWash({ glow }: { glow: number }) {
         decay={2}
         color={WARM_SOFT}
       />
-      <GooseneckFixture
-        position={[0, HALL_Y + 6.2, HALL_Z + 6.95]}
-        target={[0, HALL_Y + 5.1, HALL_Z + 6.65]}
+      {/* Bucky banner — ground wash from terrace up */}
+      <GroundUplight
+        position={[0, HALL_Y + 0.35, HALL_Z + 8.9]}
+        target={[0, HALL_Y + 5.0, HALL_Z + 6.65]}
         glow={glow}
-        strength={1.15}
-        distance={5.5}
+        strength={1.1}
+        distance={8}
+        angle={0.55}
       />
     </group>
   );
@@ -266,20 +275,55 @@ function GalleryWindows({
   );
 }
 
-/** W banners, wayfinding planks, and gallery door titles — aimed spotlights. */
+/** W banners, wayfinding planks, and gallery door titles — ground uplights. */
 function SignLights({ glow }: { glow: number }) {
   if (glow < 0.04) return null;
 
   const wayfindZ = GALLERY_Z + 2.55;
-  const projectsY = getTerrainHeight(5.22, wayfindZ);
-  const awardsY = getTerrainHeight(-5.22, wayfindZ);
+  const projectsOrigin: [number, number, number] = [5.22, getTerrainHeight(5.22, wayfindZ), wayfindZ];
+  const awardsOrigin: [number, number, number] = [-5.22, getTerrainHeight(-5.22, wayfindZ), wayfindZ];
+
+  // Sign local +Z is the plank face; rotations match CampusBanners.
+  const projectsYaw = -0.62;
+  const awardsYaw = 0.62;
+  const projectsFront = (dist: number): [number, number, number] => [
+    projectsOrigin[0] + Math.sin(projectsYaw) * dist,
+    projectsOrigin[1],
+    projectsOrigin[2] + Math.cos(projectsYaw) * dist,
+  ];
+  const awardsFront = (dist: number): [number, number, number] => [
+    awardsOrigin[0] + Math.sin(awardsYaw) * dist,
+    awardsOrigin[1],
+    awardsOrigin[2] + Math.cos(awardsYaw) * dist,
+  ];
+
+  // Mid-stack targets (scale 1.18) so all planks sit in the cone.
+  const projectsTarget: [number, number, number] = [
+    projectsOrigin[0],
+    projectsOrigin[1] + 1.32,
+    projectsOrigin[2],
+  ];
+  const awardsTarget: [number, number, number] = [
+    awardsOrigin[0],
+    awardsOrigin[1] + 1.4,
+    awardsOrigin[2],
+  ];
 
   const projectsDoor = galleryDoorX();
   const awardsDoor = awardsDoorX();
   const projectsDoorY = getTerrainHeight(projectsDoor, GALLERY_Z);
   const awardsDoorY = getTerrainHeight(awardsDoor, GALLERY_Z);
-  const projectsSignY = projectsDoorY + GALLERY_DOOR_HEIGHT + 0.62;
-  const awardsSignY = awardsDoorY + GALLERY_DOOR_HEIGHT + 0.62;
+  // Door title plane: ~2.95 × 0.46 at DOOR_H + 0.62
+  const projectsSignCenter: [number, number, number] = [
+    projectsDoor - 0.2,
+    projectsDoorY + GALLERY_DOOR_HEIGHT + 0.62,
+    GALLERY_Z,
+  ];
+  const awardsSignCenter: [number, number, number] = [
+    awardsDoor + 0.2,
+    awardsDoorY + GALLERY_DOOR_HEIGHT + 0.62,
+    GALLERY_Z,
+  ];
 
   return (
     <group>
@@ -287,53 +331,102 @@ function SignLights({ glow }: { glow: number }) {
         ([-8.6, 8.6] as const).map((x) => {
           const y = getTerrainHeight(x, z);
           const clothX = x > 0 ? x - 0.4 : x + 0.4;
-          const lampPos: [number, number, number] = [clothX, y + 2.95, z + (x > 0 ? -0.12 : 0.12)];
-          const clothTarget: [number, number, number] = [clothX, y + 2.15, z];
+          // Stand in front of the cloth (toward mall center) and aim up the full flag.
+          const towardMall = x > 0 ? -1 : 1;
+          const lamp: [number, number, number] = [clothX + towardMall * 0.55, y + 0.02, z + 0.15];
+          const clothMid: [number, number, number] = [clothX, y + 2.15, z];
           return (
-            <GooseneckFixture
+            <GroundUplight
               key={`banner-${x}-${z}`}
-              position={lampPos}
-              target={clothTarget}
+              position={lamp}
+              target={clothMid}
               glow={glow}
-              strength={0.9}
-              distance={4.8}
+              strength={1.05}
+              distance={5.5}
+              angle={0.58}
             />
           );
         }),
       )}
 
-      {/* Projects wayfind */}
-      <GooseneckFixture
-        position={[5.22, projectsY + 1.95, wayfindZ + 0.55]}
-        target={[5.22, projectsY + 1.3, wayfindZ + 0.12]}
+      {/* Projects wayfind — dual ground wash covers both planks edge-to-edge */}
+      <GroundUplight
+        position={projectsFront(1.15)}
+        target={projectsTarget}
         glow={glow}
-        strength={1.2}
-        distance={5.5}
+        strength={1.35}
+        distance={6.5}
+        angle={0.78}
         castShadow
       />
-      {/* Awards & Certificates wayfind */}
-      <GooseneckFixture
-        position={[-5.22, awardsY + 2.05, wayfindZ + 0.55]}
-        target={[-5.22, awardsY + 1.35, wayfindZ + 0.12]}
+      <GroundUplight
+        position={[
+          projectsFront(0.95)[0] + Math.cos(projectsYaw) * 0.35,
+          projectsOrigin[1],
+          projectsFront(0.95)[2] - Math.sin(projectsYaw) * 0.35,
+        ]}
+        target={[projectsTarget[0], projectsTarget[1] + 0.15, projectsTarget[2]]}
         glow={glow}
-        strength={1.25}
-        distance={5.8}
-        castShadow
+        strength={0.85}
+        distance={6}
+        angle={0.7}
       />
 
-      <GooseneckFixture
-        position={[projectsDoor - 0.65, projectsSignY + 0.35, GALLERY_Z]}
-        target={[projectsDoor - 0.25, projectsSignY, GALLERY_Z]}
+      {/* Awards & Certificates wayfind — wide dual uplight for all three planks */}
+      <GroundUplight
+        position={awardsFront(1.2)}
+        target={awardsTarget}
         glow={glow}
-        strength={1.15}
-        distance={5}
+        strength={1.4}
+        distance={7}
+        angle={0.82}
+        castShadow
       />
-      <GooseneckFixture
-        position={[awardsDoor + 0.65, awardsSignY + 0.35, GALLERY_Z]}
-        target={[awardsDoor + 0.25, awardsSignY, GALLERY_Z]}
+      <GroundUplight
+        position={[
+          awardsFront(1.0)[0] + Math.cos(awardsYaw) * 0.4,
+          awardsOrigin[1],
+          awardsFront(1.0)[2] - Math.sin(awardsYaw) * 0.4,
+        ]}
+        target={[awardsTarget[0], awardsTarget[1] + 0.1, awardsTarget[2]]}
         glow={glow}
-        strength={1.15}
-        distance={5}
+        strength={0.9}
+        distance={6.5}
+        angle={0.75}
+      />
+
+      {/* Building door titles — two ground spots left/right so full lettering reads */}
+      <GroundUplight
+        position={[projectsDoor - 1.15, projectsDoorY + 0.05, GALLERY_Z - 0.15]}
+        target={[projectsSignCenter[0] - 0.55, projectsSignCenter[1], projectsSignCenter[2]]}
+        glow={glow}
+        strength={1.3}
+        distance={6.5}
+        angle={0.62}
+      />
+      <GroundUplight
+        position={[projectsDoor - 1.15, projectsDoorY + 0.05, GALLERY_Z + 0.15]}
+        target={[projectsSignCenter[0] + 0.55, projectsSignCenter[1], projectsSignCenter[2]]}
+        glow={glow}
+        strength={1.3}
+        distance={6.5}
+        angle={0.62}
+      />
+      <GroundUplight
+        position={[awardsDoor + 1.15, awardsDoorY + 0.05, GALLERY_Z - 0.15]}
+        target={[awardsSignCenter[0] - 0.55, awardsSignCenter[1], awardsSignCenter[2]]}
+        glow={glow}
+        strength={1.3}
+        distance={6.5}
+        angle={0.62}
+      />
+      <GroundUplight
+        position={[awardsDoor + 1.15, awardsDoorY + 0.05, GALLERY_Z + 0.15]}
+        target={[awardsSignCenter[0] + 0.55, awardsSignCenter[1], awardsSignCenter[2]]}
+        glow={glow}
+        strength={1.3}
+        distance={6.5}
+        angle={0.62}
       />
     </group>
   );
