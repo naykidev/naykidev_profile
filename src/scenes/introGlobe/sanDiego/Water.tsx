@@ -1,9 +1,9 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import { ShaderMaterial } from "three";
-import { shoreXAt } from "./noise";
 import { waterFragment, waterVertex } from "./shaders/water";
 
+/** Large continuous stylized Pacific — no foam boxes or floating debris. */
 export function Water() {
   const mat = useRef<ShaderMaterial>(null);
   const uniforms = useMemo(() => ({ uTime: { value: 0 } }), []);
@@ -12,8 +12,8 @@ export function Water() {
   });
 
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[90, -0.48, 0]} frustumCulled={false}>
-      <planeGeometry args={[420, 460, 48, 36]} />
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[110, -0.42, 0]} frustumCulled={false}>
+      <planeGeometry args={[520, 520, 64, 48]} />
       <shaderMaterial
         ref={mat}
         uniforms={uniforms}
@@ -21,29 +21,5 @@ export function Water() {
         fragmentShader={waterFragment}
       />
     </mesh>
-  );
-}
-
-/** Thin stylized surf line along the cove — not a copied layout. */
-export function Surf() {
-  const pieces = useMemo(() => {
-    const out: { x: number; z: number; r: number }[] = [];
-    for (let z = -72; z <= 72; z += 3.4) {
-      const x = shoreXAt(z) + 3.4;
-      const nx = shoreXAt(z + 1.2) + 3.4;
-      out.push({ x, z, r: Math.atan2(nx - x, 1.2) });
-    }
-    return out;
-  }, []);
-
-  return (
-    <group>
-      {pieces.map((p) => (
-        <mesh key={p.z} position={[p.x, -0.22, p.z]} rotation={[0, p.r, 0]}>
-          <boxGeometry args={[0.55, 0.08, 3.5]} />
-          <meshLambertMaterial color="#f4f7fb" />
-        </mesh>
-      ))}
-    </group>
   );
 }

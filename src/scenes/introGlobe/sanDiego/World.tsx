@@ -4,14 +4,13 @@ import { CameraRig } from "./CameraRig";
 import { Cliffs } from "./Cliffs";
 import { Clouds } from "./Clouds";
 import { Details } from "./Details";
-import { DistantIslets } from "./DistantIslets";
 import { Lighting } from "./Lighting";
 import { Mountains } from "./Mountains";
 import { Palms } from "./Palms";
 import { SkyDome } from "./Sky";
 import { Terrain } from "./Terrain";
 import { Nature } from "./Nature";
-import { Surf, Water } from "./Water";
+import { Water } from "./Water";
 
 export function SanDiegoWorld({
   elapsed = 0,
@@ -31,7 +30,6 @@ export function SanDiegoWorld({
       <Terrain />
       <Cliffs />
       <Mountains />
-      <DistantIslets />
       <Suspense fallback={null}>
         <Palms />
       </Suspense>
@@ -43,7 +41,6 @@ export function SanDiegoWorld({
       <Suspense fallback={null}>
         <Details />
       </Suspense>
-      <Surf />
       <Water />
       <Clouds />
     </>
