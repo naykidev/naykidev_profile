@@ -30,6 +30,8 @@ export type Atmosphere = {
   cloudColor: string;
   showClouds: boolean;
   starOpacity: number;
+  /** 0 by day → 1 at night; drives window glow and facade lamps. */
+  buildingGlow: number;
 };
 
 type Keyframe = { hour: number; phase: DayPhase } & Omit<Atmosphere, "phase">;
@@ -64,6 +66,7 @@ const KEYFRAMES: Keyframe[] = [
     cloudColor: "#2a3348",
     showClouds: true,
     starOpacity: 1,
+    buildingGlow: 1,
   },
   {
     hour: 5.2,
@@ -94,6 +97,7 @@ const KEYFRAMES: Keyframe[] = [
     cloudColor: "#3a4258",
     showClouds: true,
     starOpacity: 0.75,
+    buildingGlow: 0.85,
   },
   {
     hour: 6.4,
@@ -124,6 +128,7 @@ const KEYFRAMES: Keyframe[] = [
     cloudColor: "#f8dcc8",
     showClouds: true,
     starOpacity: 0,
+    buildingGlow: 0.15,
   },
   {
     hour: 8,
@@ -154,6 +159,7 @@ const KEYFRAMES: Keyframe[] = [
     cloudColor: "#f4f7fb",
     showClouds: true,
     starOpacity: 0,
+    buildingGlow: 0,
   },
   {
     hour: 13,
@@ -184,6 +190,7 @@ const KEYFRAMES: Keyframe[] = [
     cloudColor: "#f7f9fc",
     showClouds: true,
     starOpacity: 0,
+    buildingGlow: 0,
   },
   {
     hour: 17.2,
@@ -214,6 +221,7 @@ const KEYFRAMES: Keyframe[] = [
     cloudColor: "#f0c8b0",
     showClouds: true,
     starOpacity: 0,
+    buildingGlow: 0.45,
   },
   {
     hour: 19.4,
@@ -244,6 +252,7 @@ const KEYFRAMES: Keyframe[] = [
     cloudColor: "#685068",
     showClouds: true,
     starOpacity: 0.35,
+    buildingGlow: 0.9,
   },
   {
     hour: 21.5,
@@ -274,6 +283,7 @@ const KEYFRAMES: Keyframe[] = [
     cloudColor: "#2a3348",
     showClouds: true,
     starOpacity: 1,
+    buildingGlow: 1,
   },
   {
     // Wrap for midnight lerp from late night
@@ -305,6 +315,7 @@ const KEYFRAMES: Keyframe[] = [
     cloudColor: "#2a3348",
     showClouds: true,
     starOpacity: 1,
+    buildingGlow: 1,
   },
 ];
 
@@ -356,6 +367,7 @@ function mixKeyframe(a: Keyframe, b: Keyframe, t: number): Atmosphere {
     cloudColor: lerpHex(a.cloudColor, b.cloudColor, soft),
     showClouds: soft < 0.5 ? a.showClouds : b.showClouds,
     starOpacity: lerpNum(a.starOpacity, b.starOpacity, soft),
+    buildingGlow: lerpNum(a.buildingGlow, b.buildingGlow, soft),
   };
 }
 

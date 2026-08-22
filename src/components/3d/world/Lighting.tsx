@@ -4,6 +4,7 @@ import { useThree } from "@react-three/fiber";
 import { MeshLambertMaterial } from "three";
 import { sampleAtmosphere, type Atmosphere } from "@/systems/dayNight";
 import { useAppStore } from "@/systems/store";
+import { NightBuildingLights } from "./NightBuildingLights";
 
 /** Soft billowy patches — kept within the campus camera far plane. */
 const PATCHES = [
@@ -135,6 +136,7 @@ export function Lighting() {
         color={sky.porchColor}
       />
       <directionalLight position={[-22, 14, -8]} intensity={rimI} color={sky.rimColor} />
+      <NightBuildingLights glow={sky.buildingGlow} enabled={!museum} />
     </>
   );
 }

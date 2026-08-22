@@ -50,6 +50,15 @@ export const glass = new MeshStandardMaterial({
   emissiveIntensity: 0.15,
 });
 
+/** Extra facade panes that only read as lit at night (intensity driven in Lighting). */
+export const litWindow = new MeshStandardMaterial({
+  color: "#1c160c",
+  emissive: "#ffb45a",
+  emissiveIntensity: 0,
+  roughness: 0.4,
+  metalness: 0.08,
+});
+
 export const roofCopper = new MeshStandardMaterial({
   color: "#5f6e4e",
   roughness: 0.55,
