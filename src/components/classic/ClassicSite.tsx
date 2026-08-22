@@ -9,7 +9,6 @@ import { ClassicHeader, CLASSIC_NAV } from "./ClassicHeader";
 import { ContactSection } from "./ContactSection";
 import { ProjectGrid } from "./ProjectGrid";
 import { Reveal, SectionHeading } from "./Reveal";
-import { SkillsCloud } from "./SkillsCloud";
 import { useClassicMotion } from "./motion";
 
 function useActiveSection(ids: readonly string[]) {
@@ -173,7 +172,6 @@ export function ClassicSite() {
             </div>
           </section>
 
-          <SkillsCloud projects={galleryPieces} />
           <ProjectGrid projects={galleryPieces} />
 
           <section
