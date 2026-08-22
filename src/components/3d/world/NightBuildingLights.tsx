@@ -1,16 +1,21 @@
 import { useEffect } from "react";
 import {
   AWARDS_X,
+  GALLERY_DOOR_HEIGHT,
+  GALLERY_SIZE_X,
   GALLERY_X,
   GALLERY_Z,
   HALL_Y,
   HALL_Z,
+  awardsDoorX,
+  galleryDoorX,
 } from "@/systems/campusLayout";
 import { getTerrainHeight } from "@/systems/terrain";
-import { doorGlass, glass, litWindow } from "./materials";
+import { doorGlass, glass, litWindow, signLamp } from "./materials";
 
 const WARM = "#ffc078";
 const WARM_SOFT = "#ffd6a0";
+const BANNER_Z = [32, 22, 12, 2, -8] as const;
 
 function syncWindowMaterials(glow: number) {
   const g = Math.max(0, Math.min(1, glow));
@@ -20,6 +25,7 @@ function syncWindowMaterials(glow: number) {
   doorGlass.emissiveIntensity = 0.1 + g * 1.8;
   litWindow.emissiveIntensity = g * 2.8;
   litWindow.opacity = 1;
+  signLamp.emissiveIntensity = g * 3.2;
 }
 
 function WindowPane({
@@ -36,6 +42,30 @@ function WindowPane({
   );
 }
 
+function SignFixture({
+  position,
+  intensity,
+  distance = 5.5,
+}: {
+  position: [number, number, number];
+  intensity: number;
+  distance?: number;
+}) {
+  if (intensity < 0.04) return null;
+  return (
+    <group position={position}>
+      <mesh position={[0, 0.06, 0]} material={signLamp}>
+        <sphereGeometry args={[0.055, 10, 8]} />
+      </mesh>
+      <mesh position={[0, 0.02, -0.08]} rotation={[0.55, 0, 0]}>
+        <cylinderGeometry args={[0.018, 0.022, 0.22, 8]} />
+        <meshStandardMaterial color="#3a3228" roughness={0.55} metalness={0.35} />
+      </mesh>
+      <pointLight position={[0, -0.05, 0.12]} intensity={intensity} distance={distance} decay={2} color={WARM_SOFT} />
+    </group>
+  );
+}
+
 function BascomWash({ glow }: { glow: number }) {
   const i = glow * 2.4;
   if (i < 0.05) return null;
@@ -47,6 +77,7 @@ function BascomWash({ glow }: { glow: number }) {
       <pointLight position={[-16.5, HALL_Y + 4.2, HALL_Z + 6.5]} intensity={i * 0.7} distance={14} decay={2} color={WARM} />
       <pointLight position={[16.5, HALL_Y + 4.2, HALL_Z + 6.5]} intensity={i * 0.7} distance={14} decay={2} color={WARM} />
       <pointLight position={[0, HALL_Y + 3.2, HALL_Z + 11.2]} intensity={i * 0.9} distance={12} decay={2} color={WARM_SOFT} />
+      <SignFixture position={[0, HALL_Y + 6.35, HALL_Z + 7.05]} intensity={glow * 1.35} distance={7} />
     </group>
   );
 }
@@ -79,7 +110,6 @@ function SideBuildingWindows({ glow }: { glow: number }) {
           color={WARM}
         />
       ) : null}
-      {/* East face hint */}
       {[-2, 0, 2].map((z) => (
         <WindowPane
           key={`e-${z}`}
@@ -101,7 +131,7 @@ function GalleryWindows({
   glow: number;
 }) {
   const y = getTerrainHeight(x, GALLERY_Z);
-  const faceX = x + doorSign * (8.8 / 2 + 0.05);
+  const faceX = x + doorSign * (GALLERY_SIZE_X / 2 + 0.05);
   const i = glow * 1.35;
   const zs = [-4.2, -2.1, 2.1, 4.2];
   return (
@@ -125,7 +155,55 @@ function GalleryWindows({
   );
 }
 
-/** Warm interior window glow + facade lamps that ramp up after dusk. */
+/** W banners, wayfinding planks, and gallery door titles. */
+function SignLights({ glow }: { glow: number }) {
+  const i = glow * 1.05;
+  if (i < 0.04) return null;
+
+  const wayfindZ = GALLERY_Z + 2.55;
+  const projectsY = getTerrainHeight(5.22, wayfindZ);
+  const awardsY = getTerrainHeight(-5.22, wayfindZ);
+
+  const projectsDoor = galleryDoorX();
+  const awardsDoor = awardsDoorX();
+  const projectsSignY = getTerrainHeight(projectsDoor, GALLERY_Z) + GALLERY_DOOR_HEIGHT + 0.72;
+  const awardsSignY = getTerrainHeight(awardsDoor, GALLERY_Z) + GALLERY_DOOR_HEIGHT + 0.72;
+
+  return (
+    <group>
+      {BANNER_Z.map((z) =>
+        ([-8.6, 8.6] as const).map((x) => {
+          const y = getTerrainHeight(x, z);
+          const clothX = x > 0 ? x - 0.4 : x + 0.4;
+          return (
+            <SignFixture
+              key={`banner-${x}-${z}`}
+              position={[clothX, y + 2.95, z]}
+              intensity={i * 0.95}
+              distance={5.2}
+            />
+          );
+        }),
+      )}
+
+      <SignFixture position={[5.22, projectsY + 1.85, wayfindZ + 0.35]} intensity={i * 1.25} distance={6} />
+      <SignFixture position={[-5.22, awardsY + 1.95, wayfindZ + 0.35]} intensity={i * 1.25} distance={6} />
+
+      <SignFixture
+        position={[projectsDoor - 0.55, projectsSignY, GALLERY_Z]}
+        intensity={i * 1.4}
+        distance={6.5}
+      />
+      <SignFixture
+        position={[awardsDoor + 0.55, awardsSignY, GALLERY_Z]}
+        intensity={i * 1.4}
+        distance={6.5}
+      />
+    </group>
+  );
+}
+
+/** Warm interior window glow + facade / sign lamps that ramp up after dusk. */
 export function NightBuildingLights({ glow, enabled }: { glow: number; enabled: boolean }) {
   useEffect(() => {
     syncWindowMaterials(enabled ? glow : 0);
@@ -140,6 +218,7 @@ export function NightBuildingLights({ glow, enabled }: { glow: number; enabled: 
       <SideBuildingWindows glow={glow} />
       <GalleryWindows x={GALLERY_X} doorSign={-1} glow={glow} />
       <GalleryWindows x={AWARDS_X} doorSign={1} glow={glow} />
+      <SignLights glow={glow} />
     </group>
   );
 }
