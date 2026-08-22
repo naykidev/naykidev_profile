@@ -39,9 +39,9 @@ export function CampusScene() {
           powerPreference: "high-performance",
           stencil: false,
         }}
-        camera={{ fov: coarse ? 62 : 50, near: 0.12, far: 180, position: [8, 4, 28] }}
+        camera={{ fov: coarse ? 62 : 50, near: 0.12, far: 200, position: [8, 4, 28] }}
         onCreated={({ gl }) => {
-          gl.setClearColor("#c9d4e0");
+          gl.setClearColor("#9eb8d4");
           gl.shadowMap.enabled = !reducedMotion && !coarse;
           gl.shadowMap.type = PCFSoftShadowMap;
         }}
