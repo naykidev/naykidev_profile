@@ -185,20 +185,19 @@ function GroundCan({
 }
 
 /**
- * Long linear fixture mounted above a door title — even wash across lettering.
- * `axis` is the sign's width direction in world space.
+ * Picture-light style bar for door titles: sits forward of the sign face,
+ * hooded so light washes the lettering instead of the brick above.
+ * `outward` points from the wall toward the mall / viewer.
  */
 function SignBarFixture({
-  position,
-  target,
-  axis = "z",
-  length = 2.85,
+  signCenter,
+  outward,
+  length = 2.9,
   glow,
   strength = 1,
 }: {
-  position: [number, number, number];
-  target: [number, number, number];
-  axis?: "z" | "x";
+  signCenter: [number, number, number];
+  outward: [number, number, number];
   length?: number;
   glow: number;
   strength?: number;
@@ -206,78 +205,77 @@ function SignBarFixture({
   const g = glow * strength;
   if (g < 0.04) return null;
 
-  const alongZ = axis === "z";
-  const glass: [number, number, number] = alongZ ? [0.045, 0.03, length - 0.12] : [length - 0.12, 0.03, 0.045];
-  const canopy: [number, number, number] = alongZ
-    ? [0.08, 0.04, length + 0.06]
-    : [length + 0.06, 0.04, 0.08];
+  const forward = 0.36;
+  const above = 0.42;
+  const ox = outward[0];
+  const oz = outward[2];
 
-  const offsetA: [number, number, number] = alongZ
-    ? [position[0], position[1], position[2] - length * 0.28]
-    : [position[0] - length * 0.28, position[1], position[2]];
-  const offsetB: [number, number, number] = alongZ
-    ? [position[0], position[1], position[2] + length * 0.28]
-    : [position[0] + length * 0.28, position[1], position[2]];
-  const targetA: [number, number, number] = alongZ
-    ? [target[0], target[1], target[2] - 0.55]
-    : [target[0] - 0.55, target[1], target[2]];
-  const targetB: [number, number, number] = alongZ
-    ? [target[0], target[1], target[2] + 0.55]
-    : [target[0] + 0.55, target[1], target[2]];
+  const pos: [number, number, number] = [
+    signCenter[0] + ox * forward,
+    signCenter[1] + above,
+    signCenter[2] + oz * forward,
+  ];
+  const aim: [number, number, number] = [signCenter[0], signCenter[1] - 0.04, signCenter[2]];
+
+  // Arm stub toward the wall (= -outward)
+  const armX = -ox * 0.1;
+  const hoodTilt = ox < 0 ? 0.65 : -0.65;
+
+  const lightPos: [number, number, number] = [pos[0], pos[1] - 0.1, pos[2]];
+  const sideA: [number, number, number] = [pos[0], pos[1] - 0.08, pos[2] - length * 0.24];
+  const sideB: [number, number, number] = [pos[0], pos[1] - 0.08, pos[2] + length * 0.24];
+  const aimA: [number, number, number] = [aim[0], aim[1], aim[2] - 0.75];
+  const aimB: [number, number, number] = [aim[0], aim[1], aim[2] + 0.75];
 
   return (
     <>
-      <group position={position}>
-        <mesh position={[0, 0.02, 0]} material={bollardBronze} castShadow>
-          <boxGeometry args={canopy} />
+      <group position={pos}>
+        <mesh position={[armX, 0.015, 0]} material={bollardBronze} castShadow>
+          <boxGeometry args={[0.2, 0.032, 0.045]} />
         </mesh>
-        <mesh
-          position={alongZ ? [0, 0, -length / 2] : [-length / 2, 0, 0]}
-          material={bollardBronze}
-        >
-          <boxGeometry args={[0.09, 0.07, 0.06]} />
+        <mesh rotation={[Math.PI / 2, 0, 0]} material={bollardBronze} castShadow>
+          <cylinderGeometry args={[0.026, 0.026, length, 14]} />
         </mesh>
-        <mesh
-          position={alongZ ? [0, 0, length / 2] : [length / 2, 0, 0]}
-          material={bollardBronze}
-        >
-          <boxGeometry args={[0.09, 0.07, 0.06]} />
+        <mesh position={[-ox * 0.02, -0.03, 0]} material={bollardGlass}>
+          <boxGeometry args={[0.035, 0.018, length - 0.18]} />
         </mesh>
-        <mesh position={[0, -0.02, 0]} material={bollardGlass}>
-          <boxGeometry args={glass} />
+        <mesh position={[-ox * 0.01, 0.04, 0]} rotation={[0, 0, hoodTilt]} material={bollardBronze} castShadow>
+          <boxGeometry args={[0.13, 0.016, length + 0.1]} />
+        </mesh>
+        <mesh position={[-ox * 0.04, 0.015, 0]} rotation={[0, 0, hoodTilt * 1.35]} material={bollardBronze}>
+          <boxGeometry args={[0.07, 0.012, length + 0.04]} />
+        </mesh>
+        <mesh position={[0, 0, -length / 2]} material={bollardBronze}>
+          <sphereGeometry args={[0.03, 10, 8]} />
+        </mesh>
+        <mesh position={[0, 0, length / 2]} material={bollardBronze}>
+          <sphereGeometry args={[0.03, 10, 8]} />
         </mesh>
       </group>
 
       <AimedSpot
-        position={[position[0], position[1] - 0.04, position[2]]}
-        target={target}
-        intensity={0.55 + g * 0.7}
-        distance={4.2}
-        angle={0.85}
+        position={lightPos}
+        target={aim}
+        intensity={0.85 + g * 0.5}
+        distance={3.4}
+        angle={Math.PI / 3}
         penumbra={0.8}
       />
       <AimedSpot
-        position={offsetA}
-        target={targetA}
-        intensity={0.35 + g * 0.4}
-        distance={3.8}
-        angle={0.7}
-        penumbra={0.75}
+        position={sideA}
+        target={aimA}
+        intensity={0.45 + g * 0.32}
+        distance={3.2}
+        angle={Math.PI / 4}
+        penumbra={0.8}
       />
       <AimedSpot
-        position={offsetB}
-        target={targetB}
-        intensity={0.35 + g * 0.4}
-        distance={3.8}
-        angle={0.7}
-        penumbra={0.75}
-      />
-      <pointLight
-        position={[position[0], position[1] - 0.02, position[2]]}
-        intensity={0.14 + g * 0.16}
-        distance={3.5}
-        decay={2}
-        color={LED_SOFT}
+        position={sideB}
+        target={aimB}
+        intensity={0.45 + g * 0.32}
+        distance={3.2}
+        angle={Math.PI / 4}
+        penumbra={0.8}
       />
     </>
   );
@@ -569,20 +567,18 @@ function SignAndEntranceLights({ glow }: { glow: number }) {
       />
 
       <SignBarFixture
-        position={[projectsDoor - 0.38, projectsSign[1] + 0.32, GALLERY_Z]}
-        target={[projectsSign[0], projectsSign[1], GALLERY_Z]}
+        signCenter={[projectsSign[0], projectsSign[1], GALLERY_Z]}
+        outward={[-1, 0, 0]}
         glow={glow}
-        strength={1.2}
+        strength={1.25}
         length={2.9}
-        axis="z"
       />
       <SignBarFixture
-        position={[awardsDoor + 0.38, awardsSign[1] + 0.32, GALLERY_Z]}
-        target={[awardsSign[0], awardsSign[1], GALLERY_Z]}
+        signCenter={[awardsSign[0], awardsSign[1], GALLERY_Z]}
+        outward={[1, 0, 0]}
         glow={glow}
-        strength={1.2}
+        strength={1.25}
         length={2.9}
-        axis="z"
       />
     </group>
   );
