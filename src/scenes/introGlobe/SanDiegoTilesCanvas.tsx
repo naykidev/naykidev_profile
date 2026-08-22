@@ -67,8 +67,8 @@ export function SanDiegoTilesCanvas({
           alpha: false,
           powerPreference: "high-performance",
         }}
-        camera={{ fov: 50, near: 0.4, far: 280, position: [...COAST_CAMERA_START] }}
-        style={{ width: "100%", height: "100%", display: "block", background: "#e4ddd0" }}
+        camera={{ fov: 50, near: 0.4, far: 520, position: [...COAST_CAMERA_START] }}
+        style={{ width: "100%", height: "100%", display: "block", background: "#c5d8ec" }}
       >
         <SanDiegoWorld
           elapsed={elapsed ?? 0}

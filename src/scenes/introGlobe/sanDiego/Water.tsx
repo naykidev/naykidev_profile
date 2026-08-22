@@ -12,9 +12,14 @@ export function Water() {
   });
 
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[62, -0.45, 0]}>
-      <planeGeometry args={[130, 180, 40, 28]} />
-      <shaderMaterial ref={mat} uniforms={uniforms} vertexShader={waterVertex} fragmentShader={waterFragment} />
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[90, -0.48, 0]} frustumCulled={false}>
+      <planeGeometry args={[420, 460, 48, 36]} />
+      <shaderMaterial
+        ref={mat}
+        uniforms={uniforms}
+        vertexShader={waterVertex}
+        fragmentShader={waterFragment}
+      />
     </mesh>
   );
 }
@@ -23,7 +28,7 @@ export function Water() {
 export function Surf() {
   const pieces = useMemo(() => {
     const out: { x: number; z: number; r: number }[] = [];
-    for (let z = -48; z <= 48; z += 3.2) {
+    for (let z = -72; z <= 72; z += 3.4) {
       const x = shoreXAt(z) + 3.4;
       const nx = shoreXAt(z + 1.2) + 3.4;
       out.push({ x, z, r: Math.atan2(nx - x, 1.2) });
@@ -35,7 +40,7 @@ export function Surf() {
     <group>
       {pieces.map((p) => (
         <mesh key={p.z} position={[p.x, -0.22, p.z]} rotation={[0, p.r, 0]}>
-          <boxGeometry args={[0.55, 0.08, 3.4]} />
+          <boxGeometry args={[0.55, 0.08, 3.5]} />
           <meshLambertMaterial color="#f4f7fb" />
         </mesh>
       ))}

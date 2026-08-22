@@ -4,6 +4,7 @@ import { CameraRig } from "./CameraRig";
 import { Cliffs } from "./Cliffs";
 import { Clouds } from "./Clouds";
 import { Details } from "./Details";
+import { DistantIslets } from "./DistantIslets";
 import { Lighting } from "./Lighting";
 import { Mountains } from "./Mountains";
 import { Palms } from "./Palms";
@@ -30,6 +31,7 @@ export function SanDiegoWorld({
       <Terrain />
       <Cliffs />
       <Mountains />
+      <DistantIslets />
       <Suspense fallback={null}>
         <Palms />
       </Suspense>

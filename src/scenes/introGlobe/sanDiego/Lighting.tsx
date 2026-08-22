@@ -1,10 +1,13 @@
+/** Horizon-matched fog + soft warm coastal sunlight. */
 export function Lighting() {
   return (
     <>
-      <fog attach="fog" args={["#e4ddd0", 38, 92]} />
-      <ambientLight intensity={1.05} color="#fff4e6" />
-      <hemisphereLight args={["#e7ece8", "#cbb892", 0.55]} />
-      <directionalLight position={[-16, 40, 22]} intensity={1.35} color="#fff6e4" />
+      <color attach="background" args={["#c5d8ec"]} />
+      <fog attach="fog" args={["#c5d8ec", 55, 240]} />
+      <ambientLight intensity={0.72} color="#fff6ea" />
+      <hemisphereLight args={["#d8e8f8", "#c4b090", 0.62]} />
+      <directionalLight position={[-22, 48, 18]} intensity={1.15} color="#fff2d8" />
+      <directionalLight position={[30, 18, -12]} intensity={0.28} color="#a8c4e0" />
     </>
   );
 }

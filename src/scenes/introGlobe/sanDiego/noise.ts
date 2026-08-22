@@ -39,9 +39,36 @@ export function coastHeight(x: number, z: number) {
   }
   if (x > edge - 1.2) {
     const t = Math.min(1, (x - (edge - 1.2)) / 5.5);
-    h = h * (1 - t) + (-0.06) * t;
+    h = h * (1 - t) + -0.06 * t;
   }
   if (x > edge + 4.8) h = -0.42;
-  h -= (x * x + z * z) * 0.00022;
+  // Mild bowl only in the playable cove — avoids a hard cliff at the mesh rim
+  const r2 = x * x + z * z;
+  h -= Math.min(1.8, r2 * 0.00018);
+  return h;
+}
+
+/**
+ * Extended landscape height for the large surround mesh.
+ * Continues hills/coast without the playable-area bowl, so fog can hide
+ * the far rim instead of showing a triangular cut.
+ */
+export function coastHeightFar(x: number, z: number) {
+  const hills =
+    Math.sin(x * 0.028 + 0.2) * 2.4 +
+    Math.cos(z * 0.024) * 2.8 +
+    Math.sin((x * 0.55 + z) * 0.018) * 1.4 +
+    valueNoise(x * 0.028, z * 0.026) * 2.1 +
+    valueNoise(x * 0.012 + 9, z * 0.011) * 3.2;
+  let h = 1.6 + hills * 0.85;
+  const edge = shoreXAt(z) + Math.sin(z * 0.015) * 8;
+  if (x > edge - 2) {
+    const t = Math.min(1, (x - (edge - 2)) / 18);
+    h = h * (1 - t) + -0.35 * t;
+  }
+  if (x > edge + 14) h = -0.5;
+  // Soft inland rise toward distant ridges (never a sharp drop at mesh edge)
+  const inland = Math.max(0, edge - x - 30);
+  h += Math.min(4.5, inland * 0.04) * (0.55 + valueNoise(x * 0.008, z * 0.008) * 0.45);
   return h;
 }

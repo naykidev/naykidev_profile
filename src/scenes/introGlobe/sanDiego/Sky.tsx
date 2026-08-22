@@ -3,9 +3,14 @@ import { skyFragment, skyVertex } from "./shaders/sky";
 
 export function SkyDome() {
   return (
-    <mesh>
-      <sphereGeometry args={[380, 24, 16]} />
-      <shaderMaterial vertexShader={skyVertex} fragmentShader={skyFragment} side={BackSide} depthWrite={false} />
+    <mesh frustumCulled={false}>
+      <sphereGeometry args={[460, 32, 20]} />
+      <shaderMaterial
+        vertexShader={skyVertex}
+        fragmentShader={skyFragment}
+        side={BackSide}
+        depthWrite={false}
+      />
     </mesh>
   );
 }

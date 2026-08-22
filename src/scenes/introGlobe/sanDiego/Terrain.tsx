@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import { BufferAttribute, Color, PlaneGeometry } from "three";
-import { coastHeight, hash2, shoreXAt } from "./noise";
+import { coastHeight, coastHeightFar, hash2, shoreXAt } from "./noise";
 import { dirtRut, neighborhoodDeck, onPavement } from "./townLayout";
 
-function makeLayer(width: number, depth: number, segX: number, segZ: number) {
+function makePlayableLand(width: number, depth: number, segX: number, segZ: number) {
   const geo = new PlaneGeometry(width, depth, segX, segZ);
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position;
@@ -47,16 +47,63 @@ function makeLayer(width: number, depth: number, segX: number, segZ: number) {
   return geo;
 }
 
+/** Large low-detail skirt — continues the coast so the camera never sees a mesh cliff. */
+function makeSurroundLand(width: number, depth: number, segX: number, segZ: number) {
+  const geo = new PlaneGeometry(width, depth, segX, segZ);
+  geo.rotateX(-Math.PI / 2);
+  const pos = geo.attributes.position;
+  const colors = new Float32Array(pos.count * 3);
+  const lush = new Color(0x6f9e4e);
+  const hill = new Color(0x5f8a42);
+  const ridge = new Color(0x7a9270);
+  const sand = new Color(0xdccfa0);
+  const haze = new Color(0xb8c8b0);
+  const mixed = new Color();
+  for (let i = 0; i < pos.count; i += 1) {
+    const x = pos.getX(i);
+    const z = pos.getZ(i);
+    // Sit under the detailed playable mesh to avoid z-fight / hard skirts
+    const inCore = Math.abs(x) < 82 && Math.abs(z) < 72;
+    let h = coastHeightFar(x, z);
+    if (inCore) {
+      h = Math.min(h, coastHeight(x, z) - 0.55);
+    }
+    pos.setY(i, h);
+    const n = hash2(x * 0.11, z * 0.09);
+    const edge = shoreXAt(z);
+    const dist = Math.sqrt(x * x + z * z);
+    const hazeT = Math.min(1, Math.max(0, (dist - 90) / 140));
+    if (x > edge + 1) mixed.copy(sand).lerp(haze, 0.25 + n * 0.2);
+    else mixed.copy(hill).lerp(lush, n * 0.55).lerp(ridge, Math.min(1, Math.max(0, -x / 80)));
+    mixed.lerp(haze, hazeT * 0.65);
+    colors[i * 3] = mixed.r;
+    colors[i * 3 + 1] = mixed.g;
+    colors[i * 3 + 2] = mixed.b;
+  }
+  geo.setAttribute("color", new BufferAttribute(colors, 3));
+  geo.computeVertexNormals();
+  return geo;
+}
+
 export function Terrain() {
   const coarse =
     typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
   const land = useMemo(
-    () => makeLayer(170, 150, coarse ? 72 : 110, coarse ? 60 : 96),
+    () => makePlayableLand(170, 150, coarse ? 72 : 110, coarse ? 60 : 96),
+    [coarse],
+  );
+  const surround = useMemo(
+    () => makeSurroundLand(520, 480, coarse ? 48 : 72, coarse ? 42 : 64),
     [coarse],
   );
   return (
-    <mesh geometry={land}>
-      <meshLambertMaterial vertexColors flatShading />
-    </mesh>
+    <group>
+      <mesh geometry={surround} frustumCulled={false}>
+        <meshLambertMaterial vertexColors flatShading />
+      </mesh>
+      <mesh geometry={land}>
+        <meshLambertMaterial vertexColors flatShading />
+      </mesh>
+    </group>
   );
 }
