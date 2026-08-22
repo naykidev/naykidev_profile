@@ -1,8 +1,11 @@
-import { Cloud, Clouds, Sky } from "@react-three/drei";
+import { useEffect, useState } from "react";
+import { Cloud, Clouds, Sky, Stars } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
 import { MeshLambertMaterial } from "three";
+import { sampleAtmosphere, type Atmosphere } from "@/systems/dayNight";
 import { useAppStore } from "@/systems/store";
 
-/** Soft billowy patches — kept within the campus camera far plane (~180). */
+/** Soft billowy patches — kept within the campus camera far plane. */
 const PATCHES = [
   { seed: 1, position: [-28, 48, -55] as const, bounds: [22, 5, 10] as const, volume: 18, segments: 32 },
   { seed: 2, position: [18, 52, -62] as const, bounds: [20, 4.5, 9] as const, volume: 16, segments: 28 },
@@ -13,30 +16,77 @@ const PATCHES = [
   { seed: 7, position: [-22, 42, 35] as const, bounds: [15, 3.5, 7] as const, volume: 11, segments: 22 },
 ] as const;
 
+function useClockAtmosphere() {
+  const [sky, setSky] = useState<Atmosphere>(() => sampleAtmosphere());
+
+  useEffect(() => {
+    const tick = () => setSky(sampleAtmosphere());
+    tick();
+    const id = window.setInterval(tick, 30_000);
+    const onVis = () => {
+      if (document.visibilityState === "visible") tick();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, []);
+
+  return sky;
+}
+
+function ClearColorSync({ color }: { color: string }) {
+  const gl = useThree((s) => s.gl);
+  useEffect(() => {
+    gl.setClearColor(color);
+  }, [gl, color]);
+  return null;
+}
+
 export function Lighting() {
   const interior = useAppStore((s) => s.interior);
   const gpuShadows = useAppStore((s) => s.gpuShadows);
   const reducedMotion = useAppStore((s) => s.reducedMotion);
   const museum = interior === "gallery" || interior === "awards";
   const drift = reducedMotion ? 0 : 0.12;
+  const sky = useClockAtmosphere();
+
+  const ambientI = museum ? Math.min(sky.ambientIntensity, 0.42) : sky.ambientIntensity;
+  const hemiI = museum ? Math.min(sky.hemiIntensity, 0.2) : sky.hemiIntensity;
+  const sunI = museum ? Math.min(sky.sunIntensity, 0.28) : sky.sunIntensity;
+  const fillI = museum ? Math.min(sky.fillIntensity, 0.08) : sky.fillIntensity;
+  const rimI = museum ? Math.min(sky.rimIntensity, 0.05) : sky.rimIntensity;
+  const porchI = museum ? Math.min(sky.porchIntensity, 0.15) : sky.porchIntensity;
 
   return (
     <>
-      {/* Matches horizon so clear-color flashes don't look flat grey. */}
-      <color attach="background" args={["#9eb8d4"]} />
-      <fog attach="fog" args={["#c5d4e4", 62, 155]} />
+      <ClearColorSync color={sky.background} />
+      <color attach="background" args={[sky.background]} />
+      <fog key={sky.fog} attach="fog" args={[sky.fog, sky.fogNear, sky.fogFar]} />
 
-      {/* Default Sky distance is 1000 — beyond camera.far (180) — so it never drew. */}
       <Sky
         distance={95}
-        sunPosition={[32, 48, 28]}
-        turbidity={2.6}
-        rayleigh={1.05}
-        mieCoefficient={0.0035}
-        mieDirectionalG={0.82}
+        sunPosition={sky.sunPosition}
+        turbidity={sky.turbidity}
+        rayleigh={sky.rayleigh}
+        mieCoefficient={sky.mieCoefficient}
+        mieDirectionalG={sky.mieDirectionalG}
       />
 
-      {!museum ? (
+      {!museum && sky.starOpacity > 0.05 ? (
+        <Stars
+          radius={90}
+          depth={42}
+          count={reducedMotion ? 600 : 1600}
+          factor={3.2}
+          saturation={0}
+          fade
+          speed={reducedMotion ? 0 : 0.15}
+        />
+      ) : null}
+
+      {!museum && sky.showClouds ? (
         <Clouds material={MeshLambertMaterial} frustumCulled={false} limit={280}>
           {PATCHES.map((patch) => (
             <Cloud
@@ -49,21 +99,21 @@ export function Lighting() {
               concentrate="inside"
               growth={4}
               speed={drift}
-              opacity={0.88}
+              opacity={sky.cloudOpacity}
               fade={28}
-              color="#f4f7fb"
+              color={sky.cloudColor}
             />
           ))}
         </Clouds>
       ) : null}
 
-      <ambientLight intensity={museum ? 0.42 : 0.52} color="#fff6ea" />
-      <hemisphereLight args={["#dce8f5", "#5a6e48", museum ? 0.2 : 0.48]} />
+      <ambientLight intensity={ambientI} color={sky.ambientColor} />
+      <hemisphereLight color={sky.hemiSky} groundColor={sky.hemiGround} intensity={hemiI} />
       <directionalLight
-        position={[18, 36, 42]}
-        intensity={museum ? 0.28 : 1.85}
-        color="#ffe6b8"
-        castShadow={!museum && gpuShadows}
+        position={sky.sunPosition}
+        intensity={sunI}
+        color={sky.sunColor}
+        castShadow={!museum && gpuShadows && sky.sunIntensity > 0.4}
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
         shadow-camera-near={2}
@@ -76,15 +126,15 @@ export function Lighting() {
         shadow-normalBias={0.035}
         shadow-radius={2.5}
       />
-      <directionalLight position={[6, 14, 22]} intensity={museum ? 0.08 : 0.5} color="#ffe9c4" />
+      <directionalLight position={[6, 14, 22]} intensity={fillI} color={sky.fillColor} />
       <pointLight
         position={[0, 9.4, -16.4]}
-        intensity={museum ? 0.15 : 1.35}
+        intensity={porchI}
         distance={16}
         decay={2}
-        color="#ffe6c2"
+        color={sky.porchColor}
       />
-      <directionalLight position={[-22, 14, -8]} intensity={museum ? 0.05 : 0.28} color="#a8c0dc" />
+      <directionalLight position={[-22, 14, -8]} intensity={rimI} color={sky.rimColor} />
     </>
   );
 }
