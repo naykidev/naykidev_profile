@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Cloud, Clouds, Sky, Stars } from "@react-three/drei";
+import { Cloud, Clouds, Sky } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { MeshLambertMaterial } from "three";
 import { sampleAtmosphere, type Atmosphere } from "@/systems/dayNight";
 import { useAppStore } from "@/systems/store";
 import { CampusBloom } from "./CampusBloom";
 import { NightBuildingLights } from "./NightBuildingLights";
+import { MoonLight, NightSkyDome } from "./NightSky";
 
 /** Soft billowy patches — kept within the campus camera far plane. */
 const PATCHES = [
@@ -54,6 +55,7 @@ export function Lighting() {
   const drift = reducedMotion ? 0 : 0.12;
   const sky = useClockAtmosphere();
   const night = sky.buildingGlow;
+  const nightSky = sky.starOpacity;
 
   const ambientI = museum ? Math.min(sky.ambientIntensity, 0.42) : sky.ambientIntensity;
   const hemiI = museum ? Math.min(sky.hemiIntensity, 0.2) : sky.hemiIntensity;
@@ -62,34 +64,32 @@ export function Lighting() {
   const rimI = museum ? Math.min(sky.rimIntensity, 0.05) : sky.rimIntensity;
   const porchI = museum ? Math.min(sky.porchIntensity, 0.15) : sky.porchIntensity;
 
+  // Prefer procedural night dome once stars dominate; keep drei Sky for day/dusk.
+  const useNightDome = !museum && nightSky > 0.28;
+  const showDaySky = !museum && !useNightDome;
+  // Mute day-style clouds at night — haze lives in the dome + fog instead.
+  const showClouds = !museum && sky.showClouds && nightSky < 0.45;
+
   return (
     <>
       <ClearColorSync color={sky.background} />
       <color attach="background" args={[sky.background]} />
       <fog key={sky.fog} attach="fog" args={[sky.fog, sky.fogNear, sky.fogFar]} />
 
-      <Sky
-        distance={95}
-        sunPosition={sky.sunPosition}
-        turbidity={sky.turbidity}
-        rayleigh={sky.rayleigh}
-        mieCoefficient={sky.mieCoefficient}
-        mieDirectionalG={sky.mieDirectionalG}
-      />
-
-      {!museum && sky.starOpacity > 0.05 ? (
-        <Stars
-          radius={90}
-          depth={42}
-          count={reducedMotion ? 600 : 1600}
-          factor={3.2}
-          saturation={0}
-          fade
-          speed={reducedMotion ? 0 : 0.15}
+      {showDaySky ? (
+        <Sky
+          distance={95}
+          sunPosition={sky.sunPosition}
+          turbidity={sky.turbidity}
+          rayleigh={sky.rayleigh}
+          mieCoefficient={sky.mieCoefficient}
+          mieDirectionalG={sky.mieDirectionalG}
         />
       ) : null}
 
-      {!museum && sky.showClouds ? (
+      {useNightDome ? <NightSkyDome opacity={nightSky} reducedMotion={reducedMotion} /> : null}
+
+      {showClouds ? (
         <Clouds material={MeshLambertMaterial} frustumCulled={false} limit={280}>
           {PATCHES.map((patch) => (
             <Cloud
@@ -102,7 +102,7 @@ export function Lighting() {
               concentrate="inside"
               growth={4}
               speed={drift}
-              opacity={sky.cloudOpacity}
+              opacity={sky.cloudOpacity * (1 - nightSky * 0.7)}
               fade={28}
               color={sky.cloudColor}
             />
@@ -113,15 +113,16 @@ export function Lighting() {
       <ambientLight intensity={ambientI} color={sky.ambientColor} />
       <hemisphereLight color={sky.hemiSky} groundColor={sky.hemiGround} intensity={hemiI} />
 
-      {/* Night fill — cinematic visibility without washing fixtures */}
+      {/* Cool moonlight + slight warm residual so fixtures stay the hero */}
       {!museum && night > 0.15 ? (
         <>
+          <MoonLight intensity={0.12 + night * 0.14} />
           <hemisphereLight
-            color="#1e2438"
-            groundColor="#0c0e14"
-            intensity={0.28 + night * 0.26}
+            color="#1a2438"
+            groundColor="#0c1018"
+            intensity={0.22 + night * 0.2}
           />
-          <ambientLight intensity={0.08 + night * 0.12} color="#ffdcc0" />
+          <ambientLight intensity={0.05 + night * 0.07} color="#ffdcc0" />
         </>
       ) : null}
 
