@@ -59,6 +59,15 @@ export const litWindow = new MeshStandardMaterial({
   metalness: 0.08,
 });
 
+/** Tiny gooseneck / sign-lamp bulbs driven with night glow. */
+export const signLamp = new MeshStandardMaterial({
+  color: "#2a2418",
+  emissive: "#ffd08a",
+  emissiveIntensity: 0,
+  roughness: 0.45,
+  metalness: 0.25,
+});
+
 export const roofCopper = new MeshStandardMaterial({
   color: "#5f6e4e",
   roughness: 0.55,
