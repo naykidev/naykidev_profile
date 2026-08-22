@@ -185,49 +185,97 @@ function GroundCan({
 }
 
 /**
- * Vertical bronze wall sconce with frosted panel — for gallery / hall entrances.
+ * Long linear fixture mounted above a door title — even wash across lettering.
+ * `axis` is the sign's width direction in world space.
  */
-function EntranceSconce({
+function SignBarFixture({
   position,
   target,
+  axis = "z",
+  length = 2.85,
   glow,
-  yaw = 0,
   strength = 1,
 }: {
   position: [number, number, number];
   target: [number, number, number];
+  axis?: "z" | "x";
+  length?: number;
   glow: number;
-  yaw?: number;
   strength?: number;
 }) {
   const g = glow * strength;
   if (g < 0.04) return null;
 
+  const alongZ = axis === "z";
+  const glass: [number, number, number] = alongZ ? [0.045, 0.03, length - 0.12] : [length - 0.12, 0.03, 0.045];
+  const canopy: [number, number, number] = alongZ
+    ? [0.08, 0.04, length + 0.06]
+    : [length + 0.06, 0.04, 0.08];
+
+  const offsetA: [number, number, number] = alongZ
+    ? [position[0], position[1], position[2] - length * 0.28]
+    : [position[0] - length * 0.28, position[1], position[2]];
+  const offsetB: [number, number, number] = alongZ
+    ? [position[0], position[1], position[2] + length * 0.28]
+    : [position[0] + length * 0.28, position[1], position[2]];
+  const targetA: [number, number, number] = alongZ
+    ? [target[0], target[1], target[2] - 0.55]
+    : [target[0] - 0.55, target[1], target[2]];
+  const targetB: [number, number, number] = alongZ
+    ? [target[0], target[1], target[2] + 0.55]
+    : [target[0] + 0.55, target[1], target[2]];
+
   return (
     <>
-      <group position={position} rotation={[0, yaw, 0]}>
-        <mesh position={[0, 0, 0]} material={bollardBronze} castShadow>
-          <boxGeometry args={[0.08, 0.42, 0.06]} />
+      <group position={position}>
+        <mesh position={[0, 0.02, 0]} material={bollardBronze} castShadow>
+          <boxGeometry args={canopy} />
         </mesh>
-        <mesh position={[0.02, 0, 0.045]} material={bollardGlass}>
-          <boxGeometry args={[0.04, 0.34, 0.03]} />
+        <mesh
+          position={alongZ ? [0, 0, -length / 2] : [-length / 2, 0, 0]}
+          material={bollardBronze}
+        >
+          <boxGeometry args={[0.09, 0.07, 0.06]} />
         </mesh>
-        <mesh position={[0, 0.24, 0]} material={bollardBronze}>
-          <boxGeometry args={[0.09, 0.04, 0.07]} />
+        <mesh
+          position={alongZ ? [0, 0, length / 2] : [length / 2, 0, 0]}
+          material={bollardBronze}
+        >
+          <boxGeometry args={[0.09, 0.07, 0.06]} />
+        </mesh>
+        <mesh position={[0, -0.02, 0]} material={bollardGlass}>
+          <boxGeometry args={glass} />
         </mesh>
       </group>
+
       <AimedSpot
-        position={[position[0], position[1], position[2]]}
+        position={[position[0], position[1] - 0.04, position[2]]}
         target={target}
-        intensity={0.5 + g * 0.65}
-        distance={5.5}
-        angle={0.55}
-        penumbra={0.7}
+        intensity={0.55 + g * 0.7}
+        distance={4.2}
+        angle={0.85}
+        penumbra={0.8}
+      />
+      <AimedSpot
+        position={offsetA}
+        target={targetA}
+        intensity={0.35 + g * 0.4}
+        distance={3.8}
+        angle={0.7}
+        penumbra={0.75}
+      />
+      <AimedSpot
+        position={offsetB}
+        target={targetB}
+        intensity={0.35 + g * 0.4}
+        distance={3.8}
+        angle={0.7}
+        penumbra={0.75}
       />
       <pointLight
-        position={[position[0], position[1], position[2]]}
-        intensity={0.1 + g * 0.14}
-        distance={4}
+        position={[position[0], position[1] - 0.02, position[2]]}
+        intensity={0.14 + g * 0.16}
+        distance={3.5}
         decay={2}
         color={LED_SOFT}
       />
@@ -436,13 +484,8 @@ function SignAndEntranceLights({ glow }: { glow: number }) {
     GALLERY_Z,
   ];
 
-  // Approach bollards on gallery spurs
-  const spurZL = getTerrainHeight(-7.2, GALLERY_Z);
-  const spurZR = getTerrainHeight(7.2, GALLERY_Z);
-
   return (
     <group>
-      {/* W banners — ground cans aimed at cloth mid */}
       {BANNER_Z.map((z) =>
         ([-8.6, 8.6] as const).map((x) => {
           const y = getTerrainHeight(x, z);
@@ -462,7 +505,6 @@ function SignAndEntranceLights({ glow }: { glow: number }) {
         }),
       )}
 
-      {/* Wayfind wooden signs */}
       <GroundCan
         position={frontOf(projectsOrigin, projectsYaw, 1.05)}
         target={projectsTarget}
@@ -504,9 +546,7 @@ function SignAndEntranceLights({ glow }: { glow: number }) {
         angle={0.7}
       />
 
-      {/* Gallery approach bollards */}
-      <PathwayBollard position={[-7.2, spurZL, GALLERY_Z]} glow={glow} strength={0.9} />
-      <PathwayBollard position={[7.2, spurZR, GALLERY_Z]} glow={glow} strength={0.9} />
+      {/* Flanking entrance bollards only — no fixture in the doorway lane */}
       <PathwayBollard
         position={[projectsDoor - 2.4, projectsDoorY, GALLERY_Z + 1.8]}
         glow={glow}
@@ -528,34 +568,21 @@ function SignAndEntranceLights({ glow }: { glow: number }) {
         strength={0.85}
       />
 
-      {/* Building door titles — paired wall sconces wash full lettering */}
-      <EntranceSconce
-        position={[projectsDoor - 0.55, projectsSign[1], GALLERY_Z - 1.35]}
+      <SignBarFixture
+        position={[projectsDoor - 0.38, projectsSign[1] + 0.32, GALLERY_Z]}
         target={[projectsSign[0], projectsSign[1], GALLERY_Z]}
         glow={glow}
-        yaw={Math.PI / 2}
-        strength={1.15}
+        strength={1.2}
+        length={2.9}
+        axis="z"
       />
-      <EntranceSconce
-        position={[projectsDoor - 0.55, projectsSign[1], GALLERY_Z + 1.35]}
-        target={[projectsSign[0], projectsSign[1], GALLERY_Z]}
-        glow={glow}
-        yaw={Math.PI / 2}
-        strength={1.15}
-      />
-      <EntranceSconce
-        position={[awardsDoor + 0.55, awardsSign[1], GALLERY_Z - 1.35]}
+      <SignBarFixture
+        position={[awardsDoor + 0.38, awardsSign[1] + 0.32, GALLERY_Z]}
         target={[awardsSign[0], awardsSign[1], GALLERY_Z]}
         glow={glow}
-        yaw={-Math.PI / 2}
-        strength={1.15}
-      />
-      <EntranceSconce
-        position={[awardsDoor + 0.55, awardsSign[1], GALLERY_Z + 1.35]}
-        target={[awardsSign[0], awardsSign[1], GALLERY_Z]}
-        glow={glow}
-        yaw={-Math.PI / 2}
-        strength={1.15}
+        strength={1.2}
+        length={2.9}
+        axis="z"
       />
     </group>
   );
