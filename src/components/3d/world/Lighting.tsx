@@ -4,6 +4,7 @@ import { useThree } from "@react-three/fiber";
 import { MeshLambertMaterial } from "three";
 import { sampleAtmosphere, type Atmosphere } from "@/systems/dayNight";
 import { useAppStore } from "@/systems/store";
+import { CampusBloom } from "./CampusBloom";
 import { NightBuildingLights } from "./NightBuildingLights";
 
 /** Soft billowy patches — kept within the campus camera far plane. */
@@ -52,6 +53,7 @@ export function Lighting() {
   const museum = interior === "gallery" || interior === "awards";
   const drift = reducedMotion ? 0 : 0.12;
   const sky = useClockAtmosphere();
+  const night = sky.buildingGlow;
 
   const ambientI = museum ? Math.min(sky.ambientIntensity, 0.42) : sky.ambientIntensity;
   const hemiI = museum ? Math.min(sky.hemiIntensity, 0.2) : sky.hemiIntensity;
@@ -110,22 +112,34 @@ export function Lighting() {
 
       <ambientLight intensity={ambientI} color={sky.ambientColor} />
       <hemisphereLight color={sky.hemiSky} groundColor={sky.hemiGround} intensity={hemiI} />
+
+      {/* Night fill — lifts unlit voids without washing out warm fixtures */}
+      {!museum && night > 0.15 ? (
+        <>
+          <hemisphereLight
+            color="#1a1a2e"
+            groundColor="#0a0a0f"
+            intensity={0.18 + night * 0.22}
+          />
+          <ambientLight intensity={night * 0.1} color="#ffaa55" />
+        </>
+      ) : null}
+
       <directionalLight
         position={sky.sunPosition}
         intensity={sunI}
         color={sky.sunColor}
         castShadow={!museum && gpuShadows && sky.sunIntensity > 0.4}
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        shadow-mapSize={[2048, 2048]}
         shadow-camera-near={2}
         shadow-camera-far={110}
         shadow-camera-left={-32}
         shadow-camera-right={32}
         shadow-camera-top={32}
         shadow-camera-bottom={-32}
-        shadow-bias={-0.00012}
-        shadow-normalBias={0.035}
-        shadow-radius={2.5}
+        shadow-bias={-0.0001}
+        shadow-normalBias={0.04}
+        shadow-radius={3.5}
       />
       <directionalLight position={[6, 14, 22]} intensity={fillI} color={sky.fillColor} />
       <pointLight
@@ -136,7 +150,8 @@ export function Lighting() {
         color={sky.porchColor}
       />
       <directionalLight position={[-22, 14, -8]} intensity={rimI} color={sky.rimColor} />
-      <NightBuildingLights glow={sky.buildingGlow} enabled={!museum} />
+      <NightBuildingLights glow={night} enabled={!museum} />
+      {!museum ? <CampusBloom nightGlow={night} /> : null}
     </>
   );
 }
