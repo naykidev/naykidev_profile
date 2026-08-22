@@ -53,27 +53,33 @@ export const glass = new MeshStandardMaterial({
 /** Extra facade panes that only read as lit at night (intensity driven in Lighting). */
 export const litWindow = new MeshStandardMaterial({
   color: "#1c160c",
-  emissive: "#ffb45a",
+  emissive: "#ffd4a8",
   emissiveIntensity: 0,
-  roughness: 0.4,
-  metalness: 0.08,
+  roughness: 0.45,
+  metalness: 0.06,
 });
 
-/** Tiny gooseneck / sign-lamp bulbs — warm amber, intensity driven at night. */
-export const signLamp = new MeshStandardMaterial({
-  color: "#ffb366",
-  emissive: "#ffaa55",
-  emissiveIntensity: 0,
-  roughness: 0.55,
-  metalness: 0.05,
-  toneMapped: false,
+/** Dark bronze / black architectural housing for campus fixtures. */
+export const bollardBronze = new MeshStandardMaterial({
+  color: "#161310",
+  roughness: 0.42,
+  metalness: 0.78,
 });
 
-export const signHousing = new MeshStandardMaterial({
-  color: "#2c2620",
-  roughness: 0.62,
-  metalness: 0.4,
+/** Frosted warm diffuser — emits softly; intensity driven at night. */
+export const bollardGlass = new MeshStandardMaterial({
+  color: "#f3e6d2",
+  emissive: "#ffd9a8",
+  emissiveIntensity: 0,
+  roughness: 0.82,
+  metalness: 0.02,
+  transparent: true,
+  opacity: 0.9,
 });
+
+/** @deprecated alias — kept for any residual imports */
+export const signLamp = bollardGlass;
+export const signHousing = bollardBronze;
 
 export const roofCopper = new MeshStandardMaterial({
   color: "#5f6e4e",

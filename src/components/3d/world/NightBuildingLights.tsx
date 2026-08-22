@@ -12,46 +12,36 @@ import {
   galleryDoorX,
 } from "@/systems/campusLayout";
 import { getTerrainHeight } from "@/systems/terrain";
-import { doorGlass, glass, litWindow, signHousing, signLamp } from "./materials";
+import { bollardBronze, bollardGlass, doorGlass, glass, litWindow } from "./materials";
 
-const WARM = "#ffb366";
-const WARM_SOFT = "#ffaa55";
+/** ~3000K warm white LED */
+const LED = "#ffdcc0";
+const LED_SOFT = "#ffe8d2";
+
+/** Mall path is ~7.4 wide; bollards sit just off the limestone edge. */
+const PATH_EDGE_X = 4.35;
+const MALL_BOLLARD_Z = [38, 30, 22, 14, 6, -2, -10] as const;
 const BANNER_Z = [32, 22, 12, 2, -8] as const;
 
-function syncWindowMaterials(glow: number) {
+function syncNightMaterials(glow: number) {
   const g = Math.max(0, Math.min(1, glow));
-  glass.emissive.set(g > 0.08 ? "#ffb366" : "#1a2430");
-  glass.emissiveIntensity = 0.1 + g * 1.35;
-  doorGlass.emissive.set(g > 0.08 ? "#ffb366" : "#1a2430");
-  doorGlass.emissiveIntensity = 0.08 + g * 1.1;
-  litWindow.emissive.set("#ffb366");
-  litWindow.emissiveIntensity = g * 1.55;
-  // Visible warmth comes from the mesh; keep below bloom clip white.
-  signLamp.emissiveIntensity = g * 1.85;
+  glass.emissive.set(g > 0.08 ? "#ffd4a8" : "#1a2430");
+  glass.emissiveIntensity = 0.08 + g * 0.95;
+  doorGlass.emissive.set(g > 0.08 ? "#ffd4a8" : "#1a2430");
+  doorGlass.emissiveIntensity = 0.06 + g * 0.75;
+  litWindow.emissive.set("#ffd4a8");
+  litWindow.emissiveIntensity = g * 1.15;
+  // Soft frosted glow — kept low so bloom stays cinematic, not cartoon.
+  bollardGlass.emissiveIntensity = g * 0.55;
 }
 
-function WindowPane({
-  position,
-  size,
-}: {
-  position: [number, number, number];
-  size: [number, number, number];
-}) {
-  return (
-    <mesh position={position} material={litWindow}>
-      <boxGeometry args={size} />
-    </mesh>
-  );
-}
-
-/** Aimed spotlight with an explicit world-space target. */
 function AimedSpot({
   position,
   target,
   intensity,
-  distance = 7,
-  angle = 0.42,
-  penumbra = 0.55,
+  distance = 6,
+  angle = 0.55,
+  penumbra = 0.75,
   castShadow = false,
 }: {
   position: [number, number, number];
@@ -71,7 +61,7 @@ function AimedSpot({
     light.current.target.updateMatrixWorld();
   }, [position, target]);
 
-  if (intensity < 0.03) return null;
+  if (intensity < 0.02) return null;
 
   return (
     <>
@@ -83,13 +73,13 @@ function AimedSpot({
         decay={2}
         angle={angle}
         penumbra={penumbra}
-        color={WARM_SOFT}
+        color={LED}
         castShadow={castShadow}
-        shadow-mapSize-width={castShadow ? 1024 : 512}
-        shadow-mapSize-height={castShadow ? 1024 : 512}
+        shadow-mapSize-width={512}
+        shadow-mapSize-height={512}
         shadow-bias={-0.0001}
-        shadow-normalBias={0.02}
-        shadow-radius={3}
+        shadow-normalBias={0.025}
+        shadow-radius={4}
       />
       <object3D ref={aim} position={target} />
     </>
@@ -97,25 +87,17 @@ function AimedSpot({
 }
 
 /**
- * Ground bollard / uplight: fixture sits near the ground and washes upward
- * with a wide soft spotlight so full sign text / banner cloth is lit.
+ * Slim campus pathway bollard (~1m): bronze stem + frosted cylindrical diffuser + cap.
+ * Spotlight aims down for a controlled ground pool.
  */
-function GroundUplight({
+function PathwayBollard({
   position,
-  target,
   glow,
   strength = 1,
-  distance = 7,
-  angle = 0.72,
-  castShadow = false,
 }: {
   position: [number, number, number];
-  target: [number, number, number];
   glow: number;
   strength?: number;
-  distance?: number;
-  angle?: number;
-  castShadow?: boolean;
 }) {
   const g = glow * strength;
   if (g < 0.04) return null;
@@ -123,80 +105,196 @@ function GroundUplight({
   return (
     <>
       <group position={position}>
-        {/* Stake / housing */}
-        <mesh position={[0, 0.08, 0]} material={signHousing} castShadow>
-          <cylinderGeometry args={[0.045, 0.055, 0.16, 10]} />
+        <mesh position={[0, 0.02, 0]} material={bollardBronze} castShadow receiveShadow>
+          <cylinderGeometry args={[0.095, 0.1, 0.04, 16]} />
         </mesh>
-        <mesh position={[0, 0.175, 0]} material={signHousing}>
-          <cylinderGeometry args={[0.07, 0.06, 0.05, 12]} />
+        <mesh position={[0, 0.38, 0]} material={bollardBronze} castShadow>
+          <cylinderGeometry args={[0.032, 0.038, 0.68, 12]} />
         </mesh>
-        {/* Warm lens — moderate emissive, not a clipped white orb */}
-        <mesh position={[0, 0.21, 0]} material={signLamp}>
-          <sphereGeometry args={[0.042, 12, 10]} />
+        <mesh position={[0, 0.73, 0]} material={bollardBronze}>
+          <cylinderGeometry args={[0.048, 0.042, 0.04, 14]} />
+        </mesh>
+        <mesh position={[0, 0.86, 0]} material={bollardGlass}>
+          <cylinderGeometry args={[0.052, 0.052, 0.2, 16]} />
+        </mesh>
+        <mesh position={[0, 0.98, 0]} material={bollardBronze}>
+          <cylinderGeometry args={[0.058, 0.05, 0.045, 14]} />
         </mesh>
       </group>
       <AimedSpot
-        position={[position[0], position[1] + 0.24, position[2]]}
-        target={target}
-        intensity={0.95 + g * 1.35}
-        distance={distance}
-        angle={angle}
-        penumbra={0.72}
-        castShadow={castShadow}
+        position={[position[0], position[1] + 0.82, position[2]]}
+        target={[position[0], position[1] + 0.02, position[2]]}
+        intensity={0.45 + g * 0.55}
+        distance={5.2}
+        angle={0.68}
+        penumbra={0.82}
       />
-      {/* Soft fill so edges of wide signs don't fall off */}
       <pointLight
-        position={[position[0], position[1] + 0.35, position[2]]}
-        intensity={0.22 + g * 0.35}
-        distance={distance * 0.85}
+        position={[position[0], position[1] + 0.82, position[2]]}
+        intensity={0.12 + g * 0.18}
+        distance={4.5}
         decay={2}
-        color={WARM}
+        color={LED_SOFT}
       />
     </>
   );
 }
 
+/**
+ * Recessed ground can — almost flush, frosted lens, soft up-wash for signs/banners.
+ * No floating orb; housing reads as installed hardware.
+ */
+function GroundCan({
+  position,
+  target,
+  glow,
+  strength = 1,
+  distance = 5.5,
+  angle = 0.62,
+}: {
+  position: [number, number, number];
+  target: [number, number, number];
+  glow: number;
+  strength?: number;
+  distance?: number;
+  angle?: number;
+}) {
+  const g = glow * strength;
+  if (g < 0.04) return null;
+
+  return (
+    <>
+      <group position={position}>
+        <mesh position={[0, 0.015, 0]} material={bollardBronze} receiveShadow>
+          <cylinderGeometry args={[0.09, 0.095, 0.03, 16]} />
+        </mesh>
+        <mesh position={[0, 0.035, 0]} material={bollardGlass}>
+          <cylinderGeometry args={[0.055, 0.055, 0.02, 14]} />
+        </mesh>
+      </group>
+      <AimedSpot
+        position={[position[0], position[1] + 0.08, position[2]]}
+        target={target}
+        intensity={0.55 + g * 0.7}
+        distance={distance}
+        angle={angle}
+        penumbra={0.78}
+      />
+    </>
+  );
+}
+
+/**
+ * Vertical bronze wall sconce with frosted panel — for gallery / hall entrances.
+ */
+function EntranceSconce({
+  position,
+  target,
+  glow,
+  yaw = 0,
+  strength = 1,
+}: {
+  position: [number, number, number];
+  target: [number, number, number];
+  glow: number;
+  yaw?: number;
+  strength?: number;
+}) {
+  const g = glow * strength;
+  if (g < 0.04) return null;
+
+  return (
+    <>
+      <group position={position} rotation={[0, yaw, 0]}>
+        <mesh position={[0, 0, 0]} material={bollardBronze} castShadow>
+          <boxGeometry args={[0.08, 0.42, 0.06]} />
+        </mesh>
+        <mesh position={[0.02, 0, 0.045]} material={bollardGlass}>
+          <boxGeometry args={[0.04, 0.34, 0.03]} />
+        </mesh>
+        <mesh position={[0, 0.24, 0]} material={bollardBronze}>
+          <boxGeometry args={[0.09, 0.04, 0.07]} />
+        </mesh>
+      </group>
+      <AimedSpot
+        position={[position[0], position[1], position[2]]}
+        target={target}
+        intensity={0.5 + g * 0.65}
+        distance={5.5}
+        angle={0.55}
+        penumbra={0.7}
+      />
+      <pointLight
+        position={[position[0], position[1], position[2]]}
+        intensity={0.1 + g * 0.14}
+        distance={4}
+        decay={2}
+        color={LED_SOFT}
+      />
+    </>
+  );
+}
+
+function WindowPane({
+  position,
+  size,
+}: {
+  position: [number, number, number];
+  size: [number, number, number];
+}) {
+  return (
+    <mesh position={position} material={litWindow}>
+      <boxGeometry args={size} />
+    </mesh>
+  );
+}
+
 function BascomWash({ glow }: { glow: number }) {
-  const i = glow * 0.95;
-  if (i < 0.05) return null;
+  const i = glow * 0.55;
+  if (i < 0.04) return null;
+  const terraceY = getTerrainHeight(0, HALL_Z + 10);
   return (
     <group>
       <pointLight
-        position={[0, HALL_Y + 4.8, HALL_Z + 9.2]}
-        intensity={i * 0.7}
-        distance={14}
-        decay={2}
-        color={WARM}
-      />
-      <pointLight
-        position={[-10.5, HALL_Y + 4.2, HALL_Z + 7.6]}
-        intensity={i * 0.45}
-        distance={11}
-        decay={2}
-        color={WARM_SOFT}
-      />
-      <pointLight
-        position={[10.5, HALL_Y + 4.2, HALL_Z + 7.6]}
-        intensity={i * 0.45}
-        distance={11}
-        decay={2}
-        color={WARM_SOFT}
-      />
-      <pointLight
-        position={[0, HALL_Y + 2.9, HALL_Z + 10.8]}
+        position={[0, HALL_Y + 4.4, HALL_Z + 9]}
         intensity={i * 0.55}
-        distance={9}
+        distance={13}
         decay={2}
-        color={WARM_SOFT}
+        color={LED}
       />
-      {/* Bucky banner — ground wash from terrace up */}
-      <GroundUplight
-        position={[0, HALL_Y + 0.35, HALL_Z + 8.9]}
+      <pointLight
+        position={[-9.5, HALL_Y + 3.8, HALL_Z + 7.4]}
+        intensity={i * 0.32}
+        distance={10}
+        decay={2}
+        color={LED_SOFT}
+      />
+      <pointLight
+        position={[9.5, HALL_Y + 3.8, HALL_Z + 7.4]}
+        intensity={i * 0.32}
+        distance={10}
+        decay={2}
+        color={LED_SOFT}
+      />
+      {/* Terrace approach bollards */}
+      <PathwayBollard position={[-3.6, terraceY, HALL_Z + 12.2]} glow={glow} strength={0.95} />
+      <PathwayBollard position={[3.6, terraceY, HALL_Z + 12.2]} glow={glow} strength={0.95} />
+      {/* Bucky banner — recessed cans */}
+      <GroundCan
+        position={[-1.4, HALL_Y + 0.28, HALL_Z + 8.6]}
         target={[0, HALL_Y + 5.0, HALL_Z + 6.65]}
         glow={glow}
-        strength={1.1}
-        distance={8}
-        angle={0.55}
+        strength={0.9}
+        distance={7}
+        angle={0.5}
+      />
+      <GroundCan
+        position={[1.4, HALL_Y + 0.28, HALL_Z + 8.6]}
+        target={[0, HALL_Y + 5.0, HALL_Z + 6.65]}
+        glow={glow}
+        strength={0.9}
+        distance={7}
+        angle={0.5}
       />
     </group>
   );
@@ -206,10 +304,9 @@ function SideBuildingWindows({ glow }: { glow: number }) {
   const cx = 20;
   const cz = -16;
   const halfX = 5;
-  const bodyH = 6.4;
   const base = getTerrainHeight(cx, cz) - 0.18;
   const faceX = cx - halfX - 0.04;
-  const i = glow * 0.85;
+  const i = glow * 0.55;
   const panes: [number, number, number][] = [];
   for (const row of [1.4, 3.2, 5.0]) {
     for (const z of [-2.4, -0.8, 0.8, 2.4]) {
@@ -223,11 +320,11 @@ function SideBuildingWindows({ glow }: { glow: number }) {
       ))}
       {glow > 0.08 ? (
         <pointLight
-          position={[cx - halfX - 1.1, base + bodyH * 0.55, cz]}
+          position={[cx - halfX - 1.0, base + 3.4, cz]}
           intensity={i}
-          distance={12}
+          distance={11}
           decay={2}
-          color={WARM}
+          color={LED}
         />
       ) : null}
       {[-2, 0, 2].map((z) => (
@@ -252,7 +349,7 @@ function GalleryWindows({
 }) {
   const y = getTerrainHeight(x, GALLERY_Z);
   const faceX = x + doorSign * (GALLERY_SIZE_X / 2 + 0.05);
-  const i = glow * 0.75;
+  const i = glow * 0.5;
   const zs = [-4.2, -2.1, 2.1, 4.2];
   return (
     <group>
@@ -264,40 +361,55 @@ function GalleryWindows({
       ))}
       {glow > 0.08 ? (
         <pointLight
-          position={[faceX - doorSign * 1.3, y + 3.2, GALLERY_Z]}
+          position={[faceX - doorSign * 1.2, y + 3.1, GALLERY_Z]}
           intensity={i}
-          distance={11}
+          distance={10}
           decay={2}
-          color={WARM_SOFT}
+          color={LED_SOFT}
         />
       ) : null}
     </group>
   );
 }
 
-/** W banners, wayfinding planks, and gallery door titles — ground uplights. */
-function SignLights({ glow }: { glow: number }) {
+/** Evenly spaced pathway bollards along Bascom Mall. */
+function MallPathLights({ glow }: { glow: number }) {
+  return (
+    <group>
+      {MALL_BOLLARD_Z.map((z) => {
+        const yL = getTerrainHeight(-PATH_EDGE_X, z);
+        const yR = getTerrainHeight(PATH_EDGE_X, z);
+        return (
+          <group key={z}>
+            <PathwayBollard position={[-PATH_EDGE_X, yL, z]} glow={glow} />
+            <PathwayBollard position={[PATH_EDGE_X, yR, z]} glow={glow} />
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
+/** Sign / banner / entrance architectural lighting. */
+function SignAndEntranceLights({ glow }: { glow: number }) {
   if (glow < 0.04) return null;
 
   const wayfindZ = GALLERY_Z + 2.55;
   const projectsOrigin: [number, number, number] = [5.22, getTerrainHeight(5.22, wayfindZ), wayfindZ];
   const awardsOrigin: [number, number, number] = [-5.22, getTerrainHeight(-5.22, wayfindZ), wayfindZ];
-
-  // Sign local +Z is the plank face; rotations match CampusBanners.
   const projectsYaw = -0.62;
   const awardsYaw = 0.62;
-  const projectsFront = (dist: number): [number, number, number] => [
-    projectsOrigin[0] + Math.sin(projectsYaw) * dist,
-    projectsOrigin[1],
-    projectsOrigin[2] + Math.cos(projectsYaw) * dist,
-  ];
-  const awardsFront = (dist: number): [number, number, number] => [
-    awardsOrigin[0] + Math.sin(awardsYaw) * dist,
-    awardsOrigin[1],
-    awardsOrigin[2] + Math.cos(awardsYaw) * dist,
+
+  const frontOf = (
+    origin: [number, number, number],
+    yaw: number,
+    dist: number,
+  ): [number, number, number] => [
+    origin[0] + Math.sin(yaw) * dist,
+    origin[1],
+    origin[2] + Math.cos(yaw) * dist,
   ];
 
-  // Mid-stack targets (scale 1.18) so all planks sit in the cone.
   const projectsTarget: [number, number, number] = [
     projectsOrigin[0],
     projectsOrigin[1] + 1.32,
@@ -313,141 +425,159 @@ function SignLights({ glow }: { glow: number }) {
   const awardsDoor = awardsDoorX();
   const projectsDoorY = getTerrainHeight(projectsDoor, GALLERY_Z);
   const awardsDoorY = getTerrainHeight(awardsDoor, GALLERY_Z);
-  // Door title plane: ~2.95 × 0.46 at DOOR_H + 0.62
-  const projectsSignCenter: [number, number, number] = [
-    projectsDoor - 0.2,
+  const projectsSign: [number, number, number] = [
+    projectsDoor - 0.22,
     projectsDoorY + GALLERY_DOOR_HEIGHT + 0.62,
     GALLERY_Z,
   ];
-  const awardsSignCenter: [number, number, number] = [
-    awardsDoor + 0.2,
+  const awardsSign: [number, number, number] = [
+    awardsDoor + 0.22,
     awardsDoorY + GALLERY_DOOR_HEIGHT + 0.62,
     GALLERY_Z,
   ];
 
+  // Approach bollards on gallery spurs
+  const spurZL = getTerrainHeight(-7.2, GALLERY_Z);
+  const spurZR = getTerrainHeight(7.2, GALLERY_Z);
+
   return (
     <group>
+      {/* W banners — ground cans aimed at cloth mid */}
       {BANNER_Z.map((z) =>
         ([-8.6, 8.6] as const).map((x) => {
           const y = getTerrainHeight(x, z);
           const clothX = x > 0 ? x - 0.4 : x + 0.4;
-          // Stand in front of the cloth (toward mall center) and aim up the full flag.
           const towardMall = x > 0 ? -1 : 1;
-          const lamp: [number, number, number] = [clothX + towardMall * 0.55, y + 0.02, z + 0.15];
-          const clothMid: [number, number, number] = [clothX, y + 2.15, z];
           return (
-            <GroundUplight
+            <GroundCan
               key={`banner-${x}-${z}`}
-              position={lamp}
-              target={clothMid}
+              position={[clothX + towardMall * 0.5, y + 0.02, z]}
+              target={[clothX, y + 2.15, z]}
               glow={glow}
-              strength={1.05}
-              distance={5.5}
-              angle={0.58}
+              strength={0.95}
+              distance={5}
+              angle={0.52}
             />
           );
         }),
       )}
 
-      {/* Projects wayfind — dual ground wash covers both planks edge-to-edge */}
-      <GroundUplight
-        position={projectsFront(1.15)}
+      {/* Wayfind wooden signs */}
+      <GroundCan
+        position={frontOf(projectsOrigin, projectsYaw, 1.05)}
         target={projectsTarget}
         glow={glow}
-        strength={1.35}
-        distance={6.5}
-        angle={0.78}
-        castShadow
+        strength={1.15}
+        distance={5.8}
+        angle={0.72}
       />
-      <GroundUplight
+      <GroundCan
         position={[
-          projectsFront(0.95)[0] + Math.cos(projectsYaw) * 0.35,
+          frontOf(projectsOrigin, projectsYaw, 0.9)[0] + Math.cos(projectsYaw) * 0.32,
           projectsOrigin[1],
-          projectsFront(0.95)[2] - Math.sin(projectsYaw) * 0.35,
+          frontOf(projectsOrigin, projectsYaw, 0.9)[2] - Math.sin(projectsYaw) * 0.32,
         ]}
-        target={[projectsTarget[0], projectsTarget[1] + 0.15, projectsTarget[2]]}
+        target={projectsTarget}
         glow={glow}
         strength={0.85}
-        distance={6}
+        distance={5.5}
+        angle={0.65}
+      />
+      <GroundCan
+        position={frontOf(awardsOrigin, awardsYaw, 1.1)}
+        target={awardsTarget}
+        glow={glow}
+        strength={1.2}
+        distance={6.2}
+        angle={0.78}
+      />
+      <GroundCan
+        position={[
+          frontOf(awardsOrigin, awardsYaw, 0.95)[0] + Math.cos(awardsYaw) * 0.36,
+          awardsOrigin[1],
+          frontOf(awardsOrigin, awardsYaw, 0.95)[2] - Math.sin(awardsYaw) * 0.36,
+        ]}
+        target={awardsTarget}
+        glow={glow}
+        strength={0.9}
+        distance={5.8}
         angle={0.7}
       />
 
-      {/* Awards & Certificates wayfind — wide dual uplight for all three planks */}
-      <GroundUplight
-        position={awardsFront(1.2)}
-        target={awardsTarget}
+      {/* Gallery approach bollards */}
+      <PathwayBollard position={[-7.2, spurZL, GALLERY_Z]} glow={glow} strength={0.9} />
+      <PathwayBollard position={[7.2, spurZR, GALLERY_Z]} glow={glow} strength={0.9} />
+      <PathwayBollard
+        position={[projectsDoor - 2.4, projectsDoorY, GALLERY_Z + 1.8]}
         glow={glow}
-        strength={1.4}
-        distance={7}
-        angle={0.82}
-        castShadow
+        strength={0.85}
       />
-      <GroundUplight
-        position={[
-          awardsFront(1.0)[0] + Math.cos(awardsYaw) * 0.4,
-          awardsOrigin[1],
-          awardsFront(1.0)[2] - Math.sin(awardsYaw) * 0.4,
-        ]}
-        target={[awardsTarget[0], awardsTarget[1] + 0.1, awardsTarget[2]]}
+      <PathwayBollard
+        position={[projectsDoor - 2.4, projectsDoorY, GALLERY_Z - 1.8]}
         glow={glow}
-        strength={0.9}
-        distance={6.5}
-        angle={0.75}
+        strength={0.85}
+      />
+      <PathwayBollard
+        position={[awardsDoor + 2.4, awardsDoorY, GALLERY_Z + 1.8]}
+        glow={glow}
+        strength={0.85}
+      />
+      <PathwayBollard
+        position={[awardsDoor + 2.4, awardsDoorY, GALLERY_Z - 1.8]}
+        glow={glow}
+        strength={0.85}
       />
 
-      {/* Building door titles — two ground spots left/right so full lettering reads */}
-      <GroundUplight
-        position={[projectsDoor - 1.15, projectsDoorY + 0.05, GALLERY_Z - 0.15]}
-        target={[projectsSignCenter[0] - 0.55, projectsSignCenter[1], projectsSignCenter[2]]}
+      {/* Building door titles — paired wall sconces wash full lettering */}
+      <EntranceSconce
+        position={[projectsDoor - 0.55, projectsSign[1], GALLERY_Z - 1.35]}
+        target={[projectsSign[0], projectsSign[1], GALLERY_Z]}
         glow={glow}
-        strength={1.3}
-        distance={6.5}
-        angle={0.62}
+        yaw={Math.PI / 2}
+        strength={1.15}
       />
-      <GroundUplight
-        position={[projectsDoor - 1.15, projectsDoorY + 0.05, GALLERY_Z + 0.15]}
-        target={[projectsSignCenter[0] + 0.55, projectsSignCenter[1], projectsSignCenter[2]]}
+      <EntranceSconce
+        position={[projectsDoor - 0.55, projectsSign[1], GALLERY_Z + 1.35]}
+        target={[projectsSign[0], projectsSign[1], GALLERY_Z]}
         glow={glow}
-        strength={1.3}
-        distance={6.5}
-        angle={0.62}
+        yaw={Math.PI / 2}
+        strength={1.15}
       />
-      <GroundUplight
-        position={[awardsDoor + 1.15, awardsDoorY + 0.05, GALLERY_Z - 0.15]}
-        target={[awardsSignCenter[0] - 0.55, awardsSignCenter[1], awardsSignCenter[2]]}
+      <EntranceSconce
+        position={[awardsDoor + 0.55, awardsSign[1], GALLERY_Z - 1.35]}
+        target={[awardsSign[0], awardsSign[1], GALLERY_Z]}
         glow={glow}
-        strength={1.3}
-        distance={6.5}
-        angle={0.62}
+        yaw={-Math.PI / 2}
+        strength={1.15}
       />
-      <GroundUplight
-        position={[awardsDoor + 1.15, awardsDoorY + 0.05, GALLERY_Z + 0.15]}
-        target={[awardsSignCenter[0] + 0.55, awardsSignCenter[1], awardsSignCenter[2]]}
+      <EntranceSconce
+        position={[awardsDoor + 0.55, awardsSign[1], GALLERY_Z + 1.35]}
+        target={[awardsSign[0], awardsSign[1], GALLERY_Z]}
         glow={glow}
-        strength={1.3}
-        distance={6.5}
-        angle={0.62}
+        yaw={-Math.PI / 2}
+        strength={1.15}
       />
     </group>
   );
 }
 
-/** Warm interior window glow + facade / sign lamps that ramp up after dusk. */
+/** Campus night architecture lighting — bollards, cans, sconces, window glow. */
 export function NightBuildingLights({ glow, enabled }: { glow: number; enabled: boolean }) {
   useEffect(() => {
-    syncWindowMaterials(enabled ? glow : 0);
-    return () => syncWindowMaterials(0);
+    syncNightMaterials(enabled ? glow : 0);
+    return () => syncNightMaterials(0);
   }, [glow, enabled]);
 
   if (!enabled || glow < 0.04) return null;
 
   return (
     <group>
+      <MallPathLights glow={glow} />
       <BascomWash glow={glow} />
       <SideBuildingWindows glow={glow} />
       <GalleryWindows x={GALLERY_X} doorSign={-1} glow={glow} />
       <GalleryWindows x={AWARDS_X} doorSign={1} glow={glow} />
-      <SignLights glow={glow} />
+      <SignAndEntranceLights glow={glow} />
     </group>
   );
 }

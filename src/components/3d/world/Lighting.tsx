@@ -113,15 +113,15 @@ export function Lighting() {
       <ambientLight intensity={ambientI} color={sky.ambientColor} />
       <hemisphereLight color={sky.hemiSky} groundColor={sky.hemiGround} intensity={hemiI} />
 
-      {/* Night fill — lifts unlit voids without washing out warm fixtures */}
+      {/* Night fill — cinematic visibility without washing fixtures */}
       {!museum && night > 0.15 ? (
         <>
           <hemisphereLight
-            color="#1a1a2e"
-            groundColor="#0a0a0f"
-            intensity={0.18 + night * 0.22}
+            color="#1e2438"
+            groundColor="#0c0e14"
+            intensity={0.28 + night * 0.26}
           />
-          <ambientLight intensity={night * 0.1} color="#ffaa55" />
+          <ambientLight intensity={0.08 + night * 0.12} color="#ffdcc0" />
         </>
       ) : null}
 
