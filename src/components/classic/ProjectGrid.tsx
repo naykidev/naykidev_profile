@@ -94,6 +94,22 @@ export function ProjectGrid({ projects }: { projects: GalleryPiece[] }) {
                       </div>
                     </div>
                   ) : null}
+                  {isFloatingAxol ? (
+                    <div
+                      className="axolotl-float-lane axolotl-float-lane--text axolotl-float-lane--card"
+                      aria-hidden
+                    >
+                      <div
+                        className={
+                          reduce
+                            ? "axolotl-float-lane__mascot"
+                            : "axolotl-float-lane__mascot axolotl-float--active"
+                        }
+                      >
+                        <AxolotlMascot />
+                      </div>
+                    </div>
+                  ) : null}
                   <div
                     className={`relative w-full shrink-0 overflow-hidden bg-ink/40 ring-1 ring-white/10 md:w-[38%] lg:w-[34%] ${
                       i % 3 === 0 ? "rounded-xl" : i % 3 === 1 ? "rounded-2xl rounded-tr-sm" : "rounded-lg rounded-bl-xl"
@@ -110,19 +126,6 @@ export function ProjectGrid({ projects }: { projects: GalleryPiece[] }) {
                       isFloatingAxol ? "pr-14 sm:pr-16" : ""
                     }`}
                   >
-                    {isFloatingAxol ? (
-                      <div className="axolotl-float-lane axolotl-float-lane--text" aria-hidden>
-                        <div
-                          className={
-                            reduce
-                              ? "axolotl-float-lane__mascot"
-                              : "axolotl-float-lane__mascot axolotl-float--active"
-                          }
-                        >
-                          <AxolotlMascot />
-                        </div>
-                      </div>
-                    ) : null}
                     {piece.context ? (
                       <p className="mb-1 font-ui text-[10px] tracking-[0.16em] text-paper/45 uppercase">
                         {piece.context}

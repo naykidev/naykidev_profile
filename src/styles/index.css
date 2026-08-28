@@ -348,6 +348,10 @@
   right: 0.35rem;
 }
 
+.axolotl-float-lane--card {
+  z-index: 10;
+}
+
 .axolotl-float-lane--assist {
   top: 0.5rem;
   right: -0.25rem;
