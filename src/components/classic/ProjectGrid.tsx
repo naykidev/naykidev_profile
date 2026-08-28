@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import type { GalleryPiece } from "@/data/projects";
-import { AxolotlIllustration } from "./AxolotlIllustration";
+import { AxolotlMascot } from "./AxolotlMascot";
 import { Reveal, SectionHeading } from "./Reveal";
 import { useClassicMotion } from "./motion";
 
@@ -80,15 +80,12 @@ export function ProjectGrid({ projects }: { projects: GalleryPiece[] }) {
                         }
                   }
                 >
-                  {piece.id === "axol-assist" ? (
-                    <div className="axolotl-watermark" aria-hidden />
-                  ) : null}
                   {isAxol && piece.id === "axol-assist" ? (
                     <div
-                      className={`pointer-events-none absolute -right-1 bottom-2 z-10 w-14 sm:w-16 ${reduce ? "" : "axolotl-bob"}`}
+                      className="pointer-events-none absolute -right-1 bottom-0 z-10 w-16 sm:w-20"
                       aria-hidden
                     >
-                      <AxolotlIllustration peek className="h-auto w-full" />
+                      <AxolotlMascot />
                     </div>
                   ) : null}
                   <div
@@ -105,10 +102,10 @@ export function ProjectGrid({ projects }: { projects: GalleryPiece[] }) {
                   <div className="relative min-w-0 flex-1 px-1 sm:px-2 md:py-2">
                     {isAxol && piece.id !== "axol-assist" ? (
                       <div
-                        className={`pointer-events-none absolute -top-1 right-0 w-10 opacity-80 sm:w-11 ${reduce ? "" : "axolotl-bob"}`}
+                        className="pointer-events-none absolute -top-2 right-0 z-10 w-12 sm:w-14"
                         aria-hidden
                       >
-                        <AxolotlIllustration className="h-auto w-full" />
+                        <AxolotlMascot />
                       </div>
                     ) : null}
                     {piece.context ? (
