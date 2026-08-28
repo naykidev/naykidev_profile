@@ -78,7 +78,6 @@ export function ClassicSite() {
               }}
               aria-hidden
             />
-            <WaveSurfer />
             <div className="relative z-[2] mx-auto grid max-w-5xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
               <div>
                 <motion.p
@@ -145,6 +144,7 @@ export function ClassicSite() {
                 />
               </motion.figure>
             </div>
+            <WaveSurfer />
           </section>
 
           <section id="about" className="scroll-mt-24 border-b border-white/10 px-4 py-14 sm:px-6 sm:py-16">

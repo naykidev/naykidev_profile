@@ -77,7 +77,7 @@
     }
 
     .surfer-rider,
-    .wave-surfer-wrap {
+    .wave-tube-strip {
       display: none !important;
     }
   }
@@ -369,22 +369,21 @@
 }
 
 /* ── Wave surfer ── */
-.wave-surfer-wrap {
-  position: absolute;
-  inset: 0;
+.wave-tube-strip {
+  position: relative;
+  width: 100%;
   min-height: 150px;
-  z-index: 10;
-  pointer-events: none;
+  height: 150px;
   overflow: hidden;
+  isolation: isolate;
 }
 
 .wave-back,
 .wave-foam {
   position: absolute;
-  bottom: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
-  height: 90px;
+  height: 100%;
 }
 
 .wave-back {
@@ -392,7 +391,24 @@
 }
 
 .wave-foam {
+  z-index: 2;
+}
+
+.wave-coord-space {
+  position: absolute;
+  top: 0;
+  left: 0;
   z-index: 3;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+.wave-surfer-wrap {
+  position: absolute;
+  inset: 0;
+  width: 1200px;
+  height: 120px;
+  pointer-events: none;
 }
 
 :root {
@@ -477,28 +493,30 @@
 
 .surfer-rider {
   position: absolute;
-  left: 3%;
-  bottom: 52%;
+  top: 0;
+  left: 0;
   z-index: 5;
-  offset-path: var(--ride-path);
-  offset-distance: 0%;
+  width: 0;
+  height: 0;
   offset-rotate: auto;
-  opacity: 0;
 }
 
-.surfer-rider--active {
-  opacity: 1;
-  animation: ride-wave var(--ride-duration) var(--ride-easing) forwards;
+.surfer-inner {
+  position: absolute;
+  left: -16px;
+  top: -24px;
+  color: #fff;
+  animation: surfer-bob 2.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
 }
 
 .surfer-rider--shake .surfer-inner {
-  animation: finish-shake 0.4s ease-out;
+  animation: finish-shake 0.4s ease-out forwards;
 }
 
 @media (max-width: 768px) {
-  .surfer-rider {
-    left: 2%;
-    bottom: 48%;
+  .wave-tube-strip {
+    min-height: 130px;
+    height: 130px;
   }
 
   .surfer-rider--shake .surfer-inner {
@@ -519,12 +537,6 @@
       transform: translateY(-3px);
     }
   }
-}
-
-.surfer-inner {
-  position: relative;
-  color: #fff;
-  animation: surfer-bob 2.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
 }
 
 .surfer-svg {

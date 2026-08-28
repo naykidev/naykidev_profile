@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { useClassicMotion } from "./motion";
 
+const COORD_W = 1200;
+const COORD_H = 120;
+
 const PATH_VARIANTS = [
   {
     id: "v1",
@@ -129,34 +132,54 @@ function SurferSvg({ riding }: { riding: boolean }) {
 
 export function WaveSurfer() {
   const { reduce } = useClassicMotion();
-  const [variantIdx, setVariantIdx] = useState(0);
-  const [riding, setRiding] = useState(false);
-  const [shaking, setShaking] = useState(false);
-  const [visible, setVisible] = useState(true);
+  const stripRef = useRef<HTMLDivElement>(null);
   const surferRef = useRef<HTMLDivElement>(null);
   const pauseRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const [variantIdx, setVariantIdx] = useState(0);
+  const [rideKey, setRideKey] = useState(0);
+  const [phase, setPhase] = useState<"idle" | "riding" | "shake" | "hidden">("idle");
+  const [scale, setScale] = useState({ x: 1, y: 1 });
+  const [isMobile, setIsMobile] = useState(false);
+
   const variant = PATH_VARIANTS[variantIdx]!;
+  const duration = isMobile ? variant.duration.mobile : variant.duration.desktop;
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    const strip = stripRef.current;
+    if (!strip) return;
+
+    const updateScale = () => {
+      const { width, height } = strip.getBoundingClientRect();
+      setScale({
+        x: width / COORD_W,
+        y: height / COORD_H,
+      });
+    };
+
+    updateScale();
+    const ro = new ResizeObserver(updateScale);
+    ro.observe(strip);
+    return () => ro.disconnect();
+  }, []);
 
   const startRide = useCallback(() => {
-    setVisible(true);
-    setRiding(true);
-    setShaking(false);
-    requestAnimationFrame(() => {
-      const el = surferRef.current;
-      if (!el) return;
-      el.style.animation = "none";
-      void el.offsetHeight;
-      el.style.animation = "";
-    });
+    setPhase("riding");
+    setRideKey((k) => k + 1);
   }, []);
 
   const onRideEnd = useCallback(() => {
-    setRiding(false);
-    setShaking(true);
+    setPhase("shake");
     pauseRef.current = setTimeout(() => {
-      setShaking(false);
-      setVisible(false);
+      setPhase("hidden");
       pauseRef.current = setTimeout(() => {
         setVariantIdx((i) => (i + 1) % PATH_VARIANTS.length);
         startRide();
@@ -175,25 +198,42 @@ export function WaveSurfer() {
 
   useEffect(() => {
     const el = surferRef.current;
-    if (!el || reduce || !riding) return;
+    if (!el || reduce || phase !== "riding") return;
+
     const handler = (e: AnimationEvent) => {
       if (e.animationName === "ride-wave") onRideEnd();
     };
     el.addEventListener("animationend", handler);
     return () => el.removeEventListener("animationend", handler);
-  }, [riding, reduce, onRideEnd, variantIdx]);
+  }, [phase, reduce, onRideEnd, rideKey]);
 
   if (reduce) return null;
 
   const sprayBoxShadow = sprayShadow(variant.particleCount);
+  const showSurfer = phase !== "hidden";
+
+  const surferStyle: CSSProperties = {
+    offsetPath: `path('${variant.d}')`,
+    offsetDistance: "0%",
+    offsetRotate: "auto",
+    offsetAnchor: "18px 26px",
+    animation:
+      phase === "riding"
+        ? `ride-wave ${duration}s ${variant.easing} forwards`
+        : undefined,
+    opacity: showSurfer ? 1 : 0,
+    visibility: showSurfer ? "visible" : "hidden",
+    "--spray-duration": variant.sprayDuration,
+    "--wake-duration": variant.wakeDuration,
+    "--spray-peak-opacity": variant.sprayPeakOpacity,
+    "--wake-opacity": variant.wakeOpacity,
+    "--wake-w": `${variant.wakeW}px`,
+    "--wake-h": `${variant.wakeH}px`,
+  } as CSSProperties;
 
   return (
-    <div className="wave-surfer-wrap" aria-hidden>
-      <svg
-        className="wave-back"
-        viewBox="0 0 1200 120"
-        preserveAspectRatio="none"
-      >
+    <div ref={stripRef} className="wave-tube-strip" aria-hidden>
+      <svg className="wave-back" viewBox={`0 0 ${COORD_W} ${COORD_H}`} preserveAspectRatio="none">
         <defs>
           <linearGradient id="wave-grad" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="var(--wave-deep)" />
@@ -207,11 +247,7 @@ export function WaveSurfer() {
           opacity="0.65"
         />
       </svg>
-      <svg
-        className="wave-foam"
-        viewBox="0 0 1200 120"
-        preserveAspectRatio="none"
-      >
+      <svg className="wave-foam" viewBox={`0 0 ${COORD_W} ${COORD_H}`} preserveAspectRatio="none">
         <defs>
           <linearGradient id="foam-grad" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="white" stopOpacity="0.5" />
@@ -219,7 +255,7 @@ export function WaveSurfer() {
             <stop offset="100%" stopColor="white" stopOpacity="0" />
           </linearGradient>
         </defs>
-        <rect width="1200" height="120" fill="url(#foam-grad)" />
+        <rect width={COORD_W} height={COORD_H} fill="url(#foam-grad)" />
         <path
           d="M0,48 Q150,38 300,46 T600,42 T900,47 T1200,44 L1200,60 L0,60 Z"
           fill="white"
@@ -227,33 +263,30 @@ export function WaveSurfer() {
         />
       </svg>
 
-      {visible ? (
-        <div
-          ref={surferRef}
-          className={`surfer-rider surfer-rider--${variant.id} ${riding ? "surfer-rider--active" : ""} ${shaking ? "surfer-rider--shake" : ""}`}
-          style={
-            {
-              "--ride-duration": `var(--ride-dur-${variant.id})`,
-              "--ride-easing": variant.easing,
-              "--ride-path": `path('${variant.d}')`,
-              "--spray-duration": variant.sprayDuration,
-              "--wake-duration": variant.wakeDuration,
-              "--spray-peak-opacity": variant.sprayPeakOpacity,
-              "--wake-opacity": variant.wakeOpacity,
-              "--wake-w": `${variant.wakeW}px`,
-              "--wake-h": `${variant.wakeH}px`,
-            } as CSSProperties
-          }
-        >
-          <div className="surfer-inner">
-            <span
-              className="spray"
-              style={{ boxShadow: sprayBoxShadow }}
-            />
-            <SurferSvg riding={riding} />
-          </div>
+      <div
+        className="wave-coord-space"
+        style={{
+          width: COORD_W,
+          height: COORD_H,
+          transform: `scale(${scale.x}, ${scale.y})`,
+        }}
+      >
+        <div className="wave-surfer-wrap">
+          {showSurfer ? (
+            <div
+              key={rideKey}
+              ref={surferRef}
+              className={`surfer-rider surfer-rider--${variant.id} ${phase === "shake" ? "surfer-rider--shake" : ""}`}
+              style={surferStyle}
+            >
+              <div className="surfer-inner">
+                <span className="spray" style={{ boxShadow: sprayBoxShadow }} />
+                <SurferSvg riding={phase === "riding"} />
+              </div>
+            </div>
+          ) : null}
         </div>
-      ) : null}
+      </div>
     </div>
   );
 }
