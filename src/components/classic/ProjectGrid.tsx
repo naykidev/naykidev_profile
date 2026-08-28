@@ -4,8 +4,6 @@ import { AxolotlMascot } from "./AxolotlMascot";
 import { Reveal, SectionHeading } from "./Reveal";
 import { useClassicMotion } from "./motion";
 
-const AXOL_IDS = new Set(["accessibility-surfer", "axol-assist", "axol-work"]);
-
 const CARD_STYLES = [
   "rounded-2xl rounded-br-md border-white/10",
   "rounded-xl rounded-tl-lg border-sunflower/15",
@@ -62,8 +60,8 @@ export function ProjectGrid({ projects }: { projects: GalleryPiece[] }) {
         <ul className="grid grid-cols-1 gap-10">
           {projects.map((piece, i) => {
             const imageRight = i % 2 === 1;
-            const isAxol = AXOL_IDS.has(piece.id);
             const cardStyle = CARD_STYLES[i % CARD_STYLES.length]!;
+            const trackSide = imageRight ? "left" : "right";
             return (
               <Reveal key={piece.id} delay={i * 0.04}>
                 <motion.li
@@ -80,14 +78,17 @@ export function ProjectGrid({ projects }: { projects: GalleryPiece[] }) {
                         }
                   }
                 >
-                  {isAxol && piece.id === "axol-assist" ? (
+                  <div
+                    className={`project-axolotl-track project-axolotl-track--${trackSide}`}
+                    aria-hidden
+                  >
                     <div
-                      className="pointer-events-none absolute -right-1 bottom-0 z-10 w-16 sm:w-20"
-                      aria-hidden
+                      className={reduce ? "project-axolotl-float" : "project-axolotl-float project-axolotl-float--animate"}
+                      style={{ animationDelay: `${(i % 4) * 0.45}s` }}
                     >
                       <AxolotlMascot />
                     </div>
-                  ) : null}
+                  </div>
                   <div
                     className={`w-full shrink-0 overflow-hidden bg-ink/40 ring-1 ring-white/10 md:w-[38%] lg:w-[34%] ${
                       i % 3 === 0 ? "rounded-xl" : i % 3 === 1 ? "rounded-2xl rounded-tr-sm" : "rounded-lg rounded-bl-xl"
@@ -99,15 +100,7 @@ export function ProjectGrid({ projects }: { projects: GalleryPiece[] }) {
                       className="block h-auto w-full"
                     />
                   </div>
-                  <div className="relative min-w-0 flex-1 px-1 sm:px-2 md:py-2">
-                    {isAxol && piece.id !== "axol-assist" ? (
-                      <div
-                        className="pointer-events-none absolute -top-2 right-0 z-10 w-12 sm:w-14"
-                        aria-hidden
-                      >
-                        <AxolotlMascot />
-                      </div>
-                    ) : null}
+                  <div className="relative z-[1] min-w-0 flex-1 px-1 sm:px-2 md:py-2">
                     {piece.context ? (
                       <p className="mb-1 font-ui text-[10px] tracking-[0.16em] text-paper/45 uppercase">
                         {piece.context}

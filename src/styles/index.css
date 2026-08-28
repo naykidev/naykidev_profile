@@ -334,6 +334,66 @@
   mix-blend-mode: lighten;
 }
 
+.project-axolotl-track {
+  --axolotl-size: 2.75rem;
+  position: absolute;
+  z-index: 2;
+  top: 1rem;
+  bottom: 1rem;
+  width: var(--axolotl-size);
+  pointer-events: none;
+}
+
+.project-axolotl-track--right {
+  right: 0.75rem;
+}
+
+.project-axolotl-track--left {
+  left: 0.75rem;
+}
+
+.project-axolotl-float {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  top: 0;
+}
+
+.project-axolotl-float--animate {
+  animation: project-axolotl-drift 3.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+@keyframes project-axolotl-drift {
+  from {
+    top: 0;
+  }
+  to {
+    top: calc(100% - var(--axolotl-size));
+  }
+}
+
+@media (min-width: 768px) {
+  .project-axolotl-track {
+    --axolotl-size: 3.25rem;
+    top: 1.25rem;
+    bottom: 1.25rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .project-axolotl-track {
+    top: 0.75rem;
+    bottom: auto;
+    height: min(40%, 10.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-axolotl-float--animate {
+    animation: none;
+  }
+}
+
 /* ── Wave surfer ── */
 .wave-tube-strip {
   position: relative;
