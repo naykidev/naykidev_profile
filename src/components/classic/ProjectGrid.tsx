@@ -82,11 +82,14 @@ export function ProjectGrid({ projects }: { projects: GalleryPiece[] }) {
                   }
                 >
                   {isAxolAssist ? (
-                    <div
-                      className="pointer-events-none absolute -right-1 bottom-0 z-10 w-16 sm:w-20"
-                      aria-hidden
-                    >
-                      <div className={reduce ? undefined : "axolotl-assist-bob"}>
+                    <div className="axolotl-float-lane axolotl-float-lane--assist" aria-hidden>
+                      <div
+                        className={
+                          reduce
+                            ? "axolotl-float-lane__mascot"
+                            : "axolotl-float-lane__mascot axolotl-float--active"
+                        }
+                      >
                         <AxolotlMascot />
                       </div>
                     </div>

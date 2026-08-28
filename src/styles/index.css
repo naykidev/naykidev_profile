@@ -348,6 +348,20 @@
   right: 0.35rem;
 }
 
+.axolotl-float-lane--assist {
+  top: 0.5rem;
+  right: -0.25rem;
+  bottom: 0.5rem;
+  z-index: 10;
+  width: 4rem;
+}
+
+@media (min-width: 640px) {
+  .axolotl-float-lane--assist {
+    width: 5rem;
+  }
+}
+
 .axolotl-float-lane__mascot {
   position: absolute;
   top: 0;
@@ -357,6 +371,10 @@
 
 .axolotl-float--active {
   animation: axolotl-float-y 5.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
+}
+
+.axolotl-float-lane--assist .axolotl-float--active {
+  animation-name: axolotl-float-y-assist;
 }
 
 @keyframes axolotl-float-y {
@@ -385,34 +403,29 @@
   }
 }
 
-.axolotl-assist-bob {
-  animation: axolotl-assist-float 5.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
-}
-
-@keyframes axolotl-assist-float {
+@keyframes axolotl-float-y-assist {
   0%,
   100% {
-    transform: translateY(0);
+    top: 0;
   }
   50% {
-    transform: translateY(-3rem);
+    top: calc(100% - 4rem);
   }
 }
 
-@media (max-width: 640px) {
-  @keyframes axolotl-assist-float {
+@media (min-width: 640px) {
+  @keyframes axolotl-float-y-assist {
     0%,
     100% {
-      transform: translateY(0);
+      top: 0;
     }
     50% {
-      transform: translateY(-2.25rem);
+      top: calc(100% - 5rem);
     }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .axolotl-assist-bob,
   .axolotl-float--active {
     animation: none !important;
   }
