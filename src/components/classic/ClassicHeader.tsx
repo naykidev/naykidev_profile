@@ -54,7 +54,7 @@ export function ClassicHeader({ activeId }: { activeId: string }) {
                 aria-current={active ? "true" : undefined}
                 className={`rounded-full px-2.5 py-1.5 font-ui text-[10px] tracking-[0.14em] uppercase transition sm:text-[11px] ${
                   active
-                    ? "bg-sand/20 text-sand"
+                    ? "classic-nav-active"
                     : "text-paper/75 hover:bg-white/8 hover:text-paper"
                 }`}
               >
@@ -84,7 +84,7 @@ export function ClassicHeader({ activeId }: { activeId: string }) {
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="ml-1 rounded-full border border-sand/45 bg-sand/10 px-3 py-1.5 font-ui text-[10px] tracking-[0.14em] text-sand uppercase transition hover:border-sand hover:bg-sand/20 sm:text-[11px]"
+              className="classic-btn classic-btn--accent ml-1 !min-h-9 !px-3 !py-1.5 !text-[10px] sm:!text-[11px]"
             >
               Enter 3D Campus
             </button>
@@ -92,7 +92,7 @@ export function ClassicHeader({ activeId }: { activeId: string }) {
         </nav>
       </div>
       <motion.div
-        className="pointer-events-none absolute right-0 bottom-0 left-0 h-0.5 origin-left bg-sand/70"
+        className="pointer-events-none absolute right-0 bottom-0 left-0 h-0.5 origin-left bg-sunflower/80"
         style={{ scaleX }}
         aria-hidden
       />

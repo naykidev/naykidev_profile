@@ -1,7 +1,19 @@
 import { motion } from "framer-motion";
 import type { GalleryPiece } from "@/data/projects";
+import { AxolotlIllustration } from "./AxolotlIllustration";
 import { Reveal, SectionHeading } from "./Reveal";
 import { useClassicMotion } from "./motion";
+
+const AXOL_IDS = new Set(["accessibility-surfer", "axol-assist", "axol-work"]);
+
+const CARD_STYLES = [
+  "rounded-2xl rounded-br-md border-white/10",
+  "rounded-xl rounded-tl-lg border-sunflower/15",
+  "rounded-2xl rounded-bl-sm border-white/12",
+  "rounded-xl rounded-tr-2xl border-white/10",
+  "rounded-2xl border-sunflower/12",
+  "rounded-xl rounded-br-2xl border-white/10",
+];
 
 function OutLinks({ links }: { links?: readonly { label: string; href: string }[] }) {
   if (!links?.length) return null;
@@ -13,7 +25,7 @@ function OutLinks({ links }: { links?: readonly { label: string; href: string }[
           href={link.href}
           target="_blank"
           rel="noreferrer"
-          className="font-ui text-sm tracking-[0.04em] text-sand underline decoration-sand/40 underline-offset-4 transition hover:text-paper hover:decoration-paper/50"
+          className="classic-link font-ui text-sm tracking-[0.04em]"
         >
           {link.label}
         </a>
@@ -27,10 +39,7 @@ function TechPills({ items }: { items: readonly string[] }) {
   return (
     <ul className="mt-3 flex flex-wrap gap-2">
       {items.map((item) => (
-        <li
-          key={item}
-          className="rounded-full border border-white/15 bg-white/5 px-3 py-1 font-ui text-xs text-paper/85"
-        >
+        <li key={item} className="classic-pill">
           {item}
         </li>
       ))}
@@ -53,29 +62,62 @@ export function ProjectGrid({ projects }: { projects: GalleryPiece[] }) {
         <ul className="grid grid-cols-1 gap-10">
           {projects.map((piece, i) => {
             const imageRight = i % 2 === 1;
+            const isAxol = AXOL_IDS.has(piece.id);
+            const cardStyle = CARD_STYLES[i % CARD_STYLES.length]!;
             return (
               <Reveal key={piece.id} delay={i * 0.04}>
                 <motion.li
-                  className={`flex flex-col items-center gap-6 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:gap-8 sm:p-5 md:gap-10 ${
+                  className={`relative flex flex-col items-center gap-6 overflow-hidden border bg-white/[0.03] p-4 sm:gap-8 sm:p-5 md:gap-10 ${cardStyle} ${
                     imageRight ? "md:flex-row-reverse" : "md:flex-row"
                   }`}
-                  whileHover={reduce ? undefined : { borderColor: "rgba(196,165,116,0.35)" }}
+                  whileHover={
+                    reduce
+                      ? undefined
+                      : {
+                          borderColor: "rgba(252,191,73,0.4)",
+                          boxShadow: "0 12px 40px rgba(0,0,0,0.22)",
+                          y: -2,
+                        }
+                  }
                 >
-                  <div className="w-full shrink-0 overflow-hidden rounded-xl bg-ink/40 ring-1 ring-white/10 md:w-[38%] lg:w-[34%]">
+                  {piece.id === "axol-assist" ? (
+                    <div className="axolotl-watermark" aria-hidden />
+                  ) : null}
+                  {isAxol && piece.id === "axol-assist" ? (
+                    <div
+                      className={`pointer-events-none absolute -right-1 bottom-2 z-10 w-14 sm:w-16 ${reduce ? "" : "axolotl-bob"}`}
+                      aria-hidden
+                    >
+                      <AxolotlIllustration peek className="h-auto w-full" />
+                    </div>
+                  ) : null}
+                  <div
+                    className={`w-full shrink-0 overflow-hidden bg-ink/40 ring-1 ring-white/10 md:w-[38%] lg:w-[34%] ${
+                      i % 3 === 0 ? "rounded-xl" : i % 3 === 1 ? "rounded-2xl rounded-tr-sm" : "rounded-lg rounded-bl-xl"
+                    }`}
+                  >
                     <img
                       src={piece.portrait}
                       alt={`${piece.name} gallery portrait`}
                       className="block h-auto w-full"
                     />
                   </div>
-                  <div className="min-w-0 flex-1 px-1 sm:px-2 md:py-2">
+                  <div className="relative min-w-0 flex-1 px-1 sm:px-2 md:py-2">
+                    {isAxol && piece.id !== "axol-assist" ? (
+                      <div
+                        className={`pointer-events-none absolute -top-1 right-0 w-10 opacity-80 sm:w-11 ${reduce ? "" : "axolotl-bob"}`}
+                        aria-hidden
+                      >
+                        <AxolotlIllustration className="h-auto w-full" />
+                      </div>
+                    ) : null}
                     {piece.context ? (
                       <p className="mb-1 font-ui text-[10px] tracking-[0.16em] text-paper/45 uppercase">
                         {piece.context}
                       </p>
                     ) : null}
-                    <h3 className="font-display text-2xl text-paper sm:text-3xl">{piece.name}</h3>
-                    <p className="mt-2 font-ui text-sm leading-6 text-paper/70 sm:text-[15px] sm:leading-7">
+                    <h3 className="font-display text-2xl font-semibold text-paper sm:text-3xl">{piece.name}</h3>
+                    <p className="mt-2 font-ui text-sm font-light leading-6 text-paper/75 sm:text-[15px] sm:leading-7">
                       {piece.summary}
                     </p>
                     <TechPills items={piece.technologies} />

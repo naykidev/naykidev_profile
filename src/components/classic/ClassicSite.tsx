@@ -9,6 +9,7 @@ import { ClassicHeader, CLASSIC_NAV } from "./ClassicHeader";
 import { ContactSection } from "./ContactSection";
 import { ProjectGrid } from "./ProjectGrid";
 import { Reveal, SectionHeading } from "./Reveal";
+import { WaveSurfer } from "./WaveSurfer";
 import { useClassicMotion } from "./motion";
 
 function useActiveSection(ids: readonly string[]) {
@@ -55,7 +56,7 @@ export function ClassicSite() {
 
   return (
     <div className="classic-site relative min-h-dvh bg-ink text-paper">
-      <div className="classic-grain pointer-events-none fixed inset-0 z-[1] opacity-[0.35]" aria-hidden />
+      <div className="classic-grain pointer-events-none fixed inset-0 z-[1] opacity-[0.42]" aria-hidden />
 
       <a
         href="#about"
@@ -70,17 +71,18 @@ export function ClassicSite() {
         <main id="top">
           <section className="relative overflow-hidden border-b border-white/10">
             <div
-              className="pointer-events-none absolute inset-0 opacity-50"
+              className="pointer-events-none absolute inset-0 opacity-55"
               style={{
                 background:
-                  "radial-gradient(ellipse 80% 60% at 18% 0%, rgba(196,165,116,0.24), transparent 55%), radial-gradient(ellipse 70% 50% at 92% 28%, rgba(63,106,76,0.2), transparent 50%)",
+                  "radial-gradient(ellipse 80% 60% at 18% 0%, rgba(247,127,0,0.18), transparent 55%), radial-gradient(ellipse 70% 50% at 92% 28%, rgba(13,90,122,0.22), transparent 50%)",
               }}
               aria-hidden
             />
-            <div className="relative mx-auto grid max-w-5xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+            <WaveSurfer />
+            <div className="relative z-[2] mx-auto grid max-w-5xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
               <div>
                 <motion.p
-                  className="mb-3 font-ui text-[11px] tracking-[0.28em] text-sand uppercase"
+                  className="mb-3 font-ui text-[11px] font-medium tracking-[0.28em] text-sunflower uppercase"
                   initial={reduce ? false : { opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: reduce ? 0 : 0.45 }}
@@ -88,7 +90,7 @@ export function ClassicSite() {
                   {profile.locationPath}
                 </motion.p>
                 <motion.h1
-                  className="font-display text-4xl leading-[1.1] font-semibold tracking-wide sm:text-6xl"
+                  className="font-display text-4xl leading-[1.05] font-bold tracking-wide sm:text-6xl sm:leading-[1.05]"
                   initial={reduce ? false : { opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: reduce ? 0 : 0.55, delay: reduce ? 0 : 0.06 }}
@@ -96,7 +98,7 @@ export function ClassicSite() {
                   {profile.name}
                 </motion.h1>
                 <motion.p
-                  className="mt-4 font-ui text-sm tracking-[0.12em] text-paper/80 uppercase sm:text-base"
+                  className="mt-4 font-ui text-sm font-light tracking-[0.12em] text-paper/75 uppercase sm:text-base"
                   initial={reduce ? false : { opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : 0.12 }}
@@ -104,7 +106,7 @@ export function ClassicSite() {
                   {profile.headline}
                 </motion.p>
                 <motion.p
-                  className="mt-6 max-w-xl font-display text-2xl leading-snug text-paper/90 italic sm:text-3xl"
+                  className="mt-6 max-w-xl font-display text-2xl leading-snug font-medium text-sand italic sm:text-3xl"
                   initial={reduce ? false : { opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: reduce ? 0 : 0.55, delay: reduce ? 0 : 0.18 }}
@@ -117,24 +119,14 @@ export function ClassicSite() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : 0.24 }}
                 >
-                  <a
-                    href="#projects"
-                    className="inline-flex min-h-11 items-center rounded-full border border-paper/25 bg-paper/10 px-5 font-ui text-xs tracking-[0.18em] uppercase transition hover:bg-paper/15"
-                  >
+                  <a href="#projects" className="classic-btn classic-btn--filled">
                     See projects
                   </a>
-                  <a
-                    href="#resume"
-                    className="inline-flex min-h-11 items-center rounded-full border border-sand/50 px-5 font-ui text-xs tracking-[0.18em] text-sand uppercase transition hover:bg-sand/10"
-                  >
+                  <a href="#resume" className="classic-btn classic-btn--accent">
                     Resume
                   </a>
                   {!touchUi ? (
-                    <button
-                      type="button"
-                      onClick={() => navigate("/")}
-                      className="inline-flex min-h-11 items-center rounded-full border border-lawn/50 px-5 font-ui text-xs tracking-[0.18em] text-mist uppercase transition hover:bg-lawn/15"
-                    >
+                    <button type="button" onClick={() => navigate("/")} className="classic-btn">
                       Enter 3D Campus
                     </button>
                   ) : null}
@@ -149,7 +141,7 @@ export function ClassicSite() {
                 <img
                   src={profile.photo}
                   alt={profile.name}
-                  className="h-56 w-56 rounded-full object-cover shadow-[0_24px_60px_rgba(0,0,0,0.45)] ring-1 ring-white/15 sm:h-72 sm:w-72"
+                  className="h-56 w-56 rounded-full object-cover shadow-[0_24px_60px_rgba(0,0,0,0.45)] ring-2 ring-sunflower/30 sm:h-72 sm:w-72"
                 />
               </motion.figure>
             </div>
@@ -163,7 +155,7 @@ export function ClassicSite() {
                 </SectionHeading>
               </Reveal>
               <Reveal delay={0.06}>
-                <div className="max-w-3xl space-y-4 font-ui text-[15px] leading-7 text-paper/88">
+                <div className="max-w-3xl space-y-4 font-ui text-[15px] font-normal leading-7 text-paper/90">
                   {profile.intro.map((paragraph) => (
                     <p key={paragraph.slice(0, 32)}>{paragraph}</p>
                   ))}
@@ -176,7 +168,7 @@ export function ClassicSite() {
 
           <section
             id="awards"
-            className="scroll-mt-24 border-b border-white/10 bg-[#221c17] px-4 py-14 sm:px-6 sm:py-16"
+            className="scroll-mt-24 border-b border-white/10 bg-[#00243a] px-4 py-14 sm:px-6 sm:py-16"
           >
             <div className="mx-auto max-w-5xl">
               <Reveal>
@@ -184,12 +176,14 @@ export function ClassicSite() {
               </Reveal>
               {awards.length > 0 ? (
                 <div className="mb-12">
-                  <h3 className="mb-4 font-ui text-[11px] tracking-[0.2em] text-sand uppercase">Awards</h3>
+                  <h3 className="mb-4 font-ui text-[11px] font-semibold tracking-[0.2em] text-sunflower uppercase">
+                    Awards
+                  </h3>
                   <ul className="space-y-6">
                     {awards.map((item, i) => (
                       <Reveal key={item.id} delay={i * 0.04}>
                         <li className="max-w-3xl">
-                          <p className="font-display text-2xl text-paper">{item.title}</p>
+                          <p className="font-display text-2xl font-semibold text-paper">{item.title}</p>
                           <p className="mt-1 font-ui text-sm text-paper/60">
                             {item.issuer} · {item.date}
                             {item.associated ? ` · ${item.associated}` : ""}
@@ -202,21 +196,25 @@ export function ClassicSite() {
                 </div>
               ) : null}
               <div>
-                <h3 className="mb-4 font-ui text-[11px] tracking-[0.2em] text-sand uppercase">
+                <h3 className="mb-4 font-ui text-[11px] font-semibold tracking-[0.2em] text-sunflower uppercase">
                   Certificates
                 </h3>
                 <ul className="grid gap-6 sm:grid-cols-2">
                   {certificates.map((item, i) => (
                     <Reveal key={item.id} delay={i * 0.04}>
-                      <li className="border border-white/10 bg-ink/40 p-5 transition hover:border-sand/30">
+                      <li
+                        className={`border border-white/10 bg-ink/40 p-5 transition hover:border-sunflower/35 hover:shadow-[0_8px_28px_rgba(0,0,0,0.25)] ${
+                          i % 2 === 0 ? "rounded-2xl rounded-tr-sm" : "rounded-xl rounded-bl-md"
+                        }`}
+                      >
                         {item.photo ? (
                           <img
                             src={item.photo}
                             alt={item.photoAlt ?? item.title}
-                            className="mb-4 h-36 w-full object-contain bg-[#f4ece0]/5"
+                            className="mb-4 h-36 w-full object-contain bg-paper/5"
                           />
                         ) : null}
-                        <p className="font-display text-xl text-paper">{item.title}</p>
+                        <p className="font-display text-xl font-medium text-paper">{item.title}</p>
                         <p className="mt-1 font-ui text-sm text-paper/60">
                           {item.issuer} · {item.date}
                         </p>
@@ -226,7 +224,7 @@ export function ClassicSite() {
                             href={item.href}
                             target="_blank"
                             rel="noreferrer"
-                            className="mt-3 inline-block font-ui text-sm text-sand underline underline-offset-4"
+                            className="classic-link mt-3 inline-block font-ui text-sm"
                           >
                             Verify
                           </a>
@@ -248,24 +246,20 @@ export function ClassicSite() {
               </Reveal>
               <Reveal delay={0.05}>
                 <div className="flex flex-wrap gap-3">
-                  <a
-                    href={profile.resume}
-                    download
-                    className="inline-flex min-h-11 items-center rounded-full border border-paper/25 bg-paper/10 px-5 font-ui text-xs tracking-[0.18em] uppercase transition hover:bg-paper/15"
-                  >
+                  <a href={profile.resume} download className="classic-btn classic-btn--filled">
                     Download PDF
                   </a>
                   <a
                     href={profile.resume}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex min-h-11 items-center rounded-full border border-sand/50 px-5 font-ui text-xs tracking-[0.18em] text-sand uppercase transition hover:bg-sand/10"
+                    className="classic-btn classic-btn--accent"
                   >
                     Open in new tab
                   </a>
                 </div>
               </Reveal>
-              <div className="mt-8 hidden rounded-xl ring-1 ring-white/10 sm:block">
+              <div className="mt-8 hidden rounded-2xl rounded-tl-sm ring-1 ring-sunflower/20 sm:block">
                 <object
                   data={`${profile.resume}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
                   type="application/pdf"
@@ -274,7 +268,7 @@ export function ClassicSite() {
                 >
                   <p className="bg-ink p-6 font-ui text-sm text-paper/70">
                     PDF preview unavailable.{" "}
-                    <a href={profile.resume} className="text-sand underline">
+                    <a href={profile.resume} className="classic-link">
                       Open the resume
                     </a>
                     .
@@ -296,7 +290,7 @@ export function ClassicSite() {
               <button
                 type="button"
                 onClick={() => navigate("/")}
-                className="text-left font-ui text-sm text-sand underline underline-offset-4"
+                className="classic-link text-left font-ui text-sm"
               >
                 Enter 3D Campus
               </button>

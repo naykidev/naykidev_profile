@@ -11,7 +11,7 @@ export function ContactSection() {
       setToast("Email copied");
       window.setTimeout(() => setToast(null), 1800);
     } catch {
-      setToast("Couldn’t copy — use the mailto link");
+      setToast("Couldn't copy — use the mailto link");
       window.setTimeout(() => setToast(null), 2200);
     }
   };
@@ -24,13 +24,13 @@ export function ContactSection() {
         </Reveal>
         <ul className="space-y-4 font-ui text-[15px]">
           <li className="flex flex-wrap items-center gap-3">
-            <a href={`mailto:${profile.email}`} className="text-sand underline underline-offset-4">
+            <a href={`mailto:${profile.email}`} className="classic-link">
               {profile.email}
             </a>
             <button
               type="button"
               onClick={() => void copyEmail()}
-              className="rounded-full border border-white/15 px-3 py-1 font-ui text-[11px] tracking-[0.14em] text-paper/80 uppercase transition hover:border-sand/40 hover:text-sand"
+              className="classic-btn !min-h-8 !px-3 !py-1 !text-[11px]"
             >
               Copy
             </button>
@@ -40,13 +40,13 @@ export function ContactSection() {
               href={profile.linkedin}
               target="_blank"
               rel="noreferrer"
-              className="text-sand underline underline-offset-4"
+              className="classic-link"
             >
               LinkedIn
             </a>
           </li>
           <li>
-            <a href={profile.resume} className="text-sand underline underline-offset-4">
+            <a href={profile.resume} className="classic-link">
               Resume PDF
             </a>
           </li>
@@ -54,7 +54,7 @@ export function ContactSection() {
         <div
           role="status"
           aria-live="polite"
-          className={`fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full border border-sand/40 bg-ink/95 px-4 py-2 font-ui text-xs tracking-[0.14em] text-sand uppercase shadow-lg transition ${
+          className={`fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full border border-sunflower/40 bg-ink/95 px-4 py-2 font-ui text-xs tracking-[0.14em] text-sunflower uppercase shadow-lg transition ${
             toast ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
