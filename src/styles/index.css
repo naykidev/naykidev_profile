@@ -356,7 +356,7 @@
 }
 
 .axolotl-float--active {
-  animation: axolotl-float-y 3s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
+  animation: axolotl-float-y 5.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
 }
 
 @keyframes axolotl-float-y {
