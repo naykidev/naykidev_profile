@@ -349,14 +349,24 @@
 }
 
 .axolotl-float-lane--portrait {
+  inset: 0;
   top: 0;
-  right: 0.35rem;
+  right: 0;
   bottom: 0;
+  left: 0;
   z-index: 2;
+  width: auto;
 }
 
-.axolotl-float-lane--portrait .axolotl-float--active {
-  animation-name: axolotl-float-y-portrait;
+.axolotl-float-lane__mascot--portrait {
+  right: 0.35rem;
+  left: auto;
+  top: calc(100% - 2.75rem);
+  width: 2.75rem;
+}
+
+.axolotl-float--portrait {
+  animation: axolotl-float-y-portrait 5.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
 }
 
 .axolotl-float-lane--assist {
@@ -403,8 +413,13 @@
     width: 2.25rem;
   }
 
-  .axolotl-float-lane--portrait {
+  .axolotl-float-lane__mascot--portrait {
+    top: calc(100% - 2.25rem);
     width: 2.25rem;
+  }
+
+  .axolotl-float--portrait {
+    animation: axolotl-float-y-portrait-mobile 5.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
   }
 
   @keyframes axolotl-float-y {
@@ -417,7 +432,7 @@
     }
   }
 
-  @keyframes axolotl-float-y-portrait {
+  @keyframes axolotl-float-y-portrait-mobile {
     0%,
     100% {
       top: calc(100% - 2.25rem);
@@ -461,11 +476,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .axolotl-float--active {
+  .axolotl-float--active,
+  .axolotl-float--portrait {
     animation: none !important;
   }
 
-  .axolotl-float-lane--portrait .axolotl-float--active {
+  .axolotl-float-lane__mascot--portrait {
     top: calc(100% - 2.25rem);
     transform: none;
   }

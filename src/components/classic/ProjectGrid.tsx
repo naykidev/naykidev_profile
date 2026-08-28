@@ -99,24 +99,24 @@ export function ProjectGrid({ projects }: { projects: GalleryPiece[] }) {
                       i % 3 === 0 ? "rounded-xl" : i % 3 === 1 ? "rounded-2xl rounded-tr-sm" : "rounded-lg rounded-bl-xl"
                     }`}
                   >
+                    <img
+                      src={piece.portrait}
+                      alt={`${piece.name} gallery portrait`}
+                      className="block h-auto w-full"
+                    />
                     {isFloatingAxol ? (
                       <div className="axolotl-float-lane axolotl-float-lane--portrait" aria-hidden>
                         <div
                           className={
                             reduce
-                              ? "axolotl-float-lane__mascot"
-                              : "axolotl-float-lane__mascot axolotl-float--active"
+                              ? "axolotl-float-lane__mascot axolotl-float-lane__mascot--portrait"
+                              : "axolotl-float-lane__mascot axolotl-float-lane__mascot--portrait axolotl-float--portrait"
                           }
                         >
                           <AxolotlMascot />
                         </div>
                       </div>
                     ) : null}
-                    <img
-                      src={piece.portrait}
-                      alt={`${piece.name} gallery portrait`}
-                      className="block h-auto w-full"
-                    />
                   </div>
                   <div className="relative min-w-0 flex-1 px-1 sm:px-2 md:py-2">
                     {piece.context ? (
