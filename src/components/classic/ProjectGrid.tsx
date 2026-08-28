@@ -86,7 +86,9 @@ export function ProjectGrid({ projects }: { projects: GalleryPiece[] }) {
                       className="pointer-events-none absolute -right-1 bottom-0 z-10 w-16 sm:w-20"
                       aria-hidden
                     >
-                      <AxolotlMascot />
+                      <div className={reduce ? undefined : "axolotl-assist-bob"}>
+                        <AxolotlMascot />
+                      </div>
                     </div>
                   ) : null}
                   <div

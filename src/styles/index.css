@@ -385,9 +385,39 @@
   }
 }
 
+.axolotl-assist-bob {
+  animation: axolotl-assist-float 5.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
+}
+
+@keyframes axolotl-assist-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3rem);
+  }
+}
+
+@media (max-width: 640px) {
+  @keyframes axolotl-assist-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-2.25rem);
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .axolotl-assist-bob,
   .axolotl-float--active {
     animation: none !important;
+  }
+
+  .axolotl-float--active {
     top: 50%;
     transform: translateY(-50%);
   }
