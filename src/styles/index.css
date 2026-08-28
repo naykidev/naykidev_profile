@@ -336,12 +336,16 @@
 
 .axolotl-float-lane {
   position: absolute;
-  top: 0.75rem;
-  right: 0.5rem;
-  bottom: 0.75rem;
+  top: 0.5rem;
+  right: 0.25rem;
+  bottom: 0.5rem;
   z-index: 2;
   width: 2.75rem;
   pointer-events: none;
+}
+
+.axolotl-float-lane--text {
+  right: 0.35rem;
 }
 
 .axolotl-float-lane__mascot {
