@@ -348,8 +348,15 @@
   right: 0.35rem;
 }
 
-.axolotl-float-lane--card {
-  z-index: 10;
+.axolotl-float-lane--portrait {
+  top: 0;
+  right: 0.35rem;
+  bottom: 0;
+  z-index: 2;
+}
+
+.axolotl-float-lane--portrait .axolotl-float--active {
+  animation-name: axolotl-float-y-portrait;
 }
 
 .axolotl-float-lane--assist {
@@ -396,6 +403,10 @@
     width: 2.25rem;
   }
 
+  .axolotl-float-lane--portrait {
+    width: 2.25rem;
+  }
+
   @keyframes axolotl-float-y {
     0%,
     100% {
@@ -404,6 +415,26 @@
     50% {
       top: calc(100% - 2.25rem);
     }
+  }
+
+  @keyframes axolotl-float-y-portrait {
+    0%,
+    100% {
+      top: calc(100% - 2.25rem);
+    }
+    50% {
+      top: 0;
+    }
+  }
+}
+
+@keyframes axolotl-float-y-portrait {
+  0%,
+  100% {
+    top: calc(100% - 2.75rem);
+  }
+  50% {
+    top: 0;
   }
 }
 
@@ -434,7 +465,13 @@
     animation: none !important;
   }
 
-  .axolotl-float--active {
+  .axolotl-float-lane--portrait .axolotl-float--active {
+    top: calc(100% - 2.25rem);
+    transform: none;
+  }
+
+  .axolotl-float-lane--assist .axolotl-float--active,
+  .axolotl-float-lane--text .axolotl-float--active {
     top: 50%;
     transform: translateY(-50%);
   }

@@ -94,38 +94,31 @@ export function ProjectGrid({ projects }: { projects: GalleryPiece[] }) {
                       </div>
                     </div>
                   ) : null}
-                  {isFloatingAxol ? (
-                    <div
-                      className="axolotl-float-lane axolotl-float-lane--text axolotl-float-lane--card"
-                      aria-hidden
-                    >
-                      <div
-                        className={
-                          reduce
-                            ? "axolotl-float-lane__mascot"
-                            : "axolotl-float-lane__mascot axolotl-float--active"
-                        }
-                      >
-                        <AxolotlMascot />
-                      </div>
-                    </div>
-                  ) : null}
                   <div
                     className={`relative w-full shrink-0 overflow-hidden bg-ink/40 ring-1 ring-white/10 md:w-[38%] lg:w-[34%] ${
                       i % 3 === 0 ? "rounded-xl" : i % 3 === 1 ? "rounded-2xl rounded-tr-sm" : "rounded-lg rounded-bl-xl"
                     }`}
                   >
+                    {isFloatingAxol ? (
+                      <div className="axolotl-float-lane axolotl-float-lane--portrait" aria-hidden>
+                        <div
+                          className={
+                            reduce
+                              ? "axolotl-float-lane__mascot"
+                              : "axolotl-float-lane__mascot axolotl-float--active"
+                          }
+                        >
+                          <AxolotlMascot />
+                        </div>
+                      </div>
+                    ) : null}
                     <img
                       src={piece.portrait}
                       alt={`${piece.name} gallery portrait`}
                       className="block h-auto w-full"
                     />
                   </div>
-                  <div
-                    className={`relative min-w-0 flex-1 px-1 sm:px-2 md:py-2 ${
-                      isFloatingAxol ? "pr-14 sm:pr-16" : ""
-                    }`}
-                  >
+                  <div className="relative min-w-0 flex-1 px-1 sm:px-2 md:py-2">
                     {piece.context ? (
                       <p className="mb-1 font-ui text-[10px] tracking-[0.16em] text-paper/45 uppercase">
                         {piece.context}
