@@ -118,8 +118,7 @@ function SkillsPanel() {
 function AxolPanel() {
   return (
     <Shell kicker="Axol Assist" title={axolAssist.name}>
-      <p className="font-display text-xl italic">“{axolAssist.quote}”</p>
-      <p className="mt-3">{axolAssist.story}</p>
+      <p>{axolAssist.story}</p>
       <ProjectLinks links={[{ label: "axolassist.com", href: "https://axolassist.com" }]} />
       {axolAssist.products.map((product) => (
         <article key={product.id} className="border-t border-paper/10 pt-4">

@@ -9,6 +9,7 @@ import { ClassicHeader, CLASSIC_NAV } from "./ClassicHeader";
 import { ContactSection } from "./ContactSection";
 import { ProjectGrid } from "./ProjectGrid";
 import { Reveal, SectionHeading } from "./Reveal";
+import { WaveSurfer } from "./WaveSurfer";
 import { useClassicMotion } from "./motion";
 
 function useActiveSection(ids: readonly string[]) {
@@ -68,8 +69,16 @@ export function ClassicSite() {
         <ClassicHeader activeId={activeId} />
 
         <main id="top">
-          <section className="relative border-b border-white/10">
-            <div className="mx-auto grid max-w-5xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+          <section className="relative overflow-hidden border-b border-white/10">
+            <div
+              className="pointer-events-none absolute inset-0 opacity-55"
+              style={{
+                background:
+                  "radial-gradient(ellipse 80% 60% at 18% 0%, rgba(247,127,0,0.18), transparent 55%), radial-gradient(ellipse 70% 50% at 92% 28%, rgba(13,90,122,0.22), transparent 50%)",
+              }}
+              aria-hidden
+            />
+            <div className="relative z-[2] mx-auto grid max-w-5xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
               <div>
                 <motion.p
                   className="mb-3 font-ui text-[11px] font-medium tracking-[0.28em] text-sunflower uppercase"
@@ -95,19 +104,11 @@ export function ClassicSite() {
                 >
                   {profile.headline}
                 </motion.p>
-                <motion.p
-                  className="mt-6 max-w-xl font-display text-2xl leading-snug font-medium text-sand italic sm:text-3xl"
-                  initial={reduce ? false : { opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: reduce ? 0 : 0.55, delay: reduce ? 0 : 0.18 }}
-                >
-                  “{profile.quote}”
-                </motion.p>
                 <motion.div
                   className="mt-8 flex flex-wrap gap-3"
                   initial={reduce ? false : { opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : 0.24 }}
+                  transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : 0.18 }}
                 >
                   <a href="#projects" className="classic-btn classic-btn--filled">
                     See projects
@@ -135,6 +136,7 @@ export function ClassicSite() {
                 />
               </motion.figure>
             </div>
+            <WaveSurfer />
           </section>
 
           <section id="about" className="scroll-mt-24 border-b border-white/10 px-4 py-14 sm:px-6 sm:py-16">

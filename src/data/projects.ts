@@ -23,7 +23,6 @@ export type Project = {
 export const axolAssist = {
   id: "axol-assist",
   name: "Axol Assist",
-  quote: "Technology should adapt to people — not the other way around.",
   story:
     "Peer tutoring a student with learning disabilities made it obvious that the barriers weren’t intelligence or effort. Sometimes drawings worked better than words. Sometimes technology helped more than traditional instruction. That year became AP Research: interviews with parents, a district assistive-technology specialist, and accessibility professionals at major tech companies, asking why tools built to help students still get in their way. The through-line was that accessibility cannot be bolted on at the end, and that good work starts with listening. Those conversations became Axol Assist — products that make the web easier to use for everyone.",
   products: [
