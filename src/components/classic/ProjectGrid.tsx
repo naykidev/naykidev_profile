@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import type { GalleryPiece } from "@/data/projects";
-import { AxolotlMascot } from "./AxolotlMascot";
+import { AxolotlPortraitFloat } from "./AxolotlPortraitFloat";
 import { Reveal, SectionHeading } from "./Reveal";
 import { useClassicMotion } from "./motion";
 
@@ -90,19 +90,7 @@ export function ProjectGrid({ projects }: { projects: GalleryPiece[] }) {
                       alt={`${piece.name} gallery portrait`}
                       className="block h-auto w-full"
                     />
-                    {isFloatingAxol ? (
-                      <div className="axolotl-float-lane axolotl-float-lane--portrait" aria-hidden>
-                        <div
-                          className={
-                            reduce
-                              ? "axolotl-float-lane__mascot axolotl-float-lane__mascot--portrait"
-                              : "axolotl-float-lane__mascot axolotl-float-lane__mascot--portrait axolotl-float--portrait"
-                          }
-                        >
-                          <AxolotlMascot />
-                        </div>
-                      </div>
-                    ) : null}
+                    {isFloatingAxol ? <AxolotlPortraitFloat reduce={reduce} /> : null}
                   </div>
                   <div className="relative min-w-0 flex-1 px-1 sm:px-2 md:py-2">
                     {piece.context ? (

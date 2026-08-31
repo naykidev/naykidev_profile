@@ -343,51 +343,31 @@
 }
 
 .axolotl-float-lane__mascot--portrait {
+  position: absolute;
   right: 0.35rem;
-  left: auto;
-  top: calc(100% - 2.75rem);
+  bottom: 0;
   width: 2.75rem;
+  transform: translateY(0);
+  will-change: transform;
 }
 
 .axolotl-float--portrait {
   animation: axolotl-float-y-portrait 5.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
 }
 
-.axolotl-float-lane__mascot {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-}
-
 @media (max-width: 640px) {
   .axolotl-float-lane__mascot--portrait {
-    top: calc(100% - 2.25rem);
     width: 2.25rem;
-  }
-
-  .axolotl-float--portrait {
-    animation: axolotl-float-y-portrait-mobile 5.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
-  }
-
-  @keyframes axolotl-float-y-portrait-mobile {
-    0%,
-    100% {
-      top: calc(100% - 2.25rem);
-    }
-    50% {
-      top: 0;
-    }
   }
 }
 
 @keyframes axolotl-float-y-portrait {
   0%,
   100% {
-    top: calc(100% - 2.75rem);
+    transform: translateY(0);
   }
   50% {
-    top: 0;
+    transform: translateY(calc(-1 * var(--float-travel, 0px)));
   }
 }
 
@@ -397,7 +377,6 @@
   }
 
   .axolotl-float-lane__mascot--portrait {
-    top: calc(100% - 2.25rem);
     transform: none;
   }
 }
