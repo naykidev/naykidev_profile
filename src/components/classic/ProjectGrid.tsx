@@ -4,7 +4,7 @@ import { AxolotlMascot } from "./AxolotlMascot";
 import { Reveal, SectionHeading } from "./Reveal";
 import { useClassicMotion } from "./motion";
 
-const FLOATING_AXOL_IDS = new Set(["accessibility-surfer", "axol-work"]);
+const FLOATING_AXOL_IDS = new Set(["accessibility-surfer", "axol-assist", "axol-work"]);
 
 const CARD_STYLES = [
   "rounded-2xl rounded-br-md border-white/10",
@@ -62,7 +62,6 @@ export function ProjectGrid({ projects }: { projects: GalleryPiece[] }) {
         <ul className="grid grid-cols-1 gap-10">
           {projects.map((piece, i) => {
             const imageRight = i % 2 === 1;
-            const isAxolAssist = piece.id === "axol-assist";
             const isFloatingAxol = FLOATING_AXOL_IDS.has(piece.id);
             const cardStyle = CARD_STYLES[i % CARD_STYLES.length]!;
             return (
@@ -81,19 +80,6 @@ export function ProjectGrid({ projects }: { projects: GalleryPiece[] }) {
                         }
                   }
                 >
-                  {isAxolAssist ? (
-                    <div className="axolotl-float-lane axolotl-float-lane--assist" aria-hidden>
-                      <div
-                        className={
-                          reduce
-                            ? "axolotl-float-lane__mascot"
-                            : "axolotl-float-lane__mascot axolotl-float--active"
-                        }
-                      >
-                        <AxolotlMascot />
-                      </div>
-                    </div>
-                  ) : null}
                   <div
                     className={`relative w-full shrink-0 overflow-hidden bg-ink/40 ring-1 ring-white/10 md:w-[38%] lg:w-[34%] ${
                       i % 3 === 0 ? "rounded-xl" : i % 3 === 1 ? "rounded-2xl rounded-tr-sm" : "rounded-lg rounded-bl-xl"

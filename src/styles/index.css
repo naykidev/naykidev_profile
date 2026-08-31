@@ -334,28 +334,12 @@
   mix-blend-mode: lighten;
 }
 
-.axolotl-float-lane {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.25rem;
-  bottom: 0.5rem;
-  z-index: 2;
-  width: 2.75rem;
-  pointer-events: none;
-}
-
-.axolotl-float-lane--text {
-  right: 0.35rem;
-}
-
 .axolotl-float-lane--portrait {
+  position: absolute;
   inset: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
   z-index: 2;
   width: auto;
+  pointer-events: none;
 }
 
 .axolotl-float-lane__mascot--portrait {
@@ -369,20 +353,6 @@
   animation: axolotl-float-y-portrait 5.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
 }
 
-.axolotl-float-lane--assist {
-  top: 0.5rem;
-  right: 1.25rem;
-  bottom: 0.5rem;
-  z-index: 10;
-  width: 4rem;
-}
-
-@media (min-width: 640px) {
-  .axolotl-float-lane--assist {
-    width: 5rem;
-  }
-}
-
 .axolotl-float-lane__mascot {
   position: absolute;
   top: 0;
@@ -390,29 +360,7 @@
   width: 100%;
 }
 
-.axolotl-float--active {
-  animation: axolotl-float-y 5.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
-}
-
-.axolotl-float-lane--assist .axolotl-float--active {
-  animation-name: axolotl-float-y-assist;
-}
-
-@keyframes axolotl-float-y {
-  0%,
-  100% {
-    top: 0;
-  }
-  50% {
-    top: calc(100% - 2.75rem);
-  }
-}
-
 @media (max-width: 640px) {
-  .axolotl-float-lane {
-    width: 2.25rem;
-  }
-
   .axolotl-float-lane__mascot--portrait {
     top: calc(100% - 2.25rem);
     width: 2.25rem;
@@ -420,16 +368,6 @@
 
   .axolotl-float--portrait {
     animation: axolotl-float-y-portrait-mobile 5.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
-  }
-
-  @keyframes axolotl-float-y {
-    0%,
-    100% {
-      top: 0;
-    }
-    50% {
-      top: calc(100% - 2.25rem);
-    }
   }
 
   @keyframes axolotl-float-y-portrait-mobile {
@@ -453,30 +391,7 @@
   }
 }
 
-@keyframes axolotl-float-y-assist {
-  0%,
-  100% {
-    top: 0;
-  }
-  50% {
-    top: calc(100% - 4rem);
-  }
-}
-
-@media (min-width: 640px) {
-  @keyframes axolotl-float-y-assist {
-    0%,
-    100% {
-      top: 0;
-    }
-    50% {
-      top: calc(100% - 5rem);
-    }
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .axolotl-float--active,
   .axolotl-float--portrait {
     animation: none !important;
   }
@@ -484,12 +399,6 @@
   .axolotl-float-lane__mascot--portrait {
     top: calc(100% - 2.25rem);
     transform: none;
-  }
-
-  .axolotl-float-lane--assist .axolotl-float--active,
-  .axolotl-float-lane--text .axolotl-float--active {
-    top: 50%;
-    transform: translateY(-50%);
   }
 }
 
