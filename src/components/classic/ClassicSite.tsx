@@ -9,7 +9,6 @@ import { ClassicHeader, CLASSIC_NAV } from "./ClassicHeader";
 import { ContactSection } from "./ContactSection";
 import { ProjectGrid } from "./ProjectGrid";
 import { Reveal, SectionHeading } from "./Reveal";
-import { WaveSurfer } from "./WaveSurfer";
 import { useClassicMotion } from "./motion";
 
 function useActiveSection(ids: readonly string[]) {
@@ -136,7 +135,6 @@ export function ClassicSite() {
                 />
               </motion.figure>
             </div>
-            <WaveSurfer />
           </section>
 
           <section id="about" className="scroll-mt-24 border-b border-white/10 px-4 py-14 sm:px-6 sm:py-16">
