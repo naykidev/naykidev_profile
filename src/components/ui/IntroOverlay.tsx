@@ -42,13 +42,6 @@ export function IntroOverlay() {
           <button
             type="button"
             className="overlay-chip min-h-12 w-full px-6 py-3 font-ui text-xs tracking-[0.28em] uppercase sm:w-auto sm:min-w-48"
-            onClick={() => setMode("explore")}
-          >
-            Explore
-          </button>
-          <button
-            type="button"
-            className="overlay-chip min-h-12 w-full px-6 py-3 font-ui text-xs tracking-[0.28em] uppercase sm:w-auto sm:min-w-48"
             onClick={() => setMode("tour")}
           >
             Take the Tour
