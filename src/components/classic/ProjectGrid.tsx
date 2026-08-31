@@ -90,7 +90,7 @@ export function ProjectGrid({ projects }: { projects: GalleryPiece[] }) {
                       alt={`${piece.name} gallery portrait`}
                       className="block h-auto w-full"
                     />
-                    {isFloatingAxol ? <AxolotlPortraitFloat reduce={reduce} /> : null}
+                    {isFloatingAxol ? <AxolotlPortraitFloat reduce={reduce} projectId={piece.id} /> : null}
                   </div>
                   <div className="relative min-w-0 flex-1 px-1 sm:px-2 md:py-2">
                     {piece.context ? (
